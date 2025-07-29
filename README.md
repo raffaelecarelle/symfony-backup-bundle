@@ -20,7 +20,7 @@ The Symfony Backup Bundle provides a complete and configurable system for automa
 ## Installation
 
 ```bash
-composer require symfony/backup-bundle
+composer require raffaelecarelle/symfony-backup-bundle
 ```
 
 ## Configuration
