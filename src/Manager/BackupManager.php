@@ -134,18 +134,18 @@ class BackupManager
         if (!$config->getStorage()) {
             $config->setStorage($this->defaultStorage);
         }
-        
+
         // Set default output path if not specified
-        if (!$config->getOutputPath() !== null) {
+        if ($config->getOutputPath() === null) {
             $outputPath = sprintf('%s/%s', $this->backupDir, $config->getType());
             $config->setOutputPath($outputPath);
-            
+
             // Ensure the output directory exists
             if (!$this->filesystem->exists($outputPath)) {
                 $this->filesystem->mkdir($outputPath, 0755);
             }
         }
-        
+
         // Dispatch pre-backup event
         if ($this->eventDispatcher) {
             $event = new BackupEvent($config);
