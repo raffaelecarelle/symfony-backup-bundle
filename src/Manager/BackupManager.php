@@ -70,8 +70,6 @@ class BackupManager
         $this->backupDir = rtrim($backupDir, '/\\');
         $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
-
-        $this->loadExistingBackups();
     }
 
     /**
@@ -347,17 +345,21 @@ class BackupManager
     /**
      * List all available backups.
      *
-     * @param string|null $type Filter by backup type
+     * @param BackupConfiguration $configuration Filter by backup type
      *
      * @return array List of backups
      */
-    public function listBackups(?string $type = null): array
+    public function listBackups(BackupConfiguration $configuration): array
     {
-        if (null === $type) {
+        if($this->backups === []) {
+            $this->backups = $this->loadExistingBackups($configuration);
+        }
+
+        if (null === $configuration->getType()) {
             return array_values($this->backups);
         }
 
-        return array_values(array_filter($this->backups, fn ($backup) => $backup['type'] === $type));
+        return array_values(array_filter($this->backups, fn ($backup) => $backup['type'] === $configuration->getType()));
     }
 
     /**
@@ -469,6 +471,32 @@ class BackupManager
      */
     private function getAdapter(string $type): BackupAdapterInterface
     {
+        // If type is 'database', try to determine the specific database type
+        if ($type === 'database') {
+            // Look for a database adapter that has a resolver
+            foreach ($this->adapters as $adapter) {
+                if (method_exists($adapter, 'getConnection')) {
+                    $connection = $adapter->getConnection();
+                    
+                    // Create a resolver and get the specific database type
+                    $resolver = new \ProBackupBundle\Adapter\Database\DatabaseDriverResolver($connection, $this->logger);
+                    $specificType = $resolver->resolveDriverType();
+                    
+                    $this->logger->info('Resolved database type', [
+                        'generic_type' => $type,
+                        'specific_type' => $specificType
+                    ]);
+                    
+                    // If we got a more specific type, use it instead
+                    if ($specificType !== 'database') {
+                        $type = $specificType;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Find an adapter that supports the (possibly more specific) type
         foreach ($this->adapters as $adapter) {
             if ($adapter->supports($type)) {
                 return $adapter;
@@ -580,47 +608,8 @@ class BackupManager
     /**
      * Load existing backups from the backup directory.
      */
-    private function loadExistingBackups(): void
+    private function loadExistingBackups(BackupConfiguration $configuration): array
     {
-        $this->logger->info('Loading existing backups from directory', ['dir' => $this->backupDir]);
-
-        if (!$this->filesystem->exists($this->backupDir)) {
-            return;
-        }
-
-        $finder = new Finder();
-        $finder->files()->in($this->backupDir);
-
-        foreach ($finder as $file) {
-            $this->loadBackupFromFile($file);
-        }
-    }
-
-    /**
-     * Load backup information from a file.
-     */
-    private function loadBackupFromFile(\SplFileInfo $file): void
-    {
-        $filePath = $file->getRealPath();
-        $fileName = $file->getFilename();
-
-        // Extract backup information from filename or metadata
-        // Assuming filename format: {type}_{name}_{timestamp}.{extension}
-        $pathInfo = pathinfo($fileName);
-        $nameParts = explode('_', $pathInfo['filename']);
-
-        if (\count($nameParts) >= 3) {
-            $backupId = md5($filePath);
-
-            $this->backups[$backupId] = [
-                'id' => $backupId,
-                'type' => basename(\dirname($file->getRealPath())),
-                'name' => $fileName,
-                'file_path' => $filePath,
-                'file_size' => $file->getSize(),
-                'created_at' => (new \DateTime())->setTimestamp(filemtime($filePath)),
-                'storage' => 'local',
-            ];
-        }
+        return $this->storageAdapters[$configuration->getStorage()]->list();
     }
 }

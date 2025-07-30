@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProBackupBundle\Command;
 
 use ProBackupBundle\Manager\BackupManager;
+use ProBackupBundle\Model\BackupConfiguration;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,8 +30,8 @@ class ListCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Filter by backup type (database|filesystem)')
-            ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Filter by storage adapter')
+            ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Filter by backup type (database|filesystem)', 'database')
+            ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Filter by storage adapter', 'local')
             ->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'Output format (table|json|csv)', 'table')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command lists available backups:
@@ -65,8 +66,12 @@ EOF
         $storage = $input->getOption('storage');
         $format = $input->getOption('format');
 
+        $config = new BackupConfiguration();
+        $config->setType($type);
+        $config->setStorage($storage);
+
         // Get backups
-        $backups = $this->backupManager->listBackups($type);
+        $backups = $this->backupManager->listBackups($config);
 
         // Filter by storage if specified
         if ($storage) {

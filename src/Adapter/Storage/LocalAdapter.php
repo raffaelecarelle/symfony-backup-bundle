@@ -152,7 +152,7 @@ class LocalAdapter implements StorageAdapterInterface
         try {
             $searchPath = $this->basePath;
 
-            if ($prefix) {
+            if ($prefix !== '') {
                 $searchPath = $this->getFullPath($prefix);
 
                 if (!$this->filesystem->exists($searchPath)) {
@@ -166,10 +166,15 @@ class LocalAdapter implements StorageAdapterInterface
             $files = [];
             foreach ($finder as $file) {
                 $relativePath = $this->getRelativePath($file->getRealPath());
+
                 $files[] = [
-                    'path' => $relativePath,
-                    'size' => $file->getSize(),
-                    'modified' => new \DateTimeImmutable('@'.$file->getMTime()),
+                    'id' => md5($file->getFilename()),
+                    'type' => basename(dirname($file->getRealPath())),
+                    'name' => $file->getFilename(),
+                    'file_path' => $relativePath,
+                    'file_size' => $file->getSize(),
+                    'created_at' => (new \DateTime())->setTimestamp(filemtime($file->getRealPath())),
+                    'storage' => 'local',
                 ];
             }
 

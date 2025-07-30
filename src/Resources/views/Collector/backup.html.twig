@@ -137,6 +137,7 @@
         {% endif %}
     </div>
 
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -219,8 +220,8 @@
                                 tableHtml += '</tbody></table>';
                                 document.getElementById('backups-container').innerHTML = tableHtml;
 
-                                // Ri-attacca gli event listener
-                                attachEventListeners();
+                                // Ri-attacca solo gli event listener per la tabella (non per i bottoni principali)
+                                attachTableEventListeners();
                             } else {
                                 document.getElementById('backups-container').innerHTML =
                                     '<div class="empty" id="no-backups-message"><p>No backups available.</p></div>';
@@ -232,34 +233,8 @@
                     });
             }
 
-            function attachEventListeners() {
-                // Create backup
-                document.querySelectorAll('.create-backup').forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        const type = this.getAttribute('data-type');
-                        if (confirm('Are you sure you want to create a ' + type + ' backup?')) {
-                            fetch('{{ path('_profiler_backup_create') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    type: type
-                                })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('Backup created successfully!');
-                                        refreshBackupsList();
-                                    } else {
-                                        alert('Error creating backup: ' + data.error);
-                                    }
-                                });
-                        }
-                    });
-                });
-
+            // Funzione separata per gli event listener della tabella (che vengono ricreati dinamicamente)
+            function attachTableEventListeners() {
                 // Restore backup
                 document.querySelectorAll('.restore-backup').forEach(function(button) {
                     button.addEventListener('click', function(e) {
@@ -318,17 +293,45 @@
                         }
                     });
                 });
-
-                // Refresh button
-                document.querySelectorAll('.refresh-backups').forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        refreshBackupsList();
-                    });
-                });
             }
 
-            // Inizializza gli event listener
-            attachEventListeners();
+            // Inizializza gli event listener per i bottoni principali (una sola volta)
+            // Create backup
+            document.querySelectorAll('.create-backup').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    if (confirm('Are you sure you want to create a ' + type + ' backup?')) {
+                        fetch('{{ path('_profiler_backup_create') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                type: type
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert('Backup created successfully!');
+                                    refreshBackupsList();
+                                } else {
+                                    alert('Error creating backup: ' + data.error);
+                                }
+                            });
+                    }
+                });
+            });
+
+            // Refresh button
+            document.querySelectorAll('.refresh-backups').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    refreshBackupsList();
+                });
+            });
+
+            // Inizializza gli event listener per la tabella esistente
+            attachTableEventListeners();
         });
     </script>
 
