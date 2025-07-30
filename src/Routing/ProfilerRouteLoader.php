@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Routing;
 
 use Symfony\Component\Config\Loader\Loader;
