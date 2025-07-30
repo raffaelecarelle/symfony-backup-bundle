@@ -21,7 +21,7 @@
         
         <!-- Register routes for profiler actions -->
         <service id="symfony_backup.profiler_routes" class="Symfony\Component\Routing\RouteCollection">
-            <factory class="ProBackupBundle\Routing\ProfilerRouteLoader" method="load" />
+            <factory class="ProBackupBundle\Routing\ProfilerRouteLoader" method="loadRoutes" />
             <tag name="routing.loader" />
         </service>
     </services>
