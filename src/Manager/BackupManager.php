@@ -170,6 +170,13 @@ class BackupManager
             $startTime = microtime(true);
             $result = $adapter->backup($config);
 
+            $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
+
+            if ($compression) {
+                $targetPath = $compression->compress($result->getFilePath());
+                $result->setFilePath($targetPath);
+            }
+
             // Set the duration if not already set
             if (null === $result->getDuration()) {
                 $result->setDuration(microtime(true) - $startTime);
@@ -272,6 +279,14 @@ class BackupManager
             $backupPath = $backup['file_path'];
             if ('local' !== $backup['storage']) {
                 $backupPath = $this->retrieveFromRemote($backup);
+            }
+
+            $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
+            $decompressionName = 'gz' === $extension ? 'gzip' : 'zip';
+            $compression = $this->compressionAdapters[$decompressionName] ?? null;
+
+            if ($compression) {
+                $backupPath = $compression->decompress($backupPath);
             }
 
             // Perform the restore

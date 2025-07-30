@@ -12,8 +12,6 @@ use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 /**
  * Adapter for SQLite database backups.
@@ -61,20 +59,16 @@ class SQLiteAdapter implements BackupAdapterInterface
             // Copy the database file
             $this->filesystem->copy($dbPath, $filepath);
 
-            // Apply compression if needed
-            $compressedPath = $this->compressIfNeeded($filepath, $config);
-            $finalPath = $compressedPath ?: $filepath;
-
             $this->logger->info('SQLite backup completed', [
-                'file' => $finalPath,
-                'size' => filesize($finalPath),
+                'file' => $filepath,
+                'size' => filesize($filepath),
                 'duration' => microtime(true) - $startTime,
             ]);
 
             return new BackupResult(
                 true,
-                $finalPath,
-                filesize($finalPath),
+                $filepath,
+                filesize($filepath),
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime
             );
@@ -108,10 +102,6 @@ class SQLiteAdapter implements BackupAdapterInterface
         ]);
 
         try {
-            // Decompress if needed
-            $decompressedPath = $this->decompressIfNeeded($backupPath);
-            $finalPath = $decompressedPath ?: $backupPath;
-
             $dbPath = $this->getDatabasePath();
 
             // Check if the database file exists and is writable
@@ -131,12 +121,7 @@ class SQLiteAdapter implements BackupAdapterInterface
             }
 
             // Copy the backup file to the database location
-            $this->filesystem->copy($finalPath, $dbPath, true);
-
-            // Clean up temporary decompressed file
-            if ($decompressedPath && $decompressedPath !== $backupPath) {
-                $this->filesystem->remove($decompressedPath);
-            }
+            $this->filesystem->copy($backupPath, $dbPath, true);
 
             $this->logger->info('SQLite restore completed', [
                 'database' => $dbPath,
@@ -148,11 +133,6 @@ class SQLiteAdapter implements BackupAdapterInterface
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
-            // Clean up temporary decompressed file
-            if (isset($decompressedPath) && $decompressedPath !== $backupPath && $this->filesystem->exists($decompressedPath)) {
-                $this->filesystem->remove($decompressedPath);
-            }
 
             return false;
         }
@@ -211,74 +191,5 @@ class SQLiteAdapter implements BackupAdapterInterface
         $name = $config->getName() ?: 'backup';
 
         return \sprintf('%s_%s_%s.sqlite', $dbName, $name, $timestamp);
-    }
-
-    /**
-     * Compress the backup file if compression is enabled.
-     *
-     * @return string|null Path to the compressed file, or null if no compression
-     */
-    private function compressIfNeeded(string $filepath, BackupConfiguration $config): ?string
-    {
-        $compression = $config->getCompression();
-        if (!$compression) {
-            return null;
-        }
-
-        $this->logger->info('Compressing backup file', [
-            'file' => $filepath,
-            'compression' => $compression,
-        ]);
-
-        if ('gzip' === $compression) {
-            $compressedPath = $filepath.'.gz';
-
-            $process = Process::fromShellCommandline(\sprintf('gzip -c %s > %s', escapeshellarg($filepath), escapeshellarg($compressedPath)));
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
-
-            // Remove the original file
-            $this->filesystem->remove($filepath);
-
-            return $compressedPath;
-        }
-
-        // Other compression types can be added here
-
-        return null;
-    }
-
-    /**
-     * Decompress the backup file if it's compressed.
-     *
-     * @return string|null Path to the decompressed file, or null if no decompression
-     */
-    private function decompressIfNeeded(string $filepath): ?string
-    {
-        $extension = pathinfo($filepath, \PATHINFO_EXTENSION);
-
-        if ('gz' === $extension) {
-            $this->logger->info('Decompressing gzip backup file', [
-                'file' => $filepath,
-            ]);
-
-            $decompressedPath = substr($filepath, 0, -3); // Remove .gz
-
-            $process = Process::fromShellCommandline(\sprintf('gunzip -c %s > %s', escapeshellarg($filepath), escapeshellarg($decompressedPath)));
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
-
-            return $decompressedPath;
-        }
-
-        // Other compression types can be added here
-
-        return null;
     }
 }

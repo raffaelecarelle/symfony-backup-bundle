@@ -26,7 +26,7 @@ class ProBackupBundle extends Bundle
         return $this->extension;
     }
 
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
