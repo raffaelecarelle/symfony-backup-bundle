@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Model;
 
 /**
@@ -44,8 +46,6 @@ class BackupConfiguration
 
     /**
      * Get the backup type.
-     *
-     * @return string
      */
     public function getType(): string
     {
@@ -54,20 +54,16 @@ class BackupConfiguration
 
     /**
      * Set the backup type.
-     *
-     * @param string $type
-     * @return self
      */
     public function setType(string $type): self
     {
         $this->type = $type;
+
         return $this;
     }
 
     /**
      * Get the backup name.
-     *
-     * @return string
      */
     public function getName(): string
     {
@@ -76,20 +72,16 @@ class BackupConfiguration
 
     /**
      * Set the backup name.
-     *
-     * @param string $name
-     * @return self
      */
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
     /**
      * Get the backup options.
-     *
-     * @return array
      */
     public function getOptions(): array
     {
@@ -98,22 +90,16 @@ class BackupConfiguration
 
     /**
      * Set the backup options.
-     *
-     * @param array $options
-     * @return self
      */
     public function setOptions(array $options): self
     {
         $this->options = $options;
+
         return $this;
     }
 
     /**
      * Get a specific option.
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
      */
     public function getOption(string $key, $default = null)
     {
@@ -122,21 +108,16 @@ class BackupConfiguration
 
     /**
      * Set a specific option.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return self
      */
     public function setOption(string $key, $value): self
     {
         $this->options[$key] = $value;
+
         return $this;
     }
 
     /**
      * Get the storage adapter.
-     *
-     * @return string
      */
     public function getStorage(): string
     {
@@ -145,20 +126,16 @@ class BackupConfiguration
 
     /**
      * Set the storage adapter.
-     *
-     * @param string $storage
-     * @return self
      */
     public function setStorage(string $storage): self
     {
         $this->storage = $storage;
+
         return $this;
     }
 
     /**
      * Get the compression type.
-     *
-     * @return string|null
      */
     public function getCompression(): ?string
     {
@@ -167,20 +144,16 @@ class BackupConfiguration
 
     /**
      * Set the compression type.
-     *
-     * @param string|null $compression
-     * @return self
      */
     public function setCompression(?string $compression): self
     {
         $this->compression = $compression;
+
         return $this;
     }
 
     /**
      * Get the exclusions.
-     *
-     * @return array
      */
     public function getExclusions(): array
     {
@@ -189,32 +162,26 @@ class BackupConfiguration
 
     /**
      * Set the exclusions.
-     *
-     * @param array $exclusions
-     * @return self
      */
     public function setExclusions(array $exclusions): self
     {
         $this->exclusions = $exclusions;
+
         return $this;
     }
 
     /**
      * Add an exclusion.
-     *
-     * @param string $exclusion
-     * @return self
      */
     public function addExclusion(string $exclusion): self
     {
         $this->exclusions[] = $exclusion;
+
         return $this;
     }
 
     /**
      * Get the output path.
-     *
-     * @return string|null
      */
     public function getOutputPath(): ?string
     {
@@ -223,13 +190,11 @@ class BackupConfiguration
 
     /**
      * Set the output path.
-     *
-     * @param string $outputPath
-     * @return self
      */
     public function setOutputPath(string $outputPath): self
     {
         $this->outputPath = $outputPath;
+
         return $this;
     }
 }

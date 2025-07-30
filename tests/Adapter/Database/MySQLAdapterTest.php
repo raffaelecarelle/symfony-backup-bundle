@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Tests\Adapter\Database;
 
+use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\Database\MySQLAdapter;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Filesystem\Filesystem;
-use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 
 class MySQLAdapterTest extends TestCase
@@ -20,7 +20,7 @@ class MySQLAdapterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/mysql_backup_test_' . uniqid('', true);
+        $this->tempDir = sys_get_temp_dir().'/mysql_backup_test_'.uniqid('', true);
         mkdir($this->tempDir, 0777, true);
 
         $this->mockConnection = $this->createMock(Connection::class);
@@ -33,7 +33,7 @@ class MySQLAdapterTest extends TestCase
                 'host' => 'localhost',
                 'port' => 3306,
                 'user' => 'db_user',
-                'password' => 'db_password'
+                'password' => 'db_password',
             ]);
 
         $this->mockConnection->expects($this->any())
@@ -64,7 +64,7 @@ class MySQLAdapterTest extends TestCase
 
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
-            $path = $dir . '/' . $file;
+            $path = $dir.'/'.$file;
             is_dir($path) ? $this->removeDirectory($path) : unlink($path);
         }
 
@@ -87,7 +87,7 @@ class MySQLAdapterTest extends TestCase
         $config->setOptions([
             'single_transaction' => true,
             'routines' => true,
-            'triggers' => true
+            'triggers' => true,
         ]);
 
         $errors = $this->adapter->validate($config);
@@ -101,7 +101,7 @@ class MySQLAdapterTest extends TestCase
         $config->setType('mysql');
         // Non settare l'output path per testare l'errore di validazione
         $config->setOptions([
-            'single_transaction' => true
+            'single_transaction' => true,
         ]);
 
         $errors = $this->adapter->validate($config);
@@ -113,7 +113,7 @@ class MySQLAdapterTest extends TestCase
     public function testBackup(): void
     {
         // Crea un file temporaneo per simulare l'output del backup
-        $expectedFilePath = $this->tempDir . '/test_db_test_backup_' . date('Y-m-d') . '.sql';
+        $expectedFilePath = $this->tempDir.'/test_db_test_backup_'.date('Y-m-d').'.sql';
 
         // Simula la creazione del file di backup
         $testContent = 'test backup content';
@@ -127,7 +127,7 @@ class MySQLAdapterTest extends TestCase
         $config->setOptions([
             'single_transaction' => true,
             'routines' => true,
-            'triggers' => true
+            'triggers' => true,
         ]);
 
         // Mock del processo mysqldump che sia sempre di successo per questo test
@@ -140,7 +140,7 @@ class MySQLAdapterTest extends TestCase
         $expectedResult = new BackupResult(
             true,
             $expectedFilePath,
-            strlen($testContent),
+            \strlen($testContent),
             new \DateTimeImmutable(),
             0.1
         );
@@ -155,7 +155,7 @@ class MySQLAdapterTest extends TestCase
 
         // Assertions
         $this->assertTrue($result->isSuccess());
-        $this->assertEquals(strlen($testContent), $result->getFileSize());
+        $this->assertEquals(\strlen($testContent), $result->getFileSize());
         $this->assertStringContainsString('test_backup', $result->getFilePath());
     }
 
@@ -198,7 +198,7 @@ class MySQLAdapterTest extends TestCase
     public function testRestore(): void
     {
         // Create a test backup file
-        $backupPath = $this->tempDir . '/test_backup.sql';
+        $backupPath = $this->tempDir.'/test_backup.sql';
         file_put_contents($backupPath, 'test backup content');
 
         // Mock dell'adapter per il restore
@@ -222,7 +222,7 @@ class MySQLAdapterTest extends TestCase
     public function testRestoreFailure(): void
     {
         // Create a test backup file
-        $backupPath = $this->tempDir . '/test_backup.sql';
+        $backupPath = $this->tempDir.'/test_backup.sql';
         file_put_contents($backupPath, 'test backup content');
 
         // Mock dell'adapter per simulare un fallimento del restore

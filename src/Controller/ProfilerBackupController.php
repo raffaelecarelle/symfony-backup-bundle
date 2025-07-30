@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Controller;
 
+use ProBackupBundle\Manager\BackupManager;
+use ProBackupBundle\Model\BackupConfiguration;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use ProBackupBundle\Manager\BackupManager;
-use ProBackupBundle\Model\BackupConfiguration;
 
 /**
  * Controller for backup actions in the profiler.
@@ -15,25 +17,14 @@ use ProBackupBundle\Model\BackupConfiguration;
 class ProfilerBackupController
 {
     /**
-     * @var BackupManager
-     */
-    private BackupManager $backupManager;
-
-    /**
      * Constructor.
-     *
-     * @param BackupManager $backupManager
      */
-    public function __construct(BackupManager $backupManager)
+    public function __construct(private readonly BackupManager $backupManager)
     {
-        $this->backupManager = $backupManager;
     }
 
     /**
      * Create a backup.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
@@ -43,7 +34,7 @@ class ProfilerBackupController
         try {
             $config = new BackupConfiguration();
             $config->setType($type);
-            $config->setName(sprintf('profiler_%s_%s', $type, date('Y-m-d_H-i-s')));
+            $config->setName(\sprintf('profiler_%s_%s', $type, date('Y-m-d_H-i-s')));
 
             $result = $this->backupManager->backup($config);
 
@@ -52,21 +43,18 @@ class ProfilerBackupController
                 'backup_id' => $result->getId(),
                 'file_path' => $result->getFilePath(),
                 'file_size' => $result->getFileSize(),
-                'error' => $result->getError()
+                'error' => $result->getError(),
             ]);
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
 
     /**
      * Restore a backup.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function restore(Request $request): JsonResponse
     {
@@ -76,7 +64,7 @@ class ProfilerBackupController
         try {
             $backup = $this->backupManager->getBackup($backupId);
             if (!$backup) {
-                throw new \InvalidArgumentException(sprintf('Backup with ID "%s" not found', $backupId));
+                throw new \InvalidArgumentException(\sprintf('Backup with ID "%s" not found', $backupId));
             }
 
             $success = $this->backupManager->restore($backupId);
@@ -85,16 +73,13 @@ class ProfilerBackupController
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
 
     /**
      * Download a backup.
-     *
-     * @param Request $request
-     * @return Response
      */
     public function download(Request $request): Response
     {
@@ -103,14 +88,14 @@ class ProfilerBackupController
         try {
             $backup = $this->backupManager->getBackup($backupId);
             if (!$backup) {
-                throw new \InvalidArgumentException(sprintf('Backup with ID "%s" not found', $backupId));
+                throw new \InvalidArgumentException(\sprintf('Backup with ID "%s" not found', $backupId));
             }
 
             return new BinaryFileResponse(
                 $backup['file_path'],
                 200,
                 [
-                    'Content-Disposition' => sprintf('attachment; filename="%s"', basename($backup['file_path']))
+                    'Content-Disposition' => \sprintf('attachment; filename="%s"', basename((string) $backup['file_path'])),
                 ]
             );
         } catch (\Throwable $e) {
@@ -120,9 +105,6 @@ class ProfilerBackupController
 
     /**
      * Delete a backup.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function delete(Request $request): JsonResponse
     {
@@ -131,11 +113,12 @@ class ProfilerBackupController
 
         try {
             $success = $this->backupManager->deleteBackup($backupId);
+
             return new JsonResponse(['success' => $success]);
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

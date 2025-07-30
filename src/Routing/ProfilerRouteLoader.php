@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Routing;
 
 use Symfony\Component\Routing\Route;
@@ -12,13 +14,11 @@ class ProfilerRouteLoader
 {
     /**
      * Load routes for the profiler.
-     *
-     * @return RouteCollection
      */
     public static function loadRoutes(): RouteCollection
     {
         $routes = new RouteCollection();
-        
+
         // Create backup
         $routes->add('_profiler_backup_create', new Route(
             '/_profiler/backup/create',
@@ -31,7 +31,7 @@ class ProfilerRouteLoader
             [],
             ['POST']
         ));
-        
+
         // Restore backup
         $routes->add('_profiler_backup_restore', new Route(
             '/_profiler/backup/restore',
@@ -44,7 +44,7 @@ class ProfilerRouteLoader
             [],
             ['POST']
         ));
-        
+
         // Download backup
         $routes->add('_profiler_backup_download', new Route(
             '/_profiler/backup/download',
@@ -57,7 +57,7 @@ class ProfilerRouteLoader
             [],
             ['GET']
         ));
-        
+
         // Delete backup
         $routes->add('_profiler_backup_delete', new Route(
             '/_profiler/backup/delete',
@@ -70,7 +70,7 @@ class ProfilerRouteLoader
             [],
             ['DELETE']
         ));
-        
+
         return $routes;
     }
 }

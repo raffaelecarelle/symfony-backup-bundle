@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Tests\Adapter\Compression;
 
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\Compression\GzipCompression;
 use ProBackupBundle\Exception\BackupException;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Filesystem\Filesystem;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 
 class GzipCompressionTest extends TestCase
 {
@@ -18,7 +20,7 @@ class GzipCompressionTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/gzip_compression_test_' . uniqid('', true);
+        $this->tempDir = sys_get_temp_dir().'/gzip_compression_test_'.uniqid('', true);
         mkdir($this->tempDir, 0777, true);
 
         $this->mockLogger = $this->createMock(LoggerInterface::class);
@@ -44,7 +46,7 @@ class GzipCompressionTest extends TestCase
 
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
-            $path = $dir . '/' . $file;
+            $path = $dir.'/'.$file;
             is_dir($path) ? $this->removeDirectory($path) : unlink($path);
         }
 
@@ -54,10 +56,10 @@ class GzipCompressionTest extends TestCase
     private function createValidGzipFile(string $filePath, string $content): void
     {
         // Crea un file gzip valido usando il comando gzip
-        $tempFile = $filePath . '.tmp';
+        $tempFile = $filePath.'.tmp';
         file_put_contents($tempFile, $content);
 
-        $process = Process::fromShellCommandline(sprintf(
+        $process = Process::fromShellCommandline(\sprintf(
             'gzip -c %s > %s',
             escapeshellarg($tempFile),
             escapeshellarg($filePath)
@@ -75,10 +77,10 @@ class GzipCompressionTest extends TestCase
     public function testCompress(): void
     {
         // Create a test file
-        $sourcePath = $this->tempDir . '/test_file.txt';
+        $sourcePath = $this->tempDir.'/test_file.txt';
         file_put_contents($sourcePath, 'test content');
 
-        $targetPath = $this->tempDir . '/test_file.txt.gz';
+        $targetPath = $this->tempDir.'/test_file.txt.gz';
 
         $result = $this->adapter->compress($sourcePath, $targetPath);
 
@@ -89,20 +91,20 @@ class GzipCompressionTest extends TestCase
     public function testCompressWithDefaultTargetPath(): void
     {
         // Create a test file
-        $sourcePath = $this->tempDir . '/test_file.txt';
+        $sourcePath = $this->tempDir.'/test_file.txt';
         file_put_contents($sourcePath, 'test content');
 
         $result = $this->adapter->compress($sourcePath);
 
-        $this->assertEquals($sourcePath . '.gz', $result);
-        $this->assertTrue(file_exists($sourcePath . '.gz'));
+        $this->assertEquals($sourcePath.'.gz', $result);
+        $this->assertTrue(file_exists($sourcePath.'.gz'));
     }
 
     public function testCompressFailure(): void
     {
         // Use a non-existent source file
-        $sourcePath = $this->tempDir . '/non_existent_file.txt';
-        $targetPath = $this->tempDir . '/test_file.txt.gz';
+        $sourcePath = $this->tempDir.'/non_existent_file.txt';
+        $targetPath = $this->tempDir.'/test_file.txt.gz';
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Source file not found');
@@ -113,8 +115,8 @@ class GzipCompressionTest extends TestCase
     public function testDecompress(): void
     {
         // Create a valid gzip file
-        $sourcePath = $this->tempDir . '/test_file.txt.gz';
-        $targetPath = $this->tempDir . '/test_file.txt';
+        $sourcePath = $this->tempDir.'/test_file.txt.gz';
+        $targetPath = $this->tempDir.'/test_file.txt';
         $originalContent = 'test content for decompression';
 
         $this->createValidGzipFile($sourcePath, $originalContent);
@@ -129,14 +131,14 @@ class GzipCompressionTest extends TestCase
     public function testDecompressWithDefaultTargetPath(): void
     {
         // Create a valid gzip file
-        $sourcePath = $this->tempDir . '/test_file.txt.gz';
+        $sourcePath = $this->tempDir.'/test_file.txt.gz';
         $originalContent = 'test content for decompression with default path';
 
         $this->createValidGzipFile($sourcePath, $originalContent);
 
         $result = $this->adapter->decompress($sourcePath);
 
-        $expectedTargetPath = $this->tempDir . '/test_file.txt';
+        $expectedTargetPath = $this->tempDir.'/test_file.txt';
         $this->assertEquals($expectedTargetPath, $result);
         $this->assertTrue(file_exists($expectedTargetPath));
         $this->assertEquals($originalContent, file_get_contents($expectedTargetPath));
@@ -145,8 +147,8 @@ class GzipCompressionTest extends TestCase
     public function testDecompressFailure(): void
     {
         // Use a non-existent source file
-        $sourcePath = $this->tempDir . '/non_existent_file.txt.gz';
-        $targetPath = $this->tempDir . '/test_file.txt';
+        $sourcePath = $this->tempDir.'/non_existent_file.txt.gz';
+        $targetPath = $this->tempDir.'/test_file.txt';
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Source file not found');
@@ -157,10 +159,10 @@ class GzipCompressionTest extends TestCase
     public function testDecompressInvalidGzipFile(): void
     {
         // Create an invalid gzip file
-        $sourcePath = $this->tempDir . '/invalid_file.txt.gz';
+        $sourcePath = $this->tempDir.'/invalid_file.txt.gz';
         file_put_contents($sourcePath, 'this is not a valid gzip file');
 
-        $targetPath = $this->tempDir . '/test_file.txt';
+        $targetPath = $this->tempDir.'/test_file.txt';
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Failed to decompress file');
@@ -171,17 +173,17 @@ class GzipCompressionTest extends TestCase
     public function testSupports(): void
     {
         // Test with extension
-        $this->assertTrue($this->adapter->supports($this->tempDir . '/test_file.txt.gz'));
-        $this->assertFalse($this->adapter->supports($this->tempDir . '/test_file.txt'));
-        $this->assertFalse($this->adapter->supports($this->tempDir . '/test_file.zip'));
+        $this->assertTrue($this->adapter->supports($this->tempDir.'/test_file.txt.gz'));
+        $this->assertFalse($this->adapter->supports($this->tempDir.'/test_file.txt'));
+        $this->assertFalse($this->adapter->supports($this->tempDir.'/test_file.zip'));
 
         // Test with actual gzip file
-        $gzipFile = $this->tempDir . '/real_gzip_file.gz';
+        $gzipFile = $this->tempDir.'/real_gzip_file.gz';
         $this->createValidGzipFile($gzipFile, 'test content');
         $this->assertTrue($this->adapter->supports($gzipFile));
 
         // Test with file that has .gz extension but invalid content
-        $fakeGzipFile = $this->tempDir . '/fake_gzip_file.gz';
+        $fakeGzipFile = $this->tempDir.'/fake_gzip_file.gz';
         file_put_contents($fakeGzipFile, 'not gzip content');
         $this->assertTrue($this->adapter->supports($fakeGzipFile)); // Should return true based on extension
     }

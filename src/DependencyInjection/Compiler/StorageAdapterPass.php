@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -11,9 +13,6 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class StorageAdapterPass implements CompilerPassInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('symfony_backup.manager')) {
@@ -36,9 +35,6 @@ class StorageAdapterPass implements CompilerPassInterface
 
     /**
      * Extract a name from a service ID.
-     *
-     * @param string $serviceId
-     * @return string
      */
     private function getNameFromServiceId(string $serviceId): string
     {

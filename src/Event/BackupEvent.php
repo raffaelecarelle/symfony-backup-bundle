@@ -1,29 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Event;
 
-use Symfony\Contracts\EventDispatcher\Event;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event dispatched during backup and restore operations.
  */
 class BackupEvent extends Event
 {
-    private BackupConfiguration $configuration;
-    private ?BackupResult $result;
-    
     /**
      * @param BackupConfiguration $configuration The backup configuration
-     * @param BackupResult|null $result The backup result (null for pre-backup events)
+     * @param BackupResult|null   $result        The backup result (null for pre-backup events)
      */
-    public function __construct(BackupConfiguration $configuration, ?BackupResult $result = null)
+    public function __construct(private readonly BackupConfiguration $configuration, private readonly ?BackupResult $result = null)
     {
-        $this->configuration = $configuration;
-        $this->result = $result;
     }
-    
+
     /**
      * Get the backup configuration.
      */
@@ -31,10 +28,10 @@ class BackupEvent extends Event
     {
         return $this->configuration;
     }
-    
+
     /**
      * Get the backup result.
-     * 
+     *
      * @return BackupResult|null The backup result or null if not available
      */
     public function getResult(): ?BackupResult

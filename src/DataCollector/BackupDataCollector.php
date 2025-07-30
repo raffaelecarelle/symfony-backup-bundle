@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\DataCollector;
 
+use ProBackupBundle\Manager\BackupManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-use ProBackupBundle\Manager\BackupManager;
 
 /**
  * BackupDataCollector collects backup information for the Symfony Profiler.
@@ -13,24 +15,13 @@ use ProBackupBundle\Manager\BackupManager;
 class BackupDataCollector extends DataCollector
 {
     /**
-     * @var BackupManager
-     */
-    private BackupManager $backupManager;
-
-    /**
      * Constructor.
-     *
-     * @param BackupManager $backupManager
      */
-    public function __construct(BackupManager $backupManager)
+    public function __construct(private readonly BackupManager $backupManager)
     {
-        $this->backupManager = $backupManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function collect(Request $request, Response $response, \Throwable $exception = null): void
+    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
         $this->data = [
             'backups' => $this->backupManager->listBackups(),
@@ -39,17 +30,11 @@ class BackupDataCollector extends DataCollector
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function reset(): void
     {
         $this->data = [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName(): string
     {
         return 'backup';
@@ -57,8 +42,6 @@ class BackupDataCollector extends DataCollector
 
     /**
      * Get all available backups.
-     *
-     * @return array
      */
     public function getBackups(): array
     {
@@ -67,8 +50,6 @@ class BackupDataCollector extends DataCollector
 
     /**
      * Get the last backup.
-     *
-     * @return array|null
      */
     public function getLastBackup(): ?array
     {
@@ -77,8 +58,6 @@ class BackupDataCollector extends DataCollector
 
     /**
      * Get storage usage statistics.
-     *
-     * @return array
      */
     public function getStorageUsage(): array
     {

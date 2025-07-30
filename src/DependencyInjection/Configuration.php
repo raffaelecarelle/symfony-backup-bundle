@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -10,14 +12,11 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('symfony_backup');
         $rootNode = $treeBuilder->getRootNode();
-        
+
         $rootNode
             ->children()
                 ->scalarNode('backup_dir')
@@ -28,7 +27,7 @@ class Configuration implements ConfigurationInterface
                     ->info('Default storage adapter to use')
                     ->defaultValue('local')
                 ->end()
-                
+
                 // Storage adapters configuration
                 ->arrayNode('storage')
                     ->addDefaultsIfNotSet()
@@ -51,7 +50,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
-                        
+
                         // S3 storage
                         ->arrayNode('s3')
                             ->canBeEnabled()
@@ -89,7 +88,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
-                        
+
                         // Google Cloud storage
                         ->arrayNode('google_cloud')
                             ->canBeEnabled()
@@ -120,7 +119,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                
+
                 // Database configuration
                 ->arrayNode('database')
                     ->addDefaultsIfNotSet()
@@ -204,7 +203,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                
+
                 // Filesystem configuration
                 ->arrayNode('filesystem')
                     ->addDefaultsIfNotSet()
@@ -232,7 +231,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                
+
                 // Compression configuration
                 ->arrayNode('compression')
                     ->addDefaultsIfNotSet()
@@ -265,7 +264,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                
+
                 // Schedule configuration
                 ->arrayNode('schedule')
                     ->addDefaultsIfNotSet()
@@ -305,7 +304,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                
+
                 // Notifications configuration
                 ->arrayNode('notifications')
                     ->addDefaultsIfNotSet()
@@ -322,7 +321,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                
+
                 // Profiler configuration
                 ->arrayNode('profiler')
                     ->addDefaultsIfNotSet()
@@ -334,7 +333,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
         ;
-        
+
         return $treeBuilder;
     }
 }

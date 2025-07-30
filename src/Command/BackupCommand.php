@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ProBackupBundle\Command;
 
+use ProBackupBundle\Manager\BackupManager;
+use ProBackupBundle\Model\BackupConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use ProBackupBundle\Manager\BackupManager;
-use ProBackupBundle\Model\BackupConfiguration;
 
 /**
  * Command to create a backup.
@@ -17,27 +19,15 @@ class BackupCommand extends Command
 {
     protected static $defaultName = 'backup:create';
     protected static $defaultDescription = 'Create a backup of database or filesystem';
-    
-    /**
-     * @var BackupManager
-     */
-    private BackupManager $backupManager;
-    
+
     /**
      * Constructor.
-     *
-     * @param BackupManager $backupManager
      */
-    public function __construct(BackupManager $backupManager)
+    public function __construct(private readonly BackupManager $backupManager)
     {
-        $this->backupManager = $backupManager;
-        
         parent::__construct();
     }
-    
-    /**
-     * {@inheritdoc}
-     */
+
     protected function configure(): void
     {
         $this
@@ -80,21 +70,18 @@ EOF
             )
         ;
     }
-    
-    /**
-     * {@inheritdoc}
-     */
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        
+
         $type = $input->getOption('type');
-        $name = $input->getOption('name') ?: sprintf('%s_%s', $type, date('Y-m-d_H-i-s'));
+        $name = $input->getOption('name') ?: \sprintf('%s_%s', $type, date('Y-m-d_H-i-s'));
         $storage = $input->getOption('storage');
         $compression = $input->getOption('compression');
         $outputPath = $input->getOption('output-path');
         $exclusions = $input->getOption('exclude');
-        
+
         $io->title('Creating Backup');
         $io->table(
             ['Option', 'Value'],
@@ -107,94 +94,94 @@ EOF
                 ['Exclusions', $exclusions ? implode(', ', $exclusions) : '(none)'],
             ]
         );
-        
+
         $config = new BackupConfiguration();
         $config->setType($type);
         $config->setName($name);
-        
+
         if ($storage) {
             $config->setStorage($storage);
         }
-        
+
         if ($compression) {
             $config->setCompression($compression);
         }
-        
+
         if ($outputPath) {
             $config->setOutputPath($outputPath);
         }
-        
+
         if ($exclusions) {
             $config->setExclusions($exclusions);
         }
-        
+
         $io->section('Starting backup process');
         $io->progressStart(3);
-        
+
         $io->progressAdvance();
         $io->text('Preparing backup...');
-        
+
         try {
             $result = $this->backupManager->backup($config);
-            
+
             $io->progressAdvance();
             $io->text('Processing backup...');
-            
+
             $io->progressAdvance();
             $io->progressFinish();
-            
+
             if ($result->isSuccess()) {
                 $io->success([
                     'Backup created successfully',
-                    sprintf('File: %s', $result->getFilePath()),
-                    sprintf('Size: %s', $this->formatFileSize($result->getFileSize())),
-                    sprintf('Duration: %.2f seconds', $result->getDuration()),
+                    \sprintf('File: %s', $result->getFilePath()),
+                    \sprintf('Size: %s', $this->formatFileSize($result->getFileSize())),
+                    \sprintf('Duration: %.2f seconds', $result->getDuration()),
                 ]);
-                
+
                 return Command::SUCCESS;
             }
-            
+
             $io->error([
                 'Backup failed',
-                sprintf('Error: %s', $result->getError()),
+                \sprintf('Error: %s', $result->getError()),
             ]);
-            
+
             return Command::FAILURE;
         } catch (\Throwable $e) {
             $io->progressFinish();
-            
+
             $io->error([
                 'Backup failed with exception',
-                sprintf('Error: %s', $e->getMessage()),
+                \sprintf('Error: %s', $e->getMessage()),
             ]);
-            
+
             if ($output->isVerbose()) {
                 $io->section('Exception details');
                 $io->text((string) $e);
             }
-            
+
             return Command::FAILURE;
         }
     }
-    
+
     /**
      * Format file size in human-readable format.
      *
-     * @param int $bytes File size in bytes
+     * @param int $bytes     File size in bytes
      * @param int $precision Precision of the result
-     * 
+     *
      * @return string Formatted file size
      */
     private function formatFileSize(int $bytes, int $precision = 2): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-        
+        $pow = min($pow, \count($units) - 1);
+
         $bytes /= (1 << (10 * $pow));
-        
-        return round($bytes, $precision) . ' ' . $units[$pow];
+
+        return round($bytes, $precision).' '.$units[$pow];
     }
 }
