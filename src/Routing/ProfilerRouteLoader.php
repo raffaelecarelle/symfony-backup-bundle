@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Routing;
 
+use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
  * Loader for profiler routes.
  */
-class ProfilerRouteLoader
+class ProfilerRouteLoader extends Loader
 {
     /**
      * Load routes for the profiler.
      */
-    public static function loadRoutes(): RouteCollection
+    public function load(mixed $resource, ?string $type = null): mixed
     {
         $routes = new RouteCollection();
 
@@ -72,5 +73,10 @@ class ProfilerRouteLoader
         ));
 
         return $routes;
+    }
+
+    public function supports(mixed $resource, ?string $type = null): bool
+    {
+        return true;
     }
 }

@@ -10,14 +10,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class BackupExtensionTest extends TestCase
 {
-    /**
-     * @var BackupExtension
-     */
     private BackupExtension $backupExtension;
 
-    /**
-     * @var ContainerBuilder
-     */
     private ContainerBuilder $containerBuilder;
 
     protected function setUp(): void
@@ -48,7 +42,7 @@ class BackupExtensionTest extends TestCase
                 'gzip' => ['level' => 6, 'keep_original' => false],
                 'zip' => ['level' => 6, 'keep_original' => false],
             ],
-            'default_storage' => 'local'
+            'default_storage' => 'local',
         ];
 
         $this->backupExtension->load([$configs], $this->containerBuilder);

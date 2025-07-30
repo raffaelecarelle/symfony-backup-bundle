@@ -19,6 +19,13 @@
         <!-- Register the manager as an alias -->
         <service id="ProBackupBundle\Manager\BackupManager" alias="symfony_backup.manager" public="false" />
         
+        <!-- Backup Message Handler -->
+        <service id="symfony_backup.scheduler.backup_message_handler" class="ProBackupBundle\Scheduler\BackupMessageHandler" public="false">
+            <argument type="service" id="symfony_backup.manager" />
+            <argument type="service" id="logger" on-invalid="null" />
+            <tag name="messenger.message_handler" />
+        </service>
+        
         <!-- Console Commands -->
         <service id="symfony_backup.command.backup" class="ProBackupBundle\Command\BackupCommand">
             <argument type="service" id="symfony_backup.manager" />

@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\DependencyInjection;
 
+use ProBackupBundle\Adapter\Compression\GzipCompression;
+use ProBackupBundle\Adapter\Compression\ZipCompression;
+use ProBackupBundle\Adapter\Database\MySQLAdapter;
+use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
+use ProBackupBundle\Adapter\Database\SQLiteAdapter;
+use ProBackupBundle\Adapter\Database\SqlServerAdapter;
+use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
+use ProBackupBundle\Adapter\Storage\LocalAdapter;
+use ProBackupBundle\Adapter\Storage\S3Adapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
-use ProBackupBundle\Adapter\Storage\LocalAdapter;
-use ProBackupBundle\Adapter\Storage\S3Adapter;
-use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
-use ProBackupBundle\Adapter\Database\MySQLAdapter;
-use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
-use ProBackupBundle\Adapter\Database\SQLiteAdapter;
-use ProBackupBundle\Adapter\Database\SqlServerAdapter;
-use ProBackupBundle\Adapter\Compression\GzipCompression;
-use ProBackupBundle\Adapter\Compression\ZipCompression;
 
 class BackupExtension extends Extension
 {
@@ -80,8 +80,8 @@ class BackupExtension extends Extension
         $localDef->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
 
         // Configure S3 storage adapter SOLO se esplicitamente definito e abilitato
-        if (isset($config['storage']['s3']) && is_array($config['storage']['s3']) &&
-            (isset($config['storage']['s3']['enabled']) ? $config['storage']['s3']['enabled'] : true)) {
+        if (isset($config['storage']['s3']) && \is_array($config['storage']['s3'])
+            && ($config['storage']['s3']['enabled'] ?? true)) {
             $s3Config = $config['storage']['s3'];
 
             // Check if AWS SDK is available
@@ -113,8 +113,8 @@ class BackupExtension extends Extension
         }
 
         // Configure Google Cloud storage adapter SOLO se esplicitamente definito e abilitato
-        if (isset($config['storage']['google_cloud']) && is_array($config['storage']['google_cloud']) &&
-            (isset($config['storage']['google_cloud']['enabled']) ? $config['storage']['google_cloud']['enabled'] : true)) {
+        if (isset($config['storage']['google_cloud']) && \is_array($config['storage']['google_cloud'])
+            && ($config['storage']['google_cloud']['enabled'] ?? true)) {
             $gcConfig = $config['storage']['google_cloud'];
 
             // Check if Google Cloud SDK is available
