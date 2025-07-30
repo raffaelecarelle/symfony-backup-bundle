@@ -155,10 +155,6 @@ class PostgreSQLAdapter implements BackupAdapterInterface
     {
         $errors = [];
 
-        if (!$this->connection->isConnected()) {
-            $errors[] = 'Database connection is not established';
-        }
-
         if (!$config->getOutputPath()) {
             $errors[] = 'Output path is not specified';
         }

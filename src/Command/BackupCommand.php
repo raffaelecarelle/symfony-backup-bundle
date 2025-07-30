@@ -35,7 +35,7 @@ class BackupCommand extends Command
             ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Storage adapter to use')
             ->addOption('compression', 'c', InputOption::VALUE_REQUIRED, 'Compression type (gzip|zip)')
             ->addOption('output-path', 'o', InputOption::VALUE_REQUIRED, 'Custom output path for the backup file')
-            ->addOption('exclude', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Tables or paths to exclude')
+            ->addOption('exclude', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Tables or paths to exclude')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command creates a backup of the database or filesystem:
 

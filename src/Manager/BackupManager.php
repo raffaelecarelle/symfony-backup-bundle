@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProBackupBundle\Manager;
 
 use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Event\BackupEvent;
 use ProBackupBundle\Event\BackupEvents;
@@ -30,6 +31,11 @@ class BackupManager
      * @var array<string, StorageAdapterInterface> Map of storage adapters
      */
     private array $storageAdapters = [];
+
+    /**
+     * @var array<string, CompressionAdapterInterface> Map of storage adapters
+     */
+    private array $compressionAdapters = [];
 
     /**
      * @var string Default storage adapter name
@@ -81,6 +87,16 @@ class BackupManager
     public function addStorageAdapter(string $name, StorageAdapterInterface $adapter): self
     {
         $this->storageAdapters[$name] = $adapter;
+
+        return $this;
+    }
+
+    /**
+     * Add a compression adapter.
+     */
+    public function addCompressionAdapter(string $name, CompressionAdapterInterface $adapter): self
+    {
+        $this->compressionAdapters[$name] = $adapter;
 
         return $this;
     }

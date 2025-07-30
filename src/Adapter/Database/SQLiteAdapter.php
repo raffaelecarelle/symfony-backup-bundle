@@ -167,10 +167,6 @@ class SQLiteAdapter implements BackupAdapterInterface
     {
         $errors = [];
 
-        if (!$this->connection->isConnected()) {
-            $errors[] = 'Database connection is not established';
-        }
-
         $dbPath = $this->getDatabasePath();
         if (!$this->filesystem->exists($dbPath)) {
             $errors[] = \sprintf('SQLite database file not found: %s', $dbPath);
