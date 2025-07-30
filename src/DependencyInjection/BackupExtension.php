@@ -65,10 +65,6 @@ class BackupExtension extends Extension
      */
     private function configureStorageAdapters(ContainerBuilder $container, array $config): void
     {
-        // Set default storage
-        $container->getDefinition('symfony_backup.manager')
-            ->addMethodCall('setDefaultStorage', [$config['default_storage']]);
-
         // Configure local storage adapter (sempre configurato come fallback)
         $localConfig = $config['storage']['local'] ?? ['options' => ['path' => $config['backup_dir']]];
         $localDef = $container->register('symfony_backup.storage.local', LocalAdapter::class);
@@ -138,6 +134,10 @@ class BackupExtension extends Extension
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ]);
             $gcDef->addTag('symfony_backup.storage_adapter', ['name' => 'google_cloud']);
+
+            // Set default storage
+            $container->getDefinition('symfony_backup.manager')
+                ->addMethodCall('setDefaultStorage', [$config['default_storage']]);
         }
     }
 

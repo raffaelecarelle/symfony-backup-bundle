@@ -89,11 +89,6 @@
         </div>
         
         <div class="metric">
-            <span class="value">{{ collector.storageUsage.used ? (collector.storageUsage.used / 1024 / 1024)|number_format(2) ~ ' MB' : 'N/A' }}</span>
-            <span class="label">Storage Used</span>
-        </div>
-        
-        <div class="metric">
             <span class="value">{{ collector.storageUsage.total ? (collector.storageUsage.total / 1024 / 1024)|number_format(2) ~ ' MB' : 'N/A' }}</span>
             <span class="label">Storage Total</span>
         </div>
@@ -104,8 +99,6 @@
         <div class="card-block">
             <div class="sf-toolbar backup-actions">
                 <button class="btn btn-sm create-backup" data-type="database">Create Database Backup</button>
-                <button class="btn btn-sm create-backup" data-type="files">Create Files Backup</button>
-                <button class="btn btn-sm create-backup" data-type="full">Create Full Backup</button>
             </div>
         </div>
     </div>

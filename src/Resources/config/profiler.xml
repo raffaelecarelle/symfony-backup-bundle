@@ -9,7 +9,7 @@
         <service id="symfony_backup.data_collector" class="ProBackupBundle\DataCollector\BackupDataCollector" public="false">
             <argument type="service" id="symfony_backup.manager" />
             <tag name="data_collector"
-                 template="@Backup/Collector/backup.html.twig"
+                 template="@ProBackup/Collector/backup.html.twig"
                  id="backup"
                  priority="200" />
         </service>
@@ -17,11 +17,6 @@
         <!-- Profiler Controller -->
         <service id="symfony_backup.profiler_controller" class="ProBackupBundle\Controller\ProfilerBackupController" public="true">
             <argument type="service" id="symfony_backup.manager" />
-        </service>
-
-        <!-- Register routing loader (not RouteCollection directly) -->
-        <service id="symfony_backup.profiler_route_loader" class="ProBackupBundle\Routing\ProfilerRouteLoader" public="false">
-            <tag name="routing.loader" />
         </service>
     </services>
 </container>
