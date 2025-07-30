@@ -31,7 +31,7 @@ class SqlServerAdapter implements BackupAdapterInterface
         $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
     }
-    
+
     /**
      * Get the database connection.
      *

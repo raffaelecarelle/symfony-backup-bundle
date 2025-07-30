@@ -16,7 +16,6 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 
 /**
  * Main service for managing backup operations.
@@ -351,7 +350,7 @@ class BackupManager
      */
     public function listBackups(?BackupConfiguration $configuration = null): array
     {
-        if($this->backups === []) {
+        if ([] === $this->backups) {
             $this->backups = $this->loadExistingBackups($configuration);
         }
 
@@ -371,7 +370,7 @@ class BackupManager
      */
     public function getBackup(string $id): ?array
     {
-        if($this->backups === []) {
+        if ([] === $this->backups) {
             $this->backups = $this->loadExistingBackups();
         }
 
@@ -476,30 +475,30 @@ class BackupManager
     private function getAdapter(string $type): BackupAdapterInterface
     {
         // If type is 'database', try to determine the specific database type
-        if ($type === 'database') {
+        if ('database' === $type) {
             // Look for a database adapter that has a resolver
             foreach ($this->adapters as $adapter) {
                 if (method_exists($adapter, 'getConnection')) {
                     $connection = $adapter->getConnection();
-                    
+
                     // Create a resolver and get the specific database type
                     $resolver = new \ProBackupBundle\Adapter\Database\DatabaseDriverResolver($connection, $this->logger);
                     $specificType = $resolver->resolveDriverType();
-                    
+
                     $this->logger->info('Resolved database type', [
                         'generic_type' => $type,
-                        'specific_type' => $specificType
+                        'specific_type' => $specificType,
                     ]);
-                    
+
                     // If we got a more specific type, use it instead
-                    if ($specificType !== 'database') {
+                    if ('database' !== $specificType) {
                         $type = $specificType;
                         break;
                     }
                 }
             }
         }
-        
+
         // Find an adapter that supports the (possibly more specific) type
         foreach ($this->adapters as $adapter) {
             if ($adapter->supports($type)) {
@@ -614,7 +613,7 @@ class BackupManager
      */
     private function loadExistingBackups(?BackupConfiguration $configuration = null): array
     {
-        if(!$configuration) {
+        if (!$configuration) {
             $backups = [];
             foreach ($this->storageAdapters as $storageAdapter) {
                 $backups = array_merge($this->backups, $storageAdapter->list());

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Controller;
 
-use ProBackupBundle\DataCollector\BackupDataCollector;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -23,9 +22,8 @@ class ProfilerBackupController
      */
     public function __construct(
         private readonly BackupManager $backupManager,
-        private readonly DataCollector $backupDataCollector
-    )
-    {
+        private readonly DataCollector $backupDataCollector,
+    ) {
     }
 
     /**
@@ -39,7 +37,7 @@ class ProfilerBackupController
             return new JsonResponse([
                 'success' => true,
                 'backups' => $backups,
-                'count' => count($backups)
+                'count' => \count($backups),
             ]);
         } catch (\Throwable $e) {
             return new JsonResponse([
@@ -48,7 +46,6 @@ class ProfilerBackupController
             ]);
         }
     }
-
 
     /**
      * Create a backup.

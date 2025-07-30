@@ -152,7 +152,7 @@ class LocalAdapter implements StorageAdapterInterface
         try {
             $searchPath = $this->basePath;
 
-            if ($prefix !== '') {
+            if ('' !== $prefix) {
                 $searchPath = $this->getFullPath($prefix);
 
                 if (!$this->filesystem->exists($searchPath)) {
@@ -169,7 +169,7 @@ class LocalAdapter implements StorageAdapterInterface
 
                 $files[$backupId] = [
                     'id' => $backupId,
-                    'type' => basename(dirname($file->getRealPath())),
+                    'type' => basename(\dirname($file->getRealPath())),
                     'name' => $file->getFilename(),
                     'file_path' => $file->getRealPath(),
                     'file_size' => $file->getSize(),

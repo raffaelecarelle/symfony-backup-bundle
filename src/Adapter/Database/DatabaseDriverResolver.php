@@ -20,7 +20,7 @@ class DatabaseDriverResolver
      */
     public function __construct(
         private readonly Connection $connection,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
     }
@@ -41,19 +41,19 @@ class DatabaseDriverResolver
         ]);
 
         // Map the platform or driver to a specific adapter type
-        if (stripos($driverName, 'mysql') !== false) {
+        if (false !== stripos($driverName, 'mysql')) {
             return 'mysql';
         }
 
-        if (stripos($driverName, 'pgsql') !== false || stripos($driverName, 'postgresql') !== false) {
+        if (false !== stripos($driverName, 'pgsql') || false !== stripos($driverName, 'postgresql')) {
             return 'postgresql';
         }
 
-        if (stripos($driverName, 'sqlite') !== false) {
+        if (false !== stripos($driverName, 'sqlite')) {
             return 'sqlite';
         }
 
-        if (stripos($driverName, 'sqlsrv') !== false || stripos($driverName, 'mssql') !== false) {
+        if (false !== stripos($driverName, 'sqlsrv') || false !== stripos($driverName, 'mssql')) {
             return 'sqlserver';
         }
 
