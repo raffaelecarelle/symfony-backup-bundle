@@ -345,17 +345,17 @@ class BackupManager
     /**
      * List all available backups.
      *
-     * @param BackupConfiguration $configuration Filter by backup type
+     * @param BackupConfiguration|null $configuration Filter by backup type
      *
      * @return array List of backups
      */
-    public function listBackups(BackupConfiguration $configuration): array
+    public function listBackups(?BackupConfiguration $configuration = null): array
     {
         if($this->backups === []) {
             $this->backups = $this->loadExistingBackups($configuration);
         }
 
-        if (null === $configuration->getType()) {
+        if (null === $configuration?->getType()) {
             return array_values($this->backups);
         }
 
@@ -608,8 +608,17 @@ class BackupManager
     /**
      * Load existing backups from the backup directory.
      */
-    private function loadExistingBackups(BackupConfiguration $configuration): array
+    private function loadExistingBackups(?BackupConfiguration $configuration): array
     {
-        return $this->storageAdapters[$configuration->getStorage()]->list();
+        if(!$configuration) {
+            $backups = [];
+            foreach ($this->storageAdapters as $storageAdapter) {
+                $backups = array_merge($this->backups, $storageAdapter->list());
+            }
+
+            return $backups;
+        }
+
+        return $this->storageAdapters[$configuration?->getStorage()]->list();
     }
 }

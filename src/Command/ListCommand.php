@@ -30,8 +30,8 @@ class ListCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Filter by backup type (database|filesystem)', 'database')
-            ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Filter by storage adapter', 'local')
+            ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Filter by backup type (database|filesystem)')
+            ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Filter by storage adapter')
             ->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'Output format (table|json|csv)', 'table')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command lists available backups:
@@ -66,12 +66,12 @@ EOF
         $storage = $input->getOption('storage');
         $format = $input->getOption('format');
 
-        $config = new BackupConfiguration();
-        $config->setType($type);
-        $config->setStorage($storage);
-
         // Get backups
-        $backups = $this->backupManager->listBackups($config);
+        $backups = $this->backupManager->listBackups();
+
+        if ($type) {
+            $backups = array_filter($backups, fn ($backup) => $backup['type'] === $type);
+        }
 
         // Filter by storage if specified
         if ($storage) {
