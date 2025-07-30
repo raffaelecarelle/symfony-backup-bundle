@@ -170,7 +170,7 @@ class BackupManager
             $startTime = microtime(true);
             $result = $adapter->backup($config);
 
-            if($config->getType() === 'database') {
+            if ('database' === $config->getType()) {
                 $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
 
                 if ($compression) {
@@ -284,7 +284,7 @@ class BackupManager
                 $backupPath = $this->retrieveFromRemote($backup);
             }
 
-            if($backup['type'] === 'database') {
+            if ('database' === $backup['type']) {
                 $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
                 $decompressionName = null;
                 switch ($extension) {

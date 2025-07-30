@@ -65,7 +65,7 @@ class FilesystemAdapter implements BackupAdapterInterface
 
             // Get paths from configuration
             $paths = $config->getOption('paths', []);
-            
+
             // If no paths in options, try to get them from container parameter
             if (empty($paths) && isset($GLOBALS['kernel'])) {
                 $container = $GLOBALS['kernel']->getContainer();
@@ -73,7 +73,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                     $paths = $container->getParameter('symfony_backup.filesystem.paths');
                 }
             }
-            
+
             if (empty($paths)) {
                 throw new \InvalidArgumentException('No paths specified for filesystem backup');
             }
@@ -89,7 +89,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 ]);
 
                 // Resolve path if it contains parameters
-                if (strpos($sourcePath, '%') !== false) {
+                if (str_contains((string) $sourcePath, '%')) {
                     $sourcePath = $this->resolvePath($sourcePath);
                 }
 
@@ -112,7 +112,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 // Copy files to temporary directory
                 foreach ($finder as $file) {
                     $relativePath = $file->getRelativePathname();
-                    $targetPath = $tempDir.'/'.basename($sourcePath).'/'.$relativePath;
+                    $targetPath = $tempDir.'/'.basename((string) $sourcePath).'/'.$relativePath;
 
                     if ($file->isDir()) {
                         $this->filesystem->mkdir($targetPath, 0755);
@@ -258,7 +258,7 @@ class FilesystemAdapter implements BackupAdapterInterface
     {
         $timestamp = date('Y-m-d_H-i-s');
         $name = $config->getName() ?: 'filesystem';
-        $extension = $config->getCompression() === 'zip' ? 'zip' : 'tar.gz';
+        $extension = 'zip' === $config->getCompression() ? 'zip' : 'tar.gz';
 
         return \sprintf('%s_%s.%s', $name, $timestamp, $extension);
     }
@@ -329,8 +329,9 @@ class FilesystemAdapter implements BackupAdapterInterface
     private function resolvePath(string $path): string
     {
         // Simple parameter resolution for %kernel.project_dir%
-        if (strpos($path, '%kernel.project_dir%') !== false) {
-            $projectDir = dirname(__DIR__, 3); // Assuming src is 2 levels deep from project root
+        if (str_contains($path, '%kernel.project_dir%')) {
+            $projectDir = \dirname(__DIR__, 3); // Assuming src is 2 levels deep from project root
+
             return str_replace('%kernel.project_dir%', $projectDir, $path);
         }
 

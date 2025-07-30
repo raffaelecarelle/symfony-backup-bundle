@@ -25,15 +25,15 @@ class FilesystemAdapterTest extends TestCase
         // Create a directory with test files to backup
         $this->testFilesDir = $this->tempDir.'/test_files';
         mkdir($this->testFilesDir, 0777, true);
-        
+
         // Create some test files
         file_put_contents($this->testFilesDir.'/file1.txt', 'Test content 1');
         file_put_contents($this->testFilesDir.'/file2.txt', 'Test content 2');
-        
+
         // Create a subdirectory with files
         mkdir($this->testFilesDir.'/subdir', 0777, true);
         file_put_contents($this->testFilesDir.'/subdir/file3.txt', 'Test content 3');
-        
+
         // Create a directory to exclude
         mkdir($this->testFilesDir.'/secrets', 0777, true);
         file_put_contents($this->testFilesDir.'/secrets/secret.txt', 'Secret content');
@@ -94,16 +94,16 @@ class FilesystemAdapterTest extends TestCase
         $config = new BackupConfiguration();
         $config->setType('filesystem');
         // Don't set output path to test validation error
-        
+
         $errors = $this->adapter->validate($config);
 
         $this->assertNotEmpty($errors);
         $this->assertContains('Output path is not specified', $errors);
-        
+
         // Set output path but no paths
         $config->setOutputPath($this->tempDir);
         $errors = $this->adapter->validate($config);
-        
+
         $this->assertNotEmpty($errors);
         $this->assertContains('No paths specified for filesystem backup', $errors);
     }
@@ -128,12 +128,12 @@ class FilesystemAdapterTest extends TestCase
             ->setConstructorArgs([$this->mockLogger])
             ->onlyMethods(['backup'])
             ->getMock();
-        
+
         $expectedArchivePath = $this->tempDir.'/test_backup_'.date('Y-m-d_H-i-s').'.zip';
-        
+
         // Create a dummy archive file
         file_put_contents($expectedArchivePath, 'test archive content');
-        
+
         $expectedResult = new BackupResult(
             true,
             $expectedArchivePath,
@@ -146,7 +146,7 @@ class FilesystemAdapterTest extends TestCase
             ->method('backup')
             ->with($config)
             ->willReturn($expectedResult);
-            
+
         // Execute the backup
         $result = $mockAdapter->backup($config);
 
@@ -195,7 +195,7 @@ class FilesystemAdapterTest extends TestCase
             ->setConstructorArgs([$this->mockLogger])
             ->onlyMethods(['restore'])
             ->getMock();
-        
+
         $mockAdapter->expects($this->once())
             ->method('restore')
             ->with($backupPath, ['target_dir' => $targetDir])

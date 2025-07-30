@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Scheduler;
 
-use ProBackupBundle\Manager\BackupManager;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
@@ -17,12 +16,11 @@ class BackupScheduler implements ScheduleProviderInterface
     /**
      * Constructor.
      *
-     * @param array         $scheduleConfig The schedule configuration
+     * @param array $scheduleConfig The schedule configuration
      */
     public function __construct(
-        private array $scheduleConfig
-    )
-    {
+        private array $scheduleConfig,
+    ) {
     }
 
     /**

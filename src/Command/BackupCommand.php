@@ -132,8 +132,8 @@ EOF
 
         if ('filesystem' === $type) {
             $paths = $input->getOption('path');
-            if($paths === []) {
-                $paths =  $this->config['filesystem']['paths'] ?? [];
+            if ([] === $paths) {
+                $paths = $this->config['filesystem']['paths'] ?? [];
             }
 
             if (!empty($paths)) {
@@ -141,7 +141,7 @@ EOF
                 foreach ($paths as $pathConfig) {
                     $pathsConfig[] = [
                         'path' => $pathConfig['path'],
-                        'exclude' => $pathConfig['exclude']
+                        'exclude' => $pathConfig['exclude'],
                     ];
                 }
 
