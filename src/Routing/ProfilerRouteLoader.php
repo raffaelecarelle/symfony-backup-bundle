@@ -30,7 +30,7 @@ class ProfilerRouteLoader extends Loader
         return $routes;
     }
 
-    public function supports($resource, string $type = null): bool
+    public function supports($resource, ?string $type = null): bool
     {
         return 'extra' === $type;
     }
