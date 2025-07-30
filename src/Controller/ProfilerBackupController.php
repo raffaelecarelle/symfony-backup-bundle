@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Controller;
 
+use ProBackupBundle\DataCollector\BackupDataCollector;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
 /**
  * Controller for backup actions in the profiler.
@@ -19,9 +21,34 @@ class ProfilerBackupController
     /**
      * Constructor.
      */
-    public function __construct(private readonly BackupManager $backupManager)
+    public function __construct(
+        private readonly BackupManager $backupManager,
+        private readonly DataCollector $backupDataCollector
+    )
     {
     }
+
+    /**
+     * Backups list.
+     */
+    public function list(): JsonResponse
+    {
+        try {
+            $backups = $this->backupManager->listBackups();
+
+            return new JsonResponse([
+                'success' => true,
+                'backups' => $backups,
+                'count' => count($backups)
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
 
     /**
      * Create a backup.
@@ -37,6 +64,8 @@ class ProfilerBackupController
             $config->setName(\sprintf('profiler_%s_%s', $type, date('Y-m-d_H-i-s')));
 
             $result = $this->backupManager->backup($config);
+
+            $this->backupDataCollector->reset();
 
             return new JsonResponse([
                 'success' => $result->isSuccess(),
@@ -113,6 +142,8 @@ class ProfilerBackupController
 
         try {
             $success = $this->backupManager->deleteBackup($backupId);
+
+            $this->backupDataCollector->reset();
 
             return new JsonResponse(['success' => $success]);
         } catch (\Throwable $e) {

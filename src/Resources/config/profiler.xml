@@ -17,6 +17,7 @@
         <!-- Profiler Controller -->
         <service id="symfony_backup.profiler_controller" class="ProBackupBundle\Controller\ProfilerBackupController" public="true">
             <argument type="service" id="symfony_backup.manager" />
+            <argument type="service" id="symfony_backup.data_collector" />
         </service>
     </services>
 </container>

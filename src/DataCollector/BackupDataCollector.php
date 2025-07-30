@@ -32,7 +32,11 @@ class BackupDataCollector extends DataCollector
 
     public function reset(): void
     {
-        $this->data = [];
+        $this->data = [
+            'backups' => $this->backupManager->listBackups(),
+            'last_backup' => $this->backupManager->getLastBackup(),
+            'storage_usage' => $this->backupManager->getStorageUsage(),
+        ];
     }
 
     public function getName(): string

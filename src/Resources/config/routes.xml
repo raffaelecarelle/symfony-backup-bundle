@@ -8,4 +8,5 @@
     <route id="_profiler_backup_restore" controller="symfony_backup.profiler_controller::restore" path="/_profiler/backup/restore" />
     <route id="_profiler_backup_delete" controller="symfony_backup.profiler_controller::delete" path="/_profiler/backup/delete" />
     <route id="_profiler_backup_download" controller="symfony_backup.profiler_controller::download" path="/_profiler/backup/download" />
+    <route id="_profiler_backup_list" controller="symfony_backup.profiler_controller::list" path="/_profiler/backup/list" />
 </routes>
