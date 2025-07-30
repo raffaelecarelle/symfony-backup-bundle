@@ -1,15 +1,15 @@
 <?php
 
-namespace Symfony\Component\Backup\Tests\Manager;
+namespace ProBackupBundle\Tests\Manager;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Backup\Manager\BackupManager;
-use Symfony\Component\Backup\Model\BackupConfiguration;
-use Symfony\Component\Backup\Model\BackupResult;
-use Symfony\Component\Backup\Adapter\BackupAdapterInterface;
-use Symfony\Component\Backup\Adapter\Storage\StorageAdapterInterface;
-use Symfony\Component\Backup\Event\BackupEvent;
-use Symfony\Component\Backup\Event\BackupEvents;
+use ProBackupBundle\Manager\BackupManager;
+use ProBackupBundle\Model\BackupConfiguration;
+use ProBackupBundle\Model\BackupResult;
+use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
+use ProBackupBundle\Event\BackupEvent;
+use ProBackupBundle\Event\BackupEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Psr\Log\LoggerInterface;

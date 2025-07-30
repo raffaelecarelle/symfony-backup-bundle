@@ -1,10 +1,10 @@
 <?php
 
-namespace Symfony\Component\Backup\Event;
+namespace ProBackupBundle\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
-use Symfony\Component\Backup\Model\BackupConfiguration;
-use Symfony\Component\Backup\Model\BackupResult;
+use ProBackupBundle\Model\BackupConfiguration;
+use ProBackupBundle\Model\BackupResult;
 
 /**
  * Event dispatched during backup and restore operations.

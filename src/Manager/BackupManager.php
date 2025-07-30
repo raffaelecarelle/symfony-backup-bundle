@@ -1,14 +1,14 @@
 <?php
 
-namespace Symfony\Component\Backup\Manager;
+namespace ProBackupBundle\Manager;
 
-use Symfony\Component\Backup\Adapter\BackupAdapterInterface;
-use Symfony\Component\Backup\Adapter\Storage\StorageAdapterInterface;
-use Symfony\Component\Backup\Model\BackupConfiguration;
-use Symfony\Component\Backup\Model\BackupResult;
-use Symfony\Component\Backup\Exception\BackupException;
-use Symfony\Component\Backup\Event\BackupEvent;
-use Symfony\Component\Backup\Event\BackupEvents;
+use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
+use ProBackupBundle\Model\BackupConfiguration;
+use ProBackupBundle\Model\BackupResult;
+use ProBackupBundle\Exception\BackupException;
+use ProBackupBundle\Event\BackupEvent;
+use ProBackupBundle\Event\BackupEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Psr\Log\LoggerInterface;

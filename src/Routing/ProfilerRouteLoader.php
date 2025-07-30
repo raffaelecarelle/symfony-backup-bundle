@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Routing;
+namespace ProBackupBundle\Routing;
 
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;

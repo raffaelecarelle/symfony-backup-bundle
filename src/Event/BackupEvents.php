@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Event;
+namespace ProBackupBundle\Event;
 
 /**
  * Contains all events dispatched by the Backup component.

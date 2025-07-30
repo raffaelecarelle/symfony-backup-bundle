@@ -1,9 +1,9 @@
 <?php
 
-namespace Symfony\Component\Backup\Adapter;
+namespace ProBackupBundle\Adapter;
 
-use Symfony\Component\Backup\Model\BackupResult;
-use Symfony\Component\Backup\Model\BackupConfiguration;
+use ProBackupBundle\Model\BackupResult;
+use ProBackupBundle\Model\BackupConfiguration;
 
 /**
  * Interface for backup adapters.

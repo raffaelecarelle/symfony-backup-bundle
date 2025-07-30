@@ -1,8 +1,8 @@
 <?php
 
-namespace Symfony\Component\Backup\Adapter\Compression;
+namespace ProBackupBundle\Adapter\Compression;
 
-use Symfony\Component\Backup\Exception\BackupException;
+use ProBackupBundle\Exception\BackupException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Filesystem\Filesystem;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Exception;
+namespace ProBackupBundle\Exception;
 
 /**
  * Exception thrown when a backup operation fails.

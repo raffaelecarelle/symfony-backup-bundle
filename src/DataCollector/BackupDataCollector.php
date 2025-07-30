@@ -1,11 +1,11 @@
 <?php
 
-namespace Symfony\Component\Backup\DataCollector;
+namespace ProBackupBundle\DataCollector;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-use Symfony\Component\Backup\Manager\BackupManager;
+use ProBackupBundle\Manager\BackupManager;
 
 /**
  * BackupDataCollector collects backup information for the Symfony Profiler.

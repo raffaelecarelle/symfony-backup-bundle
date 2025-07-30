@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Adapter\Compression;
+namespace ProBackupBundle\Adapter\Compression;
 
 /**
  * Interface for compression adapters.
@@ -16,7 +16,7 @@ interface CompressionAdapterInterface
      * 
      * @return string Path to the compressed file
      * 
-     * @throws \Symfony\Component\Backup\Exception\BackupException If compression fails
+     * @throws \ProBackupBundle\Exception\BackupException If compression fails
      */
     public function compress(string $sourcePath, ?string $targetPath = null, array $options = []): string;
     
@@ -29,7 +29,7 @@ interface CompressionAdapterInterface
      * 
      * @return string Path to the decompressed file
      * 
-     * @throws \Symfony\Component\Backup\Exception\BackupException If decompression fails
+     * @throws \ProBackupBundle\Exception\BackupException If decompression fails
      */
     public function decompress(string $sourcePath, ?string $targetPath = null, array $options = []): string;
     

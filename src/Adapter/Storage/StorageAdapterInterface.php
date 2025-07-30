@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Adapter\Storage;
+namespace ProBackupBundle\Adapter\Storage;
 
 /**
  * Interface for storage adapters.

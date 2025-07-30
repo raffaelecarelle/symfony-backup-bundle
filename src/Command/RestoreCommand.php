@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Command;
+namespace ProBackupBundle\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Backup\Manager\BackupManager;
+use ProBackupBundle\Manager\BackupManager;
 
 /**
  * Command to restore a backup.

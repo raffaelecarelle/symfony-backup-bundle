@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\DependencyInjection\Compiler;
+namespace ProBackupBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

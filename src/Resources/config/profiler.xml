@@ -6,7 +6,7 @@
 
     <services>
         <!-- Data Collector -->
-        <service id="symfony_backup.data_collector" class="Symfony\Component\Backup\DataCollector\BackupDataCollector" public="false">
+        <service id="symfony_backup.data_collector" class="ProBackupBundle\DataCollector\BackupDataCollector" public="false">
             <argument type="service" id="symfony_backup.manager" />
             <tag name="data_collector" 
                  template="@Backup/Collector/backup.html.twig"
@@ -15,13 +15,13 @@
         </service>
         
         <!-- Profiler Controller -->
-        <service id="symfony_backup.profiler_controller" class="Symfony\Component\Backup\Controller\ProfilerBackupController" public="true">
+        <service id="symfony_backup.profiler_controller" class="ProBackupBundle\Controller\ProfilerBackupController" public="true">
             <argument type="service" id="symfony_backup.manager" />
         </service>
         
         <!-- Register routes for profiler actions -->
         <service id="symfony_backup.profiler_routes" class="Symfony\Component\Routing\RouteCollection">
-            <factory class="Symfony\Component\Backup\Routing\ProfilerRouteLoader" method="loadRoutes" />
+            <factory class="ProBackupBundle\Routing\ProfilerRouteLoader" method="loadRoutes" />
             <tag name="routing.loader" />
         </service>
     </services>

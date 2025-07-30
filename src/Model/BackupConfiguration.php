@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Model;
+namespace ProBackupBundle\Model;
 
 /**
  * Configuration for backup operations.
@@ -11,36 +11,36 @@ class BackupConfiguration
      * @var string Type of backup ('database' or 'filesystem')
      */
     private string $type;
-    
+
     /**
      * @var string Name of the backup
      */
     private string $name;
-    
+
     /**
      * @var array Additional options for the backup
      */
     private array $options = [];
-    
+
     /**
      * @var string Storage adapter to use
      */
     private string $storage = 'local';
-    
+
     /**
      * @var string|null Compression type to use
      */
     private ?string $compression = null;
-    
+
     /**
      * @var array Tables or paths to exclude
      */
     private array $exclusions = [];
-    
+
     /**
-     * @var string Output path for the backup file
+     * @var string|null Output path for the backup file
      */
-    private string $outputPath;
+    private ?string $outputPath = null;
 
     /**
      * Get the backup type.
@@ -214,9 +214,9 @@ class BackupConfiguration
     /**
      * Get the output path.
      *
-     * @return string
+     * @return string|null
      */
-    public function getOutputPath(): string
+    public function getOutputPath(): ?string
     {
         return $this->outputPath;
     }

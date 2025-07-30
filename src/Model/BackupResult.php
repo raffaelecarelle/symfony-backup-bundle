@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\Model;
+namespace ProBackupBundle\Model;
 
 /**
  * Result of a backup operation.

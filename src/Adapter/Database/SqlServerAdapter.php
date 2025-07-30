@@ -1,11 +1,11 @@
 <?php
 
-namespace Symfony\Component\Backup\Adapter\Database;
+namespace ProBackupBundle\Adapter\Database;
 
-use Symfony\Component\Backup\Adapter\BackupAdapterInterface;
-use Symfony\Component\Backup\Model\BackupConfiguration;
-use Symfony\Component\Backup\Model\BackupResult;
-use Symfony\Component\Backup\Exception\BackupException;
+use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Model\BackupConfiguration;
+use ProBackupBundle\Model\BackupResult;
+use ProBackupBundle\Exception\BackupException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Filesystem\Filesystem;

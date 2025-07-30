@@ -6,7 +6,7 @@
 
     <services>
         <!-- Backup Scheduler -->
-        <service id="symfony_backup.scheduler" class="Symfony\Component\Backup\Scheduler\BackupScheduler" public="false">
+        <service id="symfony_backup.scheduler" class="ProBackupBundle\Scheduler\BackupScheduler" public="false">
             <argument type="service" id="symfony_backup.manager" />
             <argument type="collection" /> <!-- Schedule configuration, will be set by extension -->
             <tag name="scheduler.task_source" />

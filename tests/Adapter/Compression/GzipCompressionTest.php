@@ -1,10 +1,10 @@
 <?php
 
-namespace Symfony\Component\Backup\Tests\Adapter\Compression;
+namespace ProBackupBundle\Tests\Adapter\Compression;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Backup\Adapter\Compression\GzipCompression;
-use Symfony\Component\Backup\Exception\BackupException;
+use ProBackupBundle\Adapter\Compression\GzipCompression;
+use ProBackupBundle\Exception\BackupException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Filesystem\Filesystem;
 use Psr\Log\LoggerInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Component\Backup\DependencyInjection;
+namespace ProBackupBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;

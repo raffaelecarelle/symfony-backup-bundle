@@ -1,21 +1,21 @@
 <?php
 
-namespace Symfony\Component\Backup\DependencyInjection;
+namespace ProBackupBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\Backup\Adapter\Database\MySQLAdapter;
-use Symfony\Component\Backup\Adapter\Database\PostgreSQLAdapter;
-use Symfony\Component\Backup\Adapter\Database\SQLiteAdapter;
-use Symfony\Component\Backup\Adapter\Database\SqlServerAdapter;
-use Symfony\Component\Backup\Adapter\Storage\LocalAdapter;
-use Symfony\Component\Backup\Adapter\Storage\S3Adapter;
-use Symfony\Component\Backup\Adapter\Storage\GoogleCloudAdapter;
-use Symfony\Component\Backup\Adapter\Compression\GzipCompression;
-use Symfony\Component\Backup\Adapter\Compression\ZipCompression;
+use ProBackupBundle\Adapter\Database\MySQLAdapter;
+use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
+use ProBackupBundle\Adapter\Database\SQLiteAdapter;
+use ProBackupBundle\Adapter\Database\SqlServerAdapter;
+use ProBackupBundle\Adapter\Storage\LocalAdapter;
+use ProBackupBundle\Adapter\Storage\S3Adapter;
+use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
+use ProBackupBundle\Adapter\Compression\GzipCompression;
+use ProBackupBundle\Adapter\Compression\ZipCompression;
 
 /**
  * BackupExtension is the extension class for the Backup bundle.

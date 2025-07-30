@@ -6,7 +6,7 @@
 
     <services>
         <!-- Backup Manager -->
-        <service id="symfony_backup.manager" class="Symfony\Component\Backup\Manager\BackupManager" public="true">
+        <service id="symfony_backup.manager" class="ProBackupBundle\Manager\BackupManager" public="true">
             <argument>%kernel.project_dir%/var/backups</argument> <!-- backup_dir -->
             <argument type="service" id="event_dispatcher" on-invalid="null" />
             <argument type="service" id="logger" on-invalid="null" />
@@ -17,34 +17,34 @@
         </service>
         
         <!-- Register the manager as an alias -->
-        <service id="Symfony\Component\Backup\Manager\BackupManager" alias="symfony_backup.manager" public="false" />
+        <service id="ProBackupBundle\Manager\BackupManager" alias="symfony_backup.manager" public="false" />
         
         <!-- Console Commands -->
-        <service id="symfony_backup.command.backup" class="Symfony\Component\Backup\Command\BackupCommand">
+        <service id="symfony_backup.command.backup" class="ProBackupBundle\Command\BackupCommand">
             <argument type="service" id="symfony_backup.manager" />
             <tag name="console.command" />
         </service>
         
-        <service id="symfony_backup.command.restore" class="Symfony\Component\Backup\Command\RestoreCommand">
+        <service id="symfony_backup.command.restore" class="ProBackupBundle\Command\RestoreCommand">
             <argument type="service" id="symfony_backup.manager" />
             <tag name="console.command" />
         </service>
         
-        <service id="symfony_backup.command.list" class="Symfony\Component\Backup\Command\ListCommand">
+        <service id="symfony_backup.command.list" class="ProBackupBundle\Command\ListCommand">
             <argument type="service" id="symfony_backup.manager" />
             <tag name="console.command" />
         </service>
         
         <!-- Compiler passes -->
-        <service id="symfony_backup.storage_adapter_pass" class="Symfony\Component\Backup\DependencyInjection\Compiler\StorageAdapterPass">
+        <service id="symfony_backup.storage_adapter_pass" class="ProBackupBundle\DependencyInjection\Compiler\StorageAdapterPass">
             <tag name="container.compiler_pass" />
         </service>
         
-        <service id="symfony_backup.database_adapter_pass" class="Symfony\Component\Backup\DependencyInjection\Compiler\DatabaseAdapterPass">
+        <service id="symfony_backup.database_adapter_pass" class="ProBackupBundle\DependencyInjection\Compiler\DatabaseAdapterPass">
             <tag name="container.compiler_pass" />
         </service>
         
-        <service id="symfony_backup.compression_adapter_pass" class="Symfony\Component\Backup\DependencyInjection\Compiler\CompressionAdapterPass">
+        <service id="symfony_backup.compression_adapter_pass" class="ProBackupBundle\DependencyInjection\Compiler\CompressionAdapterPass">
             <tag name="container.compiler_pass" />
         </service>
     </services>

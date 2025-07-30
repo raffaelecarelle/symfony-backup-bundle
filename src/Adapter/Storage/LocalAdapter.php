@@ -1,8 +1,8 @@
 <?php
 
-namespace Symfony\Component\Backup\Adapter\Storage;
+namespace ProBackupBundle\Adapter\Storage;
 
-use Symfony\Component\Backup\Exception\BackupException;
+use ProBackupBundle\Exception\BackupException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Psr\Log\LoggerInterface;
