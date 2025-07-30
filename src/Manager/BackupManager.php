@@ -371,6 +371,10 @@ class BackupManager
      */
     public function getBackup(string $id): ?array
     {
+        if($this->backups === []) {
+            $this->backups = $this->loadExistingBackups();
+        }
+
         return $this->backups[$id] ?? null;
     }
 
@@ -608,7 +612,7 @@ class BackupManager
     /**
      * Load existing backups from the backup directory.
      */
-    private function loadExistingBackups(?BackupConfiguration $configuration): array
+    private function loadExistingBackups(?BackupConfiguration $configuration = null): array
     {
         if(!$configuration) {
             $backups = [];

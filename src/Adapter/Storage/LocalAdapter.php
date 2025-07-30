@@ -165,13 +165,13 @@ class LocalAdapter implements StorageAdapterInterface
 
             $files = [];
             foreach ($finder as $file) {
-                $relativePath = $this->getRelativePath($file->getRealPath());
+                $backupId = md5($file->getFilename());
 
-                $files[] = [
-                    'id' => md5($file->getFilename()),
+                $files[$backupId] = [
+                    'id' => $backupId,
                     'type' => basename(dirname($file->getRealPath())),
                     'name' => $file->getFilename(),
-                    'file_path' => $relativePath,
+                    'file_path' => $file->getRealPath(),
                     'file_size' => $file->getSize(),
                     'created_at' => (new \DateTime())->setTimestamp(filemtime($file->getRealPath())),
                     'storage' => 'local',
@@ -202,18 +202,5 @@ class LocalAdapter implements StorageAdapterInterface
     private function getFullPath(string $remotePath): string
     {
         return $this->basePath.'/'.ltrim($remotePath, '/\\');
-    }
-
-    /**
-     * Get the relative path for a full path.
-     */
-    private function getRelativePath(string $fullPath): string
-    {
-        $basePath = rtrim($this->basePath, '/\\').'/';
-        if (str_starts_with($fullPath, $basePath)) {
-            return substr($fullPath, \strlen($basePath));
-        }
-
-        return $fullPath;
     }
 }
