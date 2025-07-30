@@ -170,12 +170,14 @@ class BackupManager
             $startTime = microtime(true);
             $result = $adapter->backup($config);
 
-            $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
+            if($config->getType() === 'database') {
+                $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
 
-            if ($compression) {
-                $targetPath = $compression->compress($result->getFilePath());
-                $result->setFileSize(filesize($targetPath));
-                $result->setFilePath($targetPath);
+                if ($compression) {
+                    $targetPath = $compression->compress($result->getFilePath());
+                    $result->setFileSize(filesize($targetPath));
+                    $result->setFilePath($targetPath);
+                }
             }
 
             // Set the duration if not already set
@@ -282,20 +284,22 @@ class BackupManager
                 $backupPath = $this->retrieveFromRemote($backup);
             }
 
-            $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
-            $decompressionName = null;
-            switch ($extension) {
-                case 'gz':
-                    $decompressionName = 'gzip';
-                    break;
-                case 'zip':
-                    $decompressionName = 'zip';
-                    break;
-            }
-            $compression = $this->compressionAdapters[$decompressionName] ?? null;
+            if($backup['type'] === 'database') {
+                $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
+                $decompressionName = null;
+                switch ($extension) {
+                    case 'gz':
+                        $decompressionName = 'gzip';
+                        break;
+                    case 'zip':
+                        $decompressionName = 'zip';
+                        break;
+                }
+                $compression = $this->compressionAdapters[$decompressionName] ?? null;
 
-            if ($compression) {
-                $backupPath = $compression->decompress($backupPath);
+                if ($compression) {
+                    $backupPath = $compression->decompress($backupPath);
+                }
             }
 
             // Perform the restore

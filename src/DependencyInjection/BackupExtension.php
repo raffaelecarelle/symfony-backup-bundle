@@ -10,6 +10,7 @@ use ProBackupBundle\Adapter\Database\MySQLAdapter;
 use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
 use ProBackupBundle\Adapter\Database\SQLiteAdapter;
 use ProBackupBundle\Adapter\Database\SqlServerAdapter;
+use ProBackupBundle\Adapter\Filesystem\FilesystemAdapter;
 use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
 use ProBackupBundle\Adapter\Storage\LocalAdapter;
 use ProBackupBundle\Adapter\Storage\S3Adapter;
@@ -39,6 +40,9 @@ class BackupExtension extends Extension
 
         // Configure database adapters
         $this->configureDatabaseAdapters($container, $config);
+
+        // Configure filesystem adapter
+        $this->configureFilesystemAdapter($container, $config);
 
         // Configure compression adapters
         $this->configureCompressionAdapters($container, $config);
@@ -188,6 +192,27 @@ class BackupExtension extends Extension
             ]);
             $sqlServerDef->addTag('symfony_backup.database_adapter');
         }
+    }
+
+    /**
+     * Configure filesystem adapter.
+     */
+    private function configureFilesystemAdapter(ContainerBuilder $container, array $config): void
+    {
+        if (!$config['filesystem']['enabled']) {
+            return;
+        }
+
+        // Register filesystem adapter
+        $filesystemDef = $container->register('symfony_backup.adapter.filesystem', FilesystemAdapter::class);
+        $filesystemDef->setArguments([
+            new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+        ]);
+        $filesystemDef->addTag('symfony_backup.database_adapter');
+        $filesystemDef->addMethodCall('setCompressionAdapter', [new Reference('symfony_backup.compression.'.$config['filesystem']['compression'])]);
+
+        // Set paths in options
+        $container->setParameter('symfony_backup.filesystem.paths', $config['filesystem']['paths']);
     }
 
     /**

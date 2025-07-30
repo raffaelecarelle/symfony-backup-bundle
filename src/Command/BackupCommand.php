@@ -37,6 +37,7 @@ class BackupCommand extends Command
             ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Storage adapter to use')
             ->addOption('compression', 'c', InputOption::VALUE_REQUIRED, 'Compression type (gzip|zip)')
             ->addOption('output-path', 'o', InputOption::VALUE_REQUIRED, 'Custom output path for the backup file')
+            ->addOption('path', 'p', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Paths to backup (for filesystem type)')
             ->addOption('exclude', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Tables or paths to exclude')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command creates a backup of the database or filesystem:
@@ -127,6 +128,25 @@ EOF
 
         if ($exclusions) {
             $config->setExclusions($exclusions);
+        }
+
+        if ('filesystem' === $type) {
+            $paths = $input->getOption('path');
+            if($paths === []) {
+                $paths =  $this->config['filesystem']['paths'] ?? [];
+            }
+
+            if (!empty($paths)) {
+                $pathsConfig = [];
+                foreach ($paths as $pathConfig) {
+                    $pathsConfig[] = [
+                        'path' => $pathConfig['path'],
+                        'exclude' => $pathConfig['exclude']
+                    ];
+                }
+
+                $config->setOption('paths', $pathsConfig);
+            }
         }
 
         $io->section('Starting backup process');
