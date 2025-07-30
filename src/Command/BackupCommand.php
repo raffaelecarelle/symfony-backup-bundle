@@ -6,6 +6,7 @@ namespace ProBackupBundle\Command;
 
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,11 +16,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Command to create a backup.
  */
+#[AsCommand(name: 'backup:create')]
 class BackupCommand extends Command
 {
-    protected static $defaultName = 'backup:create';
-    protected static $defaultDescription = 'Create a backup of database or filesystem';
-
     /**
      * Constructor.
      */

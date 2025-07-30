@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProBackupBundle\Command;
 
 use ProBackupBundle\Manager\BackupManager;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,11 +17,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Command to restore a backup.
  */
+#[AsCommand(name: 'backup:restore')]
 class RestoreCommand extends Command
 {
-    protected static $defaultName = 'backup:restore';
-    protected static $defaultDescription = 'Restore a backup';
-
     /**
      * Constructor.
      */
