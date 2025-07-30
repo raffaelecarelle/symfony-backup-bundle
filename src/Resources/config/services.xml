@@ -34,18 +34,5 @@
             <argument type="service" id="symfony_backup.manager" />
             <tag name="console.command" />
         </service>
-        
-        <!-- Compiler passes -->
-        <service id="symfony_backup.storage_adapter_pass" class="ProBackupBundle\DependencyInjection\Compiler\StorageAdapterPass">
-            <tag name="container.compiler_pass" />
-        </service>
-        
-        <service id="symfony_backup.database_adapter_pass" class="ProBackupBundle\DependencyInjection\Compiler\DatabaseAdapterPass">
-            <tag name="container.compiler_pass" />
-        </service>
-        
-        <service id="symfony_backup.compression_adapter_pass" class="ProBackupBundle\DependencyInjection\Compiler\CompressionAdapterPass">
-            <tag name="container.compiler_pass" />
-        </service>
     </services>
 </container>
