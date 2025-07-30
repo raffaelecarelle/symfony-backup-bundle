@@ -22,6 +22,7 @@
         <!-- Console Commands -->
         <service id="symfony_backup.command.backup" class="ProBackupBundle\Command\BackupCommand">
             <argument type="service" id="symfony_backup.manager" />
+            <argument>%symfony_backup.config%</argument>
             <tag name="console.command" />
         </service>
         

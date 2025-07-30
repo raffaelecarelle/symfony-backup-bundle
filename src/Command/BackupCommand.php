@@ -22,8 +22,10 @@ class BackupCommand extends Command
     /**
      * Constructor.
      */
-    public function __construct(private readonly BackupManager $backupManager)
-    {
+    public function __construct(
+        private readonly BackupManager $backupManager,
+        private readonly array $config,
+    ) {
         parent::__construct();
     }
 
@@ -78,6 +80,19 @@ EOF
         $name = $input->getOption('name') ?: \sprintf('%s_%s', $type, date('Y-m-d_H-i-s'));
         $storage = $input->getOption('storage');
         $compression = $input->getOption('compression');
+
+        // If compression is not provided as a parameter, get it from the configuration
+        if (null === $compression) {
+            // For database backups, use the database.compression config
+            if ('database' === $type && isset($this->config['database']['compression'])) {
+                $compression = $this->config['database']['compression'];
+            }
+            // For filesystem backups, use the filesystem.compression config
+            elseif ('filesystem' === $type && isset($this->config['filesystem']['compression'])) {
+                $compression = $this->config['filesystem']['compression'];
+            }
+        }
+
         $outputPath = $input->getOption('output-path');
         $exclusions = $input->getOption('exclude');
 
