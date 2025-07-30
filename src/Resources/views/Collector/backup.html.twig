@@ -1,0 +1,280 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{# Toolbar template #}
+{% block toolbar %}
+    {% set icon %}
+        {# Custom SVG icon for the toolbar #}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+            <path d="M8 8h8"></path>
+            <path d="M8 12h8"></path>
+            <path d="M8 16h8"></path>
+        </svg>
+        
+        {% set status_color = collector.lastBackup ? 'green' : 'red' %}
+        <span class="sf-toolbar-value">{{ collector.backups|length }}</span>
+        <span class="sf-toolbar-label">backups</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Total Backups</b>
+            <span class="sf-toolbar-status">{{ collector.backups|length }}</span>
+        </div>
+        
+        {% if collector.lastBackup %}
+            <div class="sf-toolbar-info-piece">
+                <b>Last Backup</b>
+                <span>{{ collector.lastBackup.created_at|date('Y-m-d H:i:s') }}</span>
+            </div>
+            <div class="sf-toolbar-info-piece">
+                <b>Type</b>
+                <span>{{ collector.lastBackup.type }}</span>
+            </div>
+            <div class="sf-toolbar-info-piece">
+                <b>Size</b>
+                <span>{{ (collector.lastBackup.file_size / 1024 / 1024)|number_format(2) }} MB</span>
+            </div>
+        {% else %}
+            <div class="sf-toolbar-info-piece">
+                <b>Last Backup</b>
+                <span class="sf-toolbar-status sf-toolbar-status-red">None</span>
+            </div>
+        {% endif %}
+        
+        <div class="sf-toolbar-info-piece">
+            <b>Storage Usage</b>
+            <span>{{ (collector.storageUsage.used / 1024 / 1024)|number_format(2) }} MB / {{ (collector.storageUsage.total / 1024 / 1024)|number_format(2) }} MB</span>
+        </div>
+    {% endset %}
+
+    {# Set status based on whether there's a recent backup #}
+    {% set status_color = collector.lastBackup ? '' : 'red' %}
+    
+    {# Include the toolbar with icon, text, and status #}
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url, status: status_color }) }}
+{% endblock %}
+
+{# Menu in the left sidebar #}
+{% block menu %}
+    <span class="label {{ collector.backups|length ? '' : 'disabled' }}">
+        <span class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                <path d="M8 8h8"></path>
+                <path d="M8 12h8"></path>
+                <path d="M8 16h8"></path>
+            </svg>
+        </span>
+        <strong>Backup</strong>
+        <span class="count">
+            <span>{{ collector.backups|length }}</span>
+        </span>
+    </span>
+{% endblock %}
+
+{# Panel content #}
+{% block panel %}
+    <h2>Backup Information</h2>
+    
+    <div class="metrics">
+        <div class="metric">
+            <span class="value">{{ collector.backups|length }}</span>
+            <span class="label">Total Backups</span>
+        </div>
+        
+        <div class="metric">
+            <span class="value">{{ collector.lastBackup ? collector.lastBackup.created_at|date('Y-m-d') : 'N/A' }}</span>
+            <span class="label">Last Backup Date</span>
+        </div>
+        
+        <div class="metric">
+            <span class="value">{{ collector.storageUsage.used ? (collector.storageUsage.used / 1024 / 1024)|number_format(2) ~ ' MB' : 'N/A' }}</span>
+            <span class="label">Storage Used</span>
+        </div>
+        
+        <div class="metric">
+            <span class="value">{{ collector.storageUsage.total ? (collector.storageUsage.total / 1024 / 1024)|number_format(2) ~ ' MB' : 'N/A' }}</span>
+            <span class="label">Storage Total</span>
+        </div>
+    </div>
+    
+    <h3>Backup Actions</h3>
+    <div class="card">
+        <div class="card-block">
+            <div class="sf-toolbar backup-actions">
+                <button class="btn btn-sm create-backup" data-type="database">Create Database Backup</button>
+                <button class="btn btn-sm create-backup" data-type="files">Create Files Backup</button>
+                <button class="btn btn-sm create-backup" data-type="full">Create Full Backup</button>
+            </div>
+        </div>
+    </div>
+    
+    <h3>Available Backups</h3>
+    {% if collector.backups|length > 0 %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Created At</th>
+                    <th>Size</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for backup in collector.backups %}
+                    <tr>
+                        <td>{{ backup.id }}</td>
+                        <td>{{ backup.name }}</td>
+                        <td>{{ backup.type }}</td>
+                        <td>{{ backup.created_at|date('Y-m-d H:i:s') }}</td>
+                        <td>{{ (backup.file_size / 1024 / 1024)|number_format(2) }} MB</td>
+                        <td>
+                            <a href="#" class="btn btn-sm restore-backup" data-id="{{ backup.id }}">Restore</a>
+                            <a href="{{ path('_profiler_backup_download', {'id': backup.id}) }}" class="btn btn-sm">Download</a>
+                            <a href="#" class="btn btn-sm delete-backup" data-id="{{ backup.id }}">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">
+            <p>No backups available.</p>
+        </div>
+    {% endif %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create backup
+            document.querySelectorAll('.create-backup').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    if (confirm('Are you sure you want to create a ' + type + ' backup?')) {
+                        fetch('{{ path('_profiler_backup_create') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                type: type
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Backup created successfully!');
+                                location.reload();
+                            } else {
+                                alert('Error creating backup: ' + data.error);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Restore backup
+            document.querySelectorAll('.restore-backup').forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const backupId = this.getAttribute('data-id');
+                    if (confirm('Are you sure you want to restore this backup? This will overwrite your current data.')) {
+                        fetch('{{ path('_profiler_backup_restore') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                backup_id: backupId
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Backup restored successfully!');
+                                location.reload();
+                            } else {
+                                alert('Error restoring backup: ' + data.error);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Delete backup
+            document.querySelectorAll('.delete-backup').forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const backupId = this.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this backup?')) {
+                        fetch('{{ path('_profiler_backup_delete') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                backup_id: backupId
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Backup deleted successfully!');
+                                location.reload();
+                            } else {
+                                alert('Error deleting backup: ' + data.error);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        .backup-actions {
+            margin-bottom: 20px;
+        }
+        .backup-actions button {
+            margin-right: 10px;
+        }
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            text-decoration: none;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7875rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
+        .create-backup {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .restore-backup {
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        .delete-backup {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
+{% endblock %}
