@@ -207,18 +207,28 @@ class LocalAdapterTest extends TestCase
         $result = $realAdapter->list($prefix);
 
         $this->assertCount(2, $result);
-        $this->assertArrayHasKey('path', $result[0]);
-        $this->assertArrayHasKey('size', $result[0]);
-        $this->assertArrayHasKey('modified', $result[0]);
 
-        // Sort results by path for predictable testing
-        usort($result, fn ($a, $b) => strcmp((string) $a['path'], (string) $b['path']));
+        // Get the first backup from the associative array
+        $firstBackup = array_values($result)[0];
 
-        $this->assertEquals('backups/file1.txt', $result[0]['path']);
-        $this->assertEquals('backups/file2.txt', $result[1]['path']);
-        $this->assertEquals(8, $result[0]['size']); // 'content1' is 8 bytes
-        $this->assertEquals(8, $result[1]['size']); // 'content2' is 8 bytes
-        $this->assertInstanceOf(\DateTimeImmutable::class, $result[0]['modified']);
+        $this->assertArrayHasKey('id', $firstBackup);
+        $this->assertArrayHasKey('type', $firstBackup);
+        $this->assertArrayHasKey('name', $firstBackup);
+        $this->assertArrayHasKey('file_path', $firstBackup);
+        $this->assertArrayHasKey('file_size', $firstBackup);
+        $this->assertArrayHasKey('created_at', $firstBackup);
+        $this->assertArrayHasKey('storage', $firstBackup);
+
+        // Sort results by name for predictable testing
+        $sortedResults = array_values($result);
+        usort($sortedResults, fn ($a, $b) => strcmp($a['name'], $b['name']));
+
+        $this->assertEquals('file1.txt', $sortedResults[0]['name']);
+        $this->assertEquals('file2.txt', $sortedResults[1]['name']);
+        $this->assertEquals(8, $sortedResults[0]['file_size']); // 'content1' is 8 bytes
+        $this->assertEquals(8, $sortedResults[1]['file_size']); // 'content2' is 8 bytes
+        $this->assertInstanceOf(\DateTimeImmutable::class, $sortedResults[0]['created_at']);
+        $this->assertEquals('local', $sortedResults[0]['storage']);
     }
 
     public function testListEmptyDirectory(): void

@@ -173,7 +173,7 @@ class LocalAdapter implements StorageAdapterInterface
                     'name' => $file->getFilename(),
                     'file_path' => $file->getRealPath(),
                     'file_size' => $file->getSize(),
-                    'created_at' => (new \DateTime())->setTimestamp(filemtime($file->getRealPath())),
+                    'created_at' => (new \DateTimeImmutable())->setTimestamp(filemtime($file->getRealPath())),
                     'storage' => 'local',
                 ];
             }

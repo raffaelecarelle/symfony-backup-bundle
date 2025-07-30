@@ -186,16 +186,21 @@ class BackupManagerTest extends TestCase
             ],
         ];
 
+        // Create a BackupConfiguration object instead of passing a string
+        $configuration = new BackupConfiguration();
+        $configuration->setType('database');
+
         $backupManagerMock->expects($this->once())
             ->method('listBackups')
-            ->with('database')
+            ->with($this->equalTo($configuration))
             ->willReturn($testBackups);
 
-        $backups = $backupManagerMock->listBackups('database');
+        // Call the method with the proper BackupConfiguration object
+        $result = $backupManagerMock->listBackups($configuration);
 
-        $this->assertCount(2, $backups);
-        $this->assertEquals('backup1', $backups[0]['id']);
-        $this->assertEquals('database', $backups[0]['type']);
+        $this->assertCount(2, $result);
+        $this->assertEquals('backup1', $result[0]['id']);
+        $this->assertEquals('backup2', $result[1]['id']);
     }
 
     public function testDeleteBackup(): void
