@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Main service for managing backup operations.
@@ -69,6 +70,8 @@ class BackupManager
         $this->backupDir = rtrim($backupDir, '/\\');
         $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
+
+        $this->loadExistingBackups();
     }
 
     /**
@@ -174,6 +177,7 @@ class BackupManager
 
             if ($compression) {
                 $targetPath = $compression->compress($result->getFilePath());
+                $result->setFileSize(filesize($targetPath));
                 $result->setFilePath($targetPath);
             }
 
@@ -325,6 +329,10 @@ class BackupManager
             }
 
             return false;
+        } finally {
+            if (isset($compression, $backupPath)) {
+                $compression->decompress($backupPath);
+            }
         }
     }
 
@@ -559,5 +567,52 @@ class BackupManager
         $type = $backup['type'];
 
         return \sprintf('%s/%s', $type, $fileName);
+    }
+
+    /**
+     * Load existing backups from the backup directory.
+     */
+    private function loadExistingBackups(): void
+    {
+        $this->logger->info('Loading existing backups from directory', ['dir' => $this->backupDir]);
+
+        if (!$this->filesystem->exists($this->backupDir)) {
+            return;
+        }
+
+        $finder = new Finder();
+        $finder->files()->in($this->backupDir);
+
+        foreach ($finder as $file) {
+            $this->loadBackupFromFile($file);
+        }
+    }
+
+    /**
+     * Load backup information from a file.
+     */
+    private function loadBackupFromFile(\SplFileInfo $file): void
+    {
+        $filePath = $file->getRealPath();
+        $fileName = $file->getFilename();
+
+        // Extract backup information from filename or metadata
+        // Assuming filename format: {type}_{name}_{timestamp}.{extension}
+        $pathInfo = pathinfo($fileName);
+        $nameParts = explode('_', $pathInfo['filename']);
+
+        if (\count($nameParts) >= 3) {
+            $backupId = md5($filePath);
+
+            $this->backups[$backupId] = [
+                'id' => $backupId,
+                'type' => basename(\dirname($file->getRealPath())),
+                'name' => $fileName,
+                'file_path' => $filePath,
+                'file_size' => $file->getSize(),
+                'created_at' => (new \DateTime())->setTimestamp(filemtime($filePath)),
+                'storage' => 'local',
+            ];
+        }
     }
 }
