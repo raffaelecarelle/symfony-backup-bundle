@@ -17,10 +17,11 @@ class BackupScheduler implements ScheduleProviderInterface
     /**
      * Constructor.
      *
-     * @param BackupManager $backupManager  The backup manager service
      * @param array         $scheduleConfig The schedule configuration
      */
-    public function __construct(private readonly BackupManager $backupManager, private array $scheduleConfig)
+    public function __construct(
+        private array $scheduleConfig
+    )
     {
     }
 
