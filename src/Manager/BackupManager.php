@@ -286,7 +286,15 @@ class BackupManager
             }
 
             $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
-            $decompressionName = 'gz' === $extension ? 'gzip' : 'zip';
+            $decompressionName = null;
+            switch ($extension) {
+                case 'gz':
+                    $decompressionName = 'gzip';
+                    break;
+                case 'zip':
+                    $decompressionName = 'zip';
+                    break;
+            }
             $compression = $this->compressionAdapters[$decompressionName] ?? null;
 
             if ($compression) {
@@ -331,7 +339,7 @@ class BackupManager
             return false;
         } finally {
             if (isset($compression, $backupPath)) {
-                $compression->decompress($backupPath);
+                $compression->compress($backupPath);
             }
         }
     }
