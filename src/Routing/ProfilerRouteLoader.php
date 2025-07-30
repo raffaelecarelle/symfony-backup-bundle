@@ -1,76 +1,37 @@
 <?php
 
-declare(strict_types=1);
-
 namespace ProBackupBundle\Routing;
 
+use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
-/**
- * Loader for profiler routes.
- */
-class ProfilerRouteLoader
+class ProfilerRouteLoader extends Loader
 {
-    /**
-     * Load routes for the profiler.
-     */
-    public static function loadRoutes(): mixed
+    private bool $isLoaded = false;
+
+    public function load($resource, string $type = null): RouteCollection
     {
+        if (true === $this->isLoaded) {
+            throw new \RuntimeException('Do not add the "extra" loader twice');
+        }
+
         $routes = new RouteCollection();
 
-        // Create backup
-        $routes->add('_profiler_backup_create', new Route(
-            '/_profiler/backup/create',
-            [
-                '_controller' => 'symfony_backup.profiler_controller:create',
-            ],
-            [],
-            [],
-            '',
-            [],
-            ['POST']
-        ));
+        // Aggiungi le tue route per il profiler qui
+        $route = new Route(
+            '/_profiler/backup/{token}',
+            ['_controller' => 'symfony_backup.profiler_controller::backupAction']
+        );
+        $routes->add('_profiler_backup', $route);
 
-        // Restore backup
-        $routes->add('_profiler_backup_restore', new Route(
-            '/_profiler/backup/restore',
-            [
-                '_controller' => 'symfony_backup.profiler_controller:restore',
-            ],
-            [],
-            [],
-            '',
-            [],
-            ['POST']
-        ));
-
-        // Download backup
-        $routes->add('_profiler_backup_download', new Route(
-            '/_profiler/backup/download',
-            [
-                '_controller' => 'symfony_backup.profiler_controller:download',
-            ],
-            [],
-            [],
-            '',
-            [],
-            ['GET']
-        ));
-
-        // Delete backup
-        $routes->add('_profiler_backup_delete', new Route(
-            '/_profiler/backup/delete',
-            [
-                '_controller' => 'symfony_backup.profiler_controller:delete',
-            ],
-            [],
-            [],
-            '',
-            [],
-            ['DELETE']
-        ));
+        $this->isLoaded = true;
 
         return $routes;
+    }
+
+    public function supports($resource, string $type = null): bool
+    {
+        return 'extra' === $type;
     }
 }

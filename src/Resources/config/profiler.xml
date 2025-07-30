@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <container xmlns="http://symfony.com/schema/dic/services"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://symfony.com/schema/dic/services
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
         https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
         <!-- Data Collector -->
         <service id="symfony_backup.data_collector" class="ProBackupBundle\DataCollector\BackupDataCollector" public="false">
             <argument type="service" id="symfony_backup.manager" />
-            <tag name="data_collector" 
+            <tag name="data_collector"
                  template="@Backup/Collector/backup.html.twig"
-                 id="backup" 
+                 id="backup"
                  priority="200" />
         </service>
-        
+
         <!-- Profiler Controller -->
         <service id="symfony_backup.profiler_controller" class="ProBackupBundle\Controller\ProfilerBackupController" public="true">
             <argument type="service" id="symfony_backup.manager" />
         </service>
-        
-        <!-- Register routes for profiler actions -->
-        <service id="symfony_backup.profiler_routes" class="Symfony\Component\Routing\RouteCollection">
-            <factory class="ProBackupBundle\Routing\ProfilerRouteLoader" method="loadRoutes" />
+
+        <!-- Register routing loader (not RouteCollection directly) -->
+        <service id="symfony_backup.profiler_route_loader" class="ProBackupBundle\Routing\ProfilerRouteLoader" public="false">
             <tag name="routing.loader" />
         </service>
     </services>
