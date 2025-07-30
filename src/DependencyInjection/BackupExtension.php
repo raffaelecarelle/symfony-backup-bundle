@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\DependencyInjection;
 
-use ProBackupBundle\Adapter\Compression\GzipCompression;
-use ProBackupBundle\Adapter\Compression\ZipCompression;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
+use ProBackupBundle\Adapter\Storage\LocalAdapter;
+use ProBackupBundle\Adapter\Storage\S3Adapter;
+use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
 use ProBackupBundle\Adapter\Database\MySQLAdapter;
 use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
 use ProBackupBundle\Adapter\Database\SQLiteAdapter;
 use ProBackupBundle\Adapter\Database\SqlServerAdapter;
-use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
-use ProBackupBundle\Adapter\Storage\LocalAdapter;
-use ProBackupBundle\Adapter\Storage\S3Adapter;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use ProBackupBundle\Adapter\Compression\GzipCompression;
+use ProBackupBundle\Adapter\Compression\ZipCompression;
 
-/**
- * BackupExtension is the extension class for the Backup bundle.
- */
 class BackupExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
@@ -72,20 +69,19 @@ class BackupExtension extends Extension
         $container->getDefinition('symfony_backup.manager')
             ->addMethodCall('setDefaultStorage', [$config['default_storage']]);
 
-        // Configure local storage adapter
-        if (isset($config['storage']['local'])) {
-            $localConfig = $config['storage']['local'];
-            $localDef = $container->register('symfony_backup.storage.local', LocalAdapter::class);
-            $localDef->setArguments([
-                $localConfig['options']['path'],
-                $localConfig['options']['permissions'] ?? 0755,
-                new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-            ]);
-            $localDef->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
-        }
+        // Configure local storage adapter (sempre configurato come fallback)
+        $localConfig = $config['storage']['local'] ?? ['options' => ['path' => $config['backup_dir']]];
+        $localDef = $container->register('symfony_backup.storage.local', LocalAdapter::class);
+        $localDef->setArguments([
+            $localConfig['options']['path'],
+            $localConfig['options']['permissions'] ?? 0755,
+            new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+        ]);
+        $localDef->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
 
-        // Configure S3 storage adapter
-        if (isset($config['storage']['s3'])) {
+        // Configure S3 storage adapter SOLO se esplicitamente definito e abilitato
+        if (isset($config['storage']['s3']) && is_array($config['storage']['s3']) &&
+            (isset($config['storage']['s3']['enabled']) ? $config['storage']['s3']['enabled'] : true)) {
             $s3Config = $config['storage']['s3'];
 
             // Check if AWS SDK is available
@@ -116,8 +112,9 @@ class BackupExtension extends Extension
             $s3Def->addTag('symfony_backup.storage_adapter', ['name' => 's3']);
         }
 
-        // Configure Google Cloud storage adapter
-        if (isset($config['storage']['google_cloud'])) {
+        // Configure Google Cloud storage adapter SOLO se esplicitamente definito e abilitato
+        if (isset($config['storage']['google_cloud']) && is_array($config['storage']['google_cloud']) &&
+            (isset($config['storage']['google_cloud']['enabled']) ? $config['storage']['google_cloud']['enabled'] : true)) {
             $gcConfig = $config['storage']['google_cloud'];
 
             // Check if Google Cloud SDK is available
