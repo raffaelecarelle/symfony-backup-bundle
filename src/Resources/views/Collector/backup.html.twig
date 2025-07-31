@@ -198,7 +198,7 @@
                                 `;
 
                                 data.backups.forEach(backup => {
-                                    const createdAt = new Date(backup.created_at).toLocaleString();
+                                    const createdAt = backup.created_at.date.toLocaleString();
                                     const size = (backup.file_size / 1024 / 1024).toFixed(2);
 
                                     tableHtml += `
