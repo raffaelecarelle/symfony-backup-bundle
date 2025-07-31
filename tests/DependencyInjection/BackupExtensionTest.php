@@ -47,11 +47,11 @@ class BackupExtensionTest extends TestCase
 
         $this->backupExtension->load([$configs], $this->containerBuilder);
 
-        $this->assertTrue($this->containerBuilder->hasDefinition('symfony_backup.manager'));
-        $this->assertTrue($this->containerBuilder->hasDefinition('symfony_backup.storage.local'));
-        $this->assertTrue($this->containerBuilder->hasDefinition('symfony_backup.compression.gzip'));
-        $this->assertTrue($this->containerBuilder->hasDefinition('symfony_backup.compression.zip'));
-        $this->assertFalse($this->containerBuilder->hasDefinition('symfony_backup.scheduler'));
+        $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.manager'));
+        $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.storage.local'));
+        $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.compression.gzip'));
+        $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.compression.zip'));
+        $this->assertFalse($this->containerBuilder->hasDefinition('pro_backup.scheduler'));
     }
 
     public function testLoadWithEnabledScheduler(): void
@@ -72,7 +72,7 @@ class BackupExtensionTest extends TestCase
 
         $this->backupExtension->load([$configs], $this->containerBuilder);
 
-        $this->assertTrue($this->containerBuilder->hasDefinition('symfony_backup.scheduler'));
+        $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.scheduler'));
     }
 
     public function testLoadThrowsExceptionForMissingAWSSDK(): void
@@ -144,6 +144,6 @@ class BackupExtensionTest extends TestCase
 
         $this->backupExtension->load([$configs], $this->containerBuilder);
 
-        $this->assertArrayHasKey('symfony_backup.config', $this->containerBuilder->getParameterBag()->all());
+        $this->assertArrayHasKey('pro_backup.config', $this->containerBuilder->getParameterBag()->all());
     }
 }

@@ -23,7 +23,7 @@ class StorageAdapterPassTest extends TestCase
 
         // Create a mock manager definition
         $this->managerDefinition = new Definition();
-        $this->containerBuilder->setDefinition('symfony_backup.manager', $this->managerDefinition);
+        $this->containerBuilder->setDefinition('pro_backup.manager', $this->managerDefinition);
     }
 
     public function testProcessWithNoTaggedServices(): void
@@ -39,12 +39,12 @@ class StorageAdapterPassTest extends TestCase
     {
         // Create and register some tagged services
         $localDefinition = new Definition();
-        $localDefinition->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
-        $this->containerBuilder->setDefinition('symfony_backup.storage.local', $localDefinition);
+        $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'local']);
+        $this->containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         $s3Definition = new Definition();
-        $s3Definition->addTag('symfony_backup.storage_adapter', ['name' => 's3']);
-        $this->containerBuilder->setDefinition('symfony_backup.storage.s3', $s3Definition);
+        $s3Definition->addTag('pro_backup.storage_adapter', ['name' => 's3']);
+        $this->containerBuilder->setDefinition('pro_backup.storage.s3', $s3Definition);
 
         // Process the container
         $this->compilerPass->process($this->containerBuilder);
@@ -57,21 +57,21 @@ class StorageAdapterPassTest extends TestCase
         $this->assertEquals('addStorageAdapter', $methodCalls[0][0]);
         $this->assertEquals('local', $methodCalls[0][1][0]);
         $this->assertInstanceOf(Reference::class, $methodCalls[0][1][1]);
-        $this->assertEquals('symfony_backup.storage.local', (string) $methodCalls[0][1][1]);
+        $this->assertEquals('pro_backup.storage.local', (string) $methodCalls[0][1][1]);
 
         // Check the second method call
         $this->assertEquals('addStorageAdapter', $methodCalls[1][0]);
         $this->assertEquals('s3', $methodCalls[1][1][0]);
         $this->assertInstanceOf(Reference::class, $methodCalls[1][1][1]);
-        $this->assertEquals('symfony_backup.storage.s3', (string) $methodCalls[1][1][1]);
+        $this->assertEquals('pro_backup.storage.s3', (string) $methodCalls[1][1][1]);
     }
 
     public function testProcessWithTaggedServicesWithoutName(): void
     {
         // Create and register a tagged service without a name
         $localDefinition = new Definition();
-        $localDefinition->addTag('symfony_backup.storage_adapter');
-        $this->containerBuilder->setDefinition('symfony_backup.storage.local', $localDefinition);
+        $localDefinition->addTag('pro_backup.storage_adapter');
+        $this->containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         // Process the container
         $this->compilerPass->process($this->containerBuilder);
@@ -84,16 +84,16 @@ class StorageAdapterPassTest extends TestCase
         $this->assertEquals('addStorageAdapter', $methodCalls[0][0]);
         $this->assertEquals('local', $methodCalls[0][1][0]);
         $this->assertInstanceOf(Reference::class, $methodCalls[0][1][1]);
-        $this->assertEquals('symfony_backup.storage.local', (string) $methodCalls[0][1][1]);
+        $this->assertEquals('pro_backup.storage.local', (string) $methodCalls[0][1][1]);
     }
 
     public function testProcessWithMultipleTags(): void
     {
         // Create and register a service with multiple tags
         $localDefinition = new Definition();
-        $localDefinition->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
-        $localDefinition->addTag('symfony_backup.storage_adapter', ['name' => 'filesystem']);
-        $this->containerBuilder->setDefinition('symfony_backup.storage.local', $localDefinition);
+        $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'local']);
+        $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'filesystem']);
+        $this->containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         // Process the container
         $this->compilerPass->process($this->containerBuilder);
@@ -118,8 +118,8 @@ class StorageAdapterPassTest extends TestCase
 
         // Create and register a tagged service
         $localDefinition = new Definition();
-        $localDefinition->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
-        $containerBuilder->setDefinition('symfony_backup.storage.local', $localDefinition);
+        $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'local']);
+        $containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         // Process the container
         $this->compilerPass->process($containerBuilder);
@@ -136,10 +136,10 @@ class StorageAdapterPassTest extends TestCase
         $method->setAccessible(true);
 
         // Test with a service ID that has a dot
-        $this->assertEquals('local', $method->invoke($this->compilerPass, 'symfony_backup.storage.local'));
+        $this->assertEquals('local', $method->invoke($this->compilerPass, 'pro_backup.storage.local'));
 
         // Test with a service ID that has multiple dots
-        $this->assertEquals('s3', $method->invoke($this->compilerPass, 'app.symfony_backup.storage.s3'));
+        $this->assertEquals('s3', $method->invoke($this->compilerPass, 'app.pro_backup.storage.s3'));
 
         // Test with a service ID that has no dots
         $this->assertEquals('local_storage', $method->invoke($this->compilerPass, 'local_storage'));

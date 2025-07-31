@@ -23,7 +23,7 @@ class CompressionAdapterPassTest extends TestCase
 
         // Create a mock manager definition
         $this->managerDefinition = new Definition();
-        $this->containerBuilder->setDefinition('symfony_backup.manager', $this->managerDefinition);
+        $this->containerBuilder->setDefinition('pro_backup.manager', $this->managerDefinition);
     }
 
     public function testProcessWithNoTaggedServices(): void
@@ -39,12 +39,12 @@ class CompressionAdapterPassTest extends TestCase
     {
         // Create and register some tagged services
         $gzipDefinition = new Definition();
-        $gzipDefinition->addTag('symfony_backup.compression_adapter', ['name' => 'gzip']);
-        $this->containerBuilder->setDefinition('symfony_backup.compression.gzip', $gzipDefinition);
+        $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
+        $this->containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         $zipDefinition = new Definition();
-        $zipDefinition->addTag('symfony_backup.compression_adapter', ['name' => 'zip']);
-        $this->containerBuilder->setDefinition('symfony_backup.compression.zip', $zipDefinition);
+        $zipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'zip']);
+        $this->containerBuilder->setDefinition('pro_backup.compression.zip', $zipDefinition);
 
         // Process the container
         $this->compilerPass->process($this->containerBuilder);
@@ -57,21 +57,21 @@ class CompressionAdapterPassTest extends TestCase
         $this->assertEquals('addCompressionAdapter', $methodCalls[0][0]);
         $this->assertEquals('gzip', $methodCalls[0][1][0]);
         $this->assertInstanceOf(Reference::class, $methodCalls[0][1][1]);
-        $this->assertEquals('symfony_backup.compression.gzip', (string) $methodCalls[0][1][1]);
+        $this->assertEquals('pro_backup.compression.gzip', (string) $methodCalls[0][1][1]);
 
         // Check the second method call
         $this->assertEquals('addCompressionAdapter', $methodCalls[1][0]);
         $this->assertEquals('zip', $methodCalls[1][1][0]);
         $this->assertInstanceOf(Reference::class, $methodCalls[1][1][1]);
-        $this->assertEquals('symfony_backup.compression.zip', (string) $methodCalls[1][1][1]);
+        $this->assertEquals('pro_backup.compression.zip', (string) $methodCalls[1][1][1]);
     }
 
     public function testProcessWithTaggedServicesWithoutName(): void
     {
         // Create and register a tagged service without a name
         $gzipDefinition = new Definition();
-        $gzipDefinition->addTag('symfony_backup.compression_adapter');
-        $this->containerBuilder->setDefinition('symfony_backup.compression.gzip', $gzipDefinition);
+        $gzipDefinition->addTag('pro_backup.compression_adapter');
+        $this->containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         // Process the container
         $this->compilerPass->process($this->containerBuilder);
@@ -84,16 +84,16 @@ class CompressionAdapterPassTest extends TestCase
         $this->assertEquals('addCompressionAdapter', $methodCalls[0][0]);
         $this->assertEquals('gzip', $methodCalls[0][1][0]);
         $this->assertInstanceOf(Reference::class, $methodCalls[0][1][1]);
-        $this->assertEquals('symfony_backup.compression.gzip', (string) $methodCalls[0][1][1]);
+        $this->assertEquals('pro_backup.compression.gzip', (string) $methodCalls[0][1][1]);
     }
 
     public function testProcessWithMultipleTags(): void
     {
         // Create and register a service with multiple tags
         $gzipDefinition = new Definition();
-        $gzipDefinition->addTag('symfony_backup.compression_adapter', ['name' => 'gzip']);
-        $gzipDefinition->addTag('symfony_backup.compression_adapter', ['name' => 'gz']);
-        $this->containerBuilder->setDefinition('symfony_backup.compression.gzip', $gzipDefinition);
+        $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
+        $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gz']);
+        $this->containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         // Process the container
         $this->compilerPass->process($this->containerBuilder);
@@ -118,8 +118,8 @@ class CompressionAdapterPassTest extends TestCase
 
         // Create and register a tagged service
         $gzipDefinition = new Definition();
-        $gzipDefinition->addTag('symfony_backup.compression_adapter', ['name' => 'gzip']);
-        $containerBuilder->setDefinition('symfony_backup.compression.gzip', $gzipDefinition);
+        $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
+        $containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         // Process the container
         $this->compilerPass->process($containerBuilder);
@@ -136,10 +136,10 @@ class CompressionAdapterPassTest extends TestCase
         $method->setAccessible(true);
 
         // Test with a service ID that has a dot
-        $this->assertEquals('gzip', $method->invoke($this->compilerPass, 'symfony_backup.compression.gzip'));
+        $this->assertEquals('gzip', $method->invoke($this->compilerPass, 'pro_backup.compression.gzip'));
 
         // Test with a service ID that has multiple dots
-        $this->assertEquals('gzip', $method->invoke($this->compilerPass, 'app.symfony_backup.compression.gzip'));
+        $this->assertEquals('gzip', $method->invoke($this->compilerPass, 'app.pro_backup.compression.gzip'));
 
         // Test with a service ID that has no dots
         $this->assertEquals('gzip_compression', $method->invoke($this->compilerPass, 'gzip_compression'));

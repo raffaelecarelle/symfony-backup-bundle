@@ -28,7 +28,7 @@ composer require raffaelecarelle/symfony-backup-bundle
 Create a configuration file at `config/packages/backup.yaml`:
 
 ```yaml
-symfony_backup:
+pro_backup:
     default_storage: 'local'
     
     storage:

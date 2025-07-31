@@ -15,12 +15,12 @@ class CompressionAdapterPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition('symfony_backup.manager')) {
+        if (!$container->hasDefinition('pro_backup.manager')) {
             return;
         }
 
-        $managerDefinition = $container->getDefinition('symfony_backup.manager');
-        $taggedServices = $container->findTaggedServiceIds('symfony_backup.compression_adapter');
+        $managerDefinition = $container->getDefinition('pro_backup.manager');
+        $taggedServices = $container->findTaggedServiceIds('pro_backup.compression_adapter');
 
         foreach ($taggedServices as $id => $tags) {
             foreach ($tags as $attributes) {

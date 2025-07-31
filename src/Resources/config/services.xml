@@ -6,7 +6,7 @@
 
     <services>
         <!-- Backup Manager -->
-        <service id="symfony_backup.manager" class="ProBackupBundle\Manager\BackupManager" public="true">
+        <service id="pro_backup.manager" class="ProBackupBundle\Manager\BackupManager" public="true">
             <argument>%kernel.project_dir%/var/backups</argument> <!-- backup_dir -->
             <argument type="service" id="event_dispatcher" on-invalid="null" />
             <argument type="service" id="logger" on-invalid="null" />
@@ -17,26 +17,26 @@
         </service>
         
         <!-- Register the manager as an alias -->
-        <service id="ProBackupBundle\Manager\BackupManager" alias="symfony_backup.manager" public="false" />
+        <service id="ProBackupBundle\Manager\BackupManager" alias="pro_backup.manager" public="false" />
         
         <!-- Console Commands -->
-        <service id="symfony_backup.command.backup" class="ProBackupBundle\Command\BackupCommand">
-            <argument type="service" id="symfony_backup.manager" />
-            <argument>%symfony_backup.config%</argument>
+        <service id="pro_backup.command.backup" class="ProBackupBundle\Command\BackupCommand">
+            <argument type="service" id="pro_backup.manager" />
+            <argument>%pro_backup.config%</argument>
             <tag name="console.command" />
         </service>
         
-        <service id="symfony_backup.command.restore" class="ProBackupBundle\Command\RestoreCommand">
-            <argument type="service" id="symfony_backup.manager" />
+        <service id="pro_backup.command.restore" class="ProBackupBundle\Command\RestoreCommand">
+            <argument type="service" id="pro_backup.manager" />
             <tag name="console.command" />
         </service>
         
-        <service id="symfony_backup.command.list" class="ProBackupBundle\Command\ListCommand">
-            <argument type="service" id="symfony_backup.manager" />
+        <service id="pro_backup.command.list" class="ProBackupBundle\Command\ListCommand">
+            <argument type="service" id="pro_backup.manager" />
             <tag name="console.command" />
         </service>
 
-        <service id="symfony_backup.process.factory" class="ProBackupBundle\Process\Factory\ProcessFactory">
+        <service id="pro_backup.process.factory" class="ProBackupBundle\Process\Factory\ProcessFactory">
         </service>
     </services>
 </container>

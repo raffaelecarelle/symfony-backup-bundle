@@ -31,7 +31,7 @@ class BackupExtension extends Extension
         $loader->load('services.xml');
 
         // Configure the backup manager
-        $backupManagerDef = $container->getDefinition('symfony_backup.manager');
+        $backupManagerDef = $container->getDefinition('pro_backup.manager');
         $backupManagerDef->setArgument(0, $config['backup_dir']);
         $backupManagerDef->setArgument(1, new Reference('event_dispatcher'));
 
@@ -56,12 +56,12 @@ class BackupExtension extends Extension
         if ($config['schedule']['enabled']) {
             $loader->load('scheduler.xml');
 
-            $schedulerDef = $container->getDefinition('symfony_backup.scheduler');
+            $schedulerDef = $container->getDefinition('pro_backup.scheduler');
             $schedulerDef->setArgument(1, $config['schedule']);
         }
 
         // Set parameters
-        $container->setParameter('symfony_backup.config', $config);
+        $container->setParameter('pro_backup.config', $config);
     }
 
     /**
@@ -71,13 +71,13 @@ class BackupExtension extends Extension
     {
         // Configure local storage adapter (sempre configurato come fallback)
         $localConfig = $config['storage']['local'] ?? ['options' => ['path' => $config['backup_dir']]];
-        $localDef = $container->register('symfony_backup.storage.local', LocalAdapter::class);
+        $localDef = $container->register('pro_backup.storage.local', LocalAdapter::class);
         $localDef->setArguments([
             $localConfig['options']['path'],
             $localConfig['options']['permissions'] ?? 0755,
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
         ]);
-        $localDef->addTag('symfony_backup.storage_adapter', ['name' => 'local']);
+        $localDef->addTag('pro_backup.storage_adapter', ['name' => 'local']);
 
         // Configure S3 storage adapter SOLO se esplicitamente definito e abilitato
         if (isset($config['storage']['s3']) && \is_array($config['storage']['s3'])
@@ -90,7 +90,7 @@ class BackupExtension extends Extension
             }
 
             // Create S3 client
-            $s3ClientDef = $container->register('symfony_backup.aws_s3_client', 'Aws\S3\S3Client');
+            $s3ClientDef = $container->register('pro_backup.aws_s3_client', 'Aws\S3\S3Client');
             $s3ClientDef->setFactory(['Aws\S3\S3Client', 'factory']);
             $s3ClientDef->setArguments([[
                 'version' => 'latest',
@@ -102,14 +102,14 @@ class BackupExtension extends Extension
             ]]);
 
             // Create S3 adapter
-            $s3Def = $container->register('symfony_backup.storage.s3', S3Adapter::class);
+            $s3Def = $container->register('pro_backup.storage.s3', S3Adapter::class);
             $s3Def->setArguments([
-                new Reference('symfony_backup.aws_s3_client'),
+                new Reference('pro_backup.aws_s3_client'),
                 $s3Config['options']['bucket'],
                 $s3Config['options']['prefix'] ?? '',
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ]);
-            $s3Def->addTag('symfony_backup.storage_adapter', ['name' => 's3']);
+            $s3Def->addTag('pro_backup.storage_adapter', ['name' => 's3']);
         }
 
         // Configure Google Cloud storage adapter SOLO se esplicitamente definito e abilitato
@@ -123,24 +123,24 @@ class BackupExtension extends Extension
             }
 
             // Create Google Cloud client
-            $gcClientDef = $container->register('symfony_backup.google_cloud_client', 'Google\Cloud\Storage\StorageClient');
+            $gcClientDef = $container->register('pro_backup.google_cloud_client', 'Google\Cloud\Storage\StorageClient');
             $gcClientDef->setArguments([[
                 'projectId' => $gcConfig['options']['project_id'],
                 'keyFilePath' => $gcConfig['options']['key_file'],
             ]]);
 
             // Create Google Cloud adapter
-            $gcDef = $container->register('symfony_backup.storage.google_cloud', GoogleCloudAdapter::class);
+            $gcDef = $container->register('pro_backup.storage.google_cloud', GoogleCloudAdapter::class);
             $gcDef->setArguments([
-                new Reference('symfony_backup.google_cloud_client'),
+                new Reference('pro_backup.google_cloud_client'),
                 $gcConfig['options']['bucket'],
                 $gcConfig['options']['prefix'] ?? '',
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ]);
-            $gcDef->addTag('symfony_backup.storage_adapter', ['name' => 'google_cloud']);
+            $gcDef->addTag('pro_backup.storage_adapter', ['name' => 'google_cloud']);
 
             // Set default storage
-            $container->getDefinition('symfony_backup.manager')
+            $container->getDefinition('pro_backup.manager')
                 ->addMethodCall('setDefaultStorage', [$config['default_storage']]);
         }
     }
@@ -161,37 +161,37 @@ class BackupExtension extends Extension
             $connectionServiceId = 'doctrine.dbal.'.$connectionName.'_connection';
 
             // MySQL adapter
-            $mysqlDef = $container->register('symfony_backup.database.mysql.'.$connectionName, MySQLAdapter::class);
+            $mysqlDef = $container->register('pro_backup.database.mysql.'.$connectionName, MySQLAdapter::class);
             $mysqlDef->setArguments([
                 new Reference($connectionServiceId),
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ]);
-            $mysqlDef->addTag('symfony_backup.database_adapter');
+            $mysqlDef->addTag('pro_backup.database_adapter');
 
             // PostgreSQL adapter
-            $pgDef = $container->register('symfony_backup.database.postgresql.'.$connectionName, PostgreSQLAdapter::class);
+            $pgDef = $container->register('pro_backup.database.postgresql.'.$connectionName, PostgreSQLAdapter::class);
             $pgDef->setArguments([
                 new Reference($connectionServiceId),
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-                new Reference('symfony_backup.process.factory'),
+                new Reference('pro_backup.process.factory'),
             ]);
-            $pgDef->addTag('symfony_backup.database_adapter');
+            $pgDef->addTag('pro_backup.database_adapter');
 
             // SQLite adapter
-            $sqliteDef = $container->register('symfony_backup.database.sqlite.'.$connectionName, SQLiteAdapter::class);
+            $sqliteDef = $container->register('pro_backup.database.sqlite.'.$connectionName, SQLiteAdapter::class);
             $sqliteDef->setArguments([
                 new Reference($connectionServiceId),
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ]);
-            $sqliteDef->addTag('symfony_backup.database_adapter');
+            $sqliteDef->addTag('pro_backup.database_adapter');
 
             // SQL Server adapter
-            $sqlServerDef = $container->register('symfony_backup.database.sqlserver.'.$connectionName, SqlServerAdapter::class);
+            $sqlServerDef = $container->register('pro_backup.database.sqlserver.'.$connectionName, SqlServerAdapter::class);
             $sqlServerDef->setArguments([
                 new Reference($connectionServiceId),
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ]);
-            $sqlServerDef->addTag('symfony_backup.database_adapter');
+            $sqlServerDef->addTag('pro_backup.database_adapter');
         }
     }
 
@@ -205,15 +205,15 @@ class BackupExtension extends Extension
         }
 
         // Register filesystem adapter
-        $filesystemDef = $container->register('symfony_backup.adapter.filesystem', FilesystemAdapter::class);
+        $filesystemDef = $container->register('pro_backup.adapter.filesystem', FilesystemAdapter::class);
         $filesystemDef->setArguments([
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
         ]);
-        $filesystemDef->addTag('symfony_backup.database_adapter');
-        $filesystemDef->addMethodCall('setCompressionAdapter', [new Reference('symfony_backup.compression.'.$config['filesystem']['compression'])]);
+        $filesystemDef->addTag('pro_backup.database_adapter');
+        $filesystemDef->addMethodCall('setCompressionAdapter', [new Reference('pro_backup.compression.'.$config['filesystem']['compression'])]);
 
         // Set paths in options
-        $container->setParameter('symfony_backup.filesystem.paths', $config['filesystem']['paths']);
+        $container->setParameter('pro_backup.filesystem.paths', $config['filesystem']['paths']);
     }
 
     /**
@@ -222,26 +222,26 @@ class BackupExtension extends Extension
     private function configureCompressionAdapters(ContainerBuilder $container, array $config): void
     {
         // Gzip compression
-        $gzipDef = $container->register('symfony_backup.compression.gzip', GzipCompression::class);
+        $gzipDef = $container->register('pro_backup.compression.gzip', GzipCompression::class);
         $gzipDef->setArguments([
             $config['compression']['gzip']['level'] ?? 6,
             $config['compression']['gzip']['keep_original'] ?? false,
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
         ]);
-        $gzipDef->addTag('symfony_backup.compression_adapter', ['name' => 'gzip']);
+        $gzipDef->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
 
         // Zip compression
-        $zipDef = $container->register('symfony_backup.compression.zip', ZipCompression::class);
+        $zipDef = $container->register('pro_backup.compression.zip', ZipCompression::class);
         $zipDef->setArguments([
             $config['compression']['zip']['level'] ?? 6,
             $config['compression']['zip']['keep_original'] ?? false,
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
         ]);
-        $zipDef->addTag('symfony_backup.compression_adapter', ['name' => 'zip']);
+        $zipDef->addTag('pro_backup.compression_adapter', ['name' => 'zip']);
     }
 
     public function getAlias(): string
     {
-        return 'symfony_backup';
+        return 'pro_backup';
     }
 }

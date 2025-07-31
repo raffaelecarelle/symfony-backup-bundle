@@ -69,8 +69,8 @@ class FilesystemAdapter implements BackupAdapterInterface
             // If no paths in options, try to get them from container parameter
             if (empty($paths) && isset($GLOBALS['kernel'])) {
                 $container = $GLOBALS['kernel']->getContainer();
-                if ($container->hasParameter('symfony_backup.filesystem.paths')) {
-                    $paths = $container->getParameter('symfony_backup.filesystem.paths');
+                if ($container->hasParameter('pro_backup.filesystem.paths')) {
+                    $paths = $container->getParameter('pro_backup.filesystem.paths');
                 }
             }
 

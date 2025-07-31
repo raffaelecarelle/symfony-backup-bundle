@@ -6,8 +6,8 @@
 
     <services>
         <!-- Data Collector -->
-        <service id="symfony_backup.data_collector" class="ProBackupBundle\DataCollector\BackupDataCollector" public="false">
-            <argument type="service" id="symfony_backup.manager" />
+        <service id="pro_backup.data_collector" class="ProBackupBundle\DataCollector\BackupDataCollector" public="false">
+            <argument type="service" id="pro_backup.manager" />
             <tag name="data_collector"
                  template="@ProBackup/Collector/backup.html.twig"
                  id="backup"
@@ -15,9 +15,9 @@
         </service>
 
         <!-- Profiler Controller -->
-        <service id="symfony_backup.profiler_controller" class="ProBackupBundle\Controller\ProfilerBackupController" public="true">
-            <argument type="service" id="symfony_backup.manager" />
-            <argument type="service" id="symfony_backup.data_collector" />
+        <service id="pro_backup.profiler_controller" class="ProBackupBundle\Controller\ProfilerBackupController" public="true">
+            <argument type="service" id="pro_backup.manager" />
+            <argument type="service" id="pro_backup.data_collector" />
         </service>
     </services>
 </container>

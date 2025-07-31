@@ -14,7 +14,7 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('symfony_backup');
+        $treeBuilder = new TreeBuilder('pro_backup');
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
