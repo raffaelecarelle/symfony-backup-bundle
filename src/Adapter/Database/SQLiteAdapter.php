@@ -176,15 +176,31 @@ class SQLiteAdapter implements BackupAdapterInterface
     {
         $params = $this->connection->getParams();
 
+        // Check for direct path parameter
         if (isset($params['path'])) {
             return $params['path'];
         }
 
+        // Check for database name parameter (common in Symfony)
+        if (isset($params['dbname'])) {
+            return $params['dbname'];
+        }
+
+        // Check for URL format
         if (isset($params['url'])) {
             $url = parse_url($params['url']);
             if (isset($url['path'])) {
-                return $url['path'];
+                // Remove leading slash if present
+                return ltrim($url['path'], '/');
+            } elseif (preg_match('#^sqlite:///(.*?)$#', $params['url'], $matches)) {
+                // Handle sqlite:/// format
+                return $matches[1];
             }
+        }
+
+        // Check for memory database
+        if (isset($params['memory']) && true === $params['memory']) {
+            return ':memory:';
         }
 
         throw new BackupException('Could not determine SQLite database path');

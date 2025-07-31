@@ -88,6 +88,14 @@ class BackupResult
     }
 
     /**
+     * Alias for getFileSize() for backward compatibility.
+     */
+    public function getSize(): ?int
+    {
+        return $this->getFileSize();
+    }
+
+    /**
      * Set the size of the backup file.
      */
     public function setFileSize(?int $fileSize): self

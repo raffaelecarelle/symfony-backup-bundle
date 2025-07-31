@@ -12,12 +12,12 @@ class BackupConfiguration
     /**
      * @var string Type of backup ('database' or 'filesystem')
      */
-    private string $type;
+    private string $type = '';
 
     /**
      * @var string Name of the backup
      */
-    private string $name;
+    private string $name = '';
 
     /**
      * @var array Additional options for the backup
@@ -43,6 +43,20 @@ class BackupConfiguration
      * @var string|null Output path for the backup file
      */
     private ?string $outputPath = null;
+
+    /**
+     * Constructor.
+     */
+    public function __construct(string $type = '', string $name = '')
+    {
+        if (!empty($type)) {
+            $this->type = $type;
+        }
+
+        if (!empty($name)) {
+            $this->name = $name;
+        }
+    }
 
     /**
      * Get the backup type.

@@ -70,20 +70,16 @@ class MySQLAdapter implements BackupAdapterInterface
                 throw new ProcessFailedException($process);
             }
 
-            // Apply compression if needed
-            $compressedPath = $this->compressIfNeeded($filepath, $config);
-            $finalPath = $compressedPath ?: $filepath;
-
             $this->logger->info('MySQL backup completed', [
-                'file' => $finalPath,
-                'size' => filesize($finalPath),
+                'file' => $filepath,
+                'size' => filesize($filepath),
                 'duration' => microtime(true) - $startTime,
             ]);
 
             return new BackupResult(
                 true,
-                $finalPath,
-                filesize($finalPath),
+                $filepath,
+                filesize($filepath),
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime
             );
@@ -117,11 +113,7 @@ class MySQLAdapter implements BackupAdapterInterface
         ]);
 
         try {
-            // Decompress if needed
-            $decompressedPath = $this->decompressIfNeeded($backupPath);
-            $finalPath = $decompressedPath ?: $backupPath;
-
-            $command = $this->buildMysqlRestoreCommand($finalPath, $options);
+            $command = $this->buildMysqlRestoreCommand($backupPath, $options);
 
             $process = Process::fromShellCommandline($command);
             $process->setTimeout(3600); // 1 hour timeout
@@ -129,11 +121,6 @@ class MySQLAdapter implements BackupAdapterInterface
 
             if (!$process->isSuccessful()) {
                 throw new ProcessFailedException($process);
-            }
-
-            // Clean up temporary decompressed file
-            if ($decompressedPath && $decompressedPath !== $backupPath) {
-                $this->filesystem->remove($decompressedPath);
             }
 
             $this->logger->info('MySQL restore completed', [
@@ -146,11 +133,6 @@ class MySQLAdapter implements BackupAdapterInterface
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
-            // Clean up temporary decompressed file
-            if (isset($decompressedPath) && $decompressedPath !== $backupPath && $this->filesystem->exists($decompressedPath)) {
-                $this->filesystem->remove($decompressedPath);
-            }
 
             return false;
         }
@@ -270,74 +252,5 @@ class MySQLAdapter implements BackupAdapterInterface
         $command .= ' '.escapeshellarg((string) $database).' < '.escapeshellarg($filepath);
 
         return $command;
-    }
-
-    /**
-     * Compress the backup file if compression is enabled.
-     *
-     * @return string|null Path to the compressed file, or null if no compression
-     */
-    private function compressIfNeeded(string $filepath, BackupConfiguration $config): ?string
-    {
-        $compression = $config->getCompression();
-        if (!$compression) {
-            return null;
-        }
-
-        $this->logger->info('Compressing backup file', [
-            'file' => $filepath,
-            'compression' => $compression,
-        ]);
-
-        if ('gzip' === $compression) {
-            $compressedPath = $filepath.'.gz';
-
-            $process = Process::fromShellCommandline(\sprintf('gzip -c %s > %s', escapeshellarg($filepath), escapeshellarg($compressedPath)));
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
-
-            // Remove the original file
-            $this->filesystem->remove($filepath);
-
-            return $compressedPath;
-        }
-
-        // Other compression types can be added here
-
-        return null;
-    }
-
-    /**
-     * Decompress the backup file if it's compressed.
-     *
-     * @return string|null Path to the decompressed file, or null if no decompression
-     */
-    private function decompressIfNeeded(string $filepath): ?string
-    {
-        $extension = pathinfo($filepath, \PATHINFO_EXTENSION);
-
-        if ('gz' === $extension) {
-            $this->logger->info('Decompressing gzip backup file', [
-                'file' => $filepath,
-            ]);
-
-            $decompressedPath = substr($filepath, 0, -3); // Remove .gz
-
-            $process = Process::fromShellCommandline(\sprintf('gunzip -c %s > %s', escapeshellarg($filepath), escapeshellarg($decompressedPath)));
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
-
-            return $decompressedPath;
-        }
-
-        // Other compression types can be added here
-
-        return null;
     }
 }

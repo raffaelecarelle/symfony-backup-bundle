@@ -173,6 +173,7 @@ class BackupExtension extends Extension
             $pgDef->setArguments([
                 new Reference($connectionServiceId),
                 new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+                new Reference('symfony_backup.process.factory'),
             ]);
             $pgDef->addTag('symfony_backup.database_adapter');
 

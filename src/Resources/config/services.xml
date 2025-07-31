@@ -35,5 +35,8 @@
             <argument type="service" id="symfony_backup.manager" />
             <tag name="console.command" />
         </service>
+
+        <service id="symfony_backup.process.factory" class="ProBackupBundle\Process\Factory\ProcessFactory">
+        </service>
     </services>
 </container>

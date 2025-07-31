@@ -82,12 +82,21 @@ EOF
 
         // Display backups
         if (empty($backups)) {
+            if ('json' === $format) {
+                $output->writeln('[]');
+
+                return Command::SUCCESS;
+            }
+
             $io->warning('No backups found');
 
             return Command::SUCCESS;
         }
 
-        $io->title(\sprintf('Available Backups: %d', \count($backups)));
+        // Only show title for non-JSON formats
+        if ('json' !== $format) {
+            $io->title(\sprintf('Available Backups: %d', \count($backups)));
+        }
 
         // Format backups for display
         $rows = [];
@@ -112,21 +121,23 @@ EOF
             ),
         };
 
-        // Display storage usage
-        $usage = $this->backupManager->getStorageUsage();
+        // Display storage usage (only for non-JSON formats)
+        if ('json' !== $format) {
+            $usage = $this->backupManager->getStorageUsage();
 
-        $io->section('Storage Usage');
-        $io->table(
-            ['Type', 'Size'],
-            array_merge(
-                [['Total', $this->formatFileSize($usage['total'])]],
-                array_map(
-                    fn ($type, $size) => [$type, $this->formatFileSize($size)],
-                    array_keys($usage['by_type']),
-                    array_values($usage['by_type'])
+            $io->section('Storage Usage');
+            $io->table(
+                ['Type', 'Size'],
+                array_merge(
+                    [['Total', $this->formatFileSize($usage['total'])]],
+                    array_map(
+                        fn ($type, $size) => [$type, $this->formatFileSize($size)],
+                        array_keys($usage['by_type']),
+                        array_values($usage['by_type'])
+                    )
                 )
-            )
-        );
+            );
+        }
 
         return Command::SUCCESS;
     }
@@ -136,14 +147,29 @@ EOF
      */
     private function outputJson(OutputInterface $output, array $backups): void
     {
-        // Convert DateTimeImmutable objects to strings
-        $backups = array_map(function ($backup) {
-            $backup['created_at'] = $backup['created_at']->format('Y-m-d H:i:s');
+        // Format the data for JSON output
+        $jsonBackups = [];
+        foreach ($backups as $backup) {
+            $jsonBackups[] = [
+                'id' => $backup['id'],
+                'type' => $backup['type'],
+                'name' => $backup['name'],
+                'file_size' => $backup['file_size'],
+                'created_at' => $backup['created_at']->format('Y-m-d H:i:s'),
+                'storage' => $backup['storage'],
+            ];
+        }
 
-            return $backup;
-        }, $backups);
+        // Ensure we're returning valid JSON
+        $jsonData = json_encode($jsonBackups, \JSON_PRETTY_PRINT);
+        if (false === $jsonData) {
+            // Handle JSON encoding error
+            $output->writeln('[]');
 
-        $output->writeln(json_encode($backups, \JSON_PRETTY_PRINT));
+            return;
+        }
+
+        $output->writeln($jsonData);
     }
 
     /**
@@ -158,7 +184,7 @@ EOF
         foreach ($rows as $row) {
             $output->writeln(implode(',', array_map(fn ($value) =>
                 // Quote values containing commas
-                str_contains((string) $value, ',') ? '"'.$value.'"' : $value, $row)));
+            str_contains((string) $value, ',') ? '"'.$value.'"' : $value, $row)));
         }
     }
 

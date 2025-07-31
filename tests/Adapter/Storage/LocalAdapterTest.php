@@ -221,7 +221,7 @@ class LocalAdapterTest extends TestCase
 
         // Sort results by name for predictable testing
         $sortedResults = array_values($result);
-        usort($sortedResults, fn ($a, $b) => strcmp($a['name'], $b['name']));
+        usort($sortedResults, fn ($a, $b) => strcmp((string) $a['name'], (string) $b['name']));
 
         $this->assertEquals('file1.txt', $sortedResults[0]['name']);
         $this->assertEquals('file2.txt', $sortedResults[1]['name']);

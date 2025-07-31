@@ -118,9 +118,8 @@ EOF
             $config->setStorage($storage);
         }
 
-        if ($compression) {
-            $config->setCompression($compression);
-        }
+        // Always set compression, even if it's null
+        $config->setCompression($compression);
 
         if ($outputPath) {
             $config->setOutputPath($outputPath);
