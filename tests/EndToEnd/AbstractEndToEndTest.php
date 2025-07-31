@@ -52,10 +52,10 @@ abstract class AbstractEndToEndTest extends TestCase
         // Create mock database connections
         $this->mockMySQLConnection = $this->createMock(Connection::class);
         $this->mockMySQLConnection->method('getParams')->willReturn([
-            'host' => 'localhost',
-            'port' => 3306,
-            'user' => 'test_user',
-            'password' => 'test_password',
+            'host' => 'mysql',
+            'port' => '3306',
+            'user' => 'root',
+            'password' => 'root',
             'driver' => 'pdo_mysql',
         ]);
         $this->mockMySQLConnection->method('getDatabase')->willReturn('test_db');
@@ -64,7 +64,7 @@ abstract class AbstractEndToEndTest extends TestCase
         $this->mockPostgreSQLConnection = $this->createMock(Connection::class);
         $this->mockPostgreSQLConnection->method('getParams')->willReturn([
             'host' => 'localhost',
-            'port' => 5432,
+            'port' => '5432',
             'user' => 'test_user',
             'password' => 'test_password',
             'driver' => 'pdo_pgsql',

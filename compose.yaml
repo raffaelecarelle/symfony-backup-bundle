@@ -1,0 +1,21 @@
+networks:
+    net:
+
+services:
+
+    composer:
+        image: composer:latest
+        volumes:
+            - .:/app
+        working_dir: /app
+        networks:
+            - net
+
+    mysql:
+        image: mysql:latest
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+        ports:
+            - 3306:3306
+        networks:
+            - net

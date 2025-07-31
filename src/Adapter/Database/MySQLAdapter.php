@@ -176,7 +176,7 @@ class MySQLAdapter implements BackupAdapterInterface
         $excludeTables = $config->getExclusions();
 
         $host = $params['host'] ?? 'localhost';
-        $port = $params['port'] ?? 3306;
+        $port = $params['port'] ?? '3306';
         $user = $params['user'] ?? 'root';
         $password = $params['password'] ?? '';
         $database = $this->connection->getDatabase();
