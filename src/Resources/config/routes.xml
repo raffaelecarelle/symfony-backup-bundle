@@ -4,9 +4,9 @@
         xsi:schemaLocation="http://symfony.com/schema/routing
         http://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <route id="_profiler_backup_create" controller="pro_backup.profiler_controller::create" path="/_profiler/backup/create" />
-    <route id="_profiler_backup_restore" controller="pro_backup.profiler_controller::restore" path="/_profiler/backup/restore" />
-    <route id="_profiler_backup_delete" controller="pro_backup.profiler_controller::delete" path="/_profiler/backup/delete" />
-    <route id="_profiler_backup_download" controller="pro_backup.profiler_controller::download" path="/_profiler/backup/download" />
-    <route id="_profiler_backup_list" controller="pro_backup.profiler_controller::list" path="/_profiler/backup/list" />
+    <route id="_profiler_pro_backup_create" controller="pro_backup.profiler_controller::create" path="/_profiler/pro-backup/create" />
+    <route id="_profiler_pro_backup_restore" controller="pro_backup.profiler_controller::restore" path="/_profiler/pro-backup/restore" />
+    <route id="_profiler_pro_backup_delete" controller="pro_backup.profiler_controller::delete" path="/_profiler/pro-backup/delete" />
+    <route id="_profiler_pro_backup_download" controller="pro_backup.profiler_controller::download" path="/_profiler/pro-backup/download" />
+    <route id="_profiler_pro_backup_list" controller="pro_backup.profiler_controller::list" path="/_profiler/pro-backup/list" />
 </routes>

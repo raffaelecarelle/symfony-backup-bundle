@@ -123,7 +123,7 @@
                         <td>{{ (backup.file_size / 1024 / 1024)|number_format(2) }} MB</td>
                         <td>
                             <a href="#" class="btn btn-sm restore-backup" data-id="{{ backup.id }}">Restore</a>
-                            <a href="{{ path('_profiler_backup_download', {'id': backup.id}) }}" class="btn btn-sm">Download</a>
+                            <a href="{{ path('_profiler_pro_backup_download', {'id': backup.id}) }}" class="btn btn-sm">Download</a>
                             <a href="#" class="btn btn-sm delete-backup" data-id="{{ backup.id }}">Delete</a>
                         </td>
                     </tr>
@@ -174,7 +174,7 @@
 
             function refreshBackupsList() {
                 // Crea un endpoint per ottenere la lista aggiornata dei backup
-                fetch('{{ path('_profiler_backup_list') }}')
+                fetch('{{ path('_profiler_pro_backup_list') }}')
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -210,7 +210,7 @@
                                             <td>${size} MB</td>
                                             <td>
                                                 <a href="#" class="btn btn-sm restore-backup" data-id="${backup.id}">Restore</a>
-                                                <a href="{{ path('_profiler_backup_download') }}?id=${backup.id}" class="btn btn-sm">Download</a>
+                                                <a href="{{ path('_profiler_pro_backup_download') }}?id=${backup.id}" class="btn btn-sm">Download</a>
                                                 <a href="#" class="btn btn-sm delete-backup" data-id="${backup.id}">Delete</a>
                                             </td>
                                         </tr>
@@ -241,7 +241,7 @@
                         e.preventDefault();
                         const backupId = this.getAttribute('data-id');
                         if (confirm('Are you sure you want to restore this backup? This will overwrite your current data.')) {
-                            fetch('{{ path('_profiler_backup_restore') }}', {
+                            fetch('{{ path('_profiler_pro_backup_restore') }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -269,7 +269,7 @@
                         e.preventDefault();
                         const backupId = this.getAttribute('data-id');
                         if (confirm('Are you sure you want to delete this backup?')) {
-                            fetch('{{ path('_profiler_backup_delete') }}', {
+                            fetch('{{ path('_profiler_pro_backup_delete') }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -301,7 +301,7 @@
                 button.addEventListener('click', function() {
                     const type = this.getAttribute('data-type');
                     if (confirm('Are you sure you want to create a ' + type + ' backup?')) {
-                        fetch('{{ path('_profiler_backup_create') }}', {
+                        fetch('{{ path('_profiler_pro_backup_create') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
