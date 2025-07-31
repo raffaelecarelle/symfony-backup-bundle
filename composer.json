@@ -33,7 +33,8 @@
         "symfony/css-selector": "^6.0|^7.0",
         "symfony/phpunit-bridge": "^6.0|^7.0",
         "symfony/twig-bundle": "^6.0|^7.0",
-        "symfony/web-profiler-bundle": "^6.0|^7.0"
+        "symfony/web-profiler-bundle": "^6.0|^7.0",
+        "ext-pdo": "*"
     },
     "suggest": {
         "aws/aws-sdk-php": "For S3 storage adapter",
