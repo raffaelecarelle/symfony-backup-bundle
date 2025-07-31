@@ -6,6 +6,7 @@ namespace ProBackupBundle\Manager;
 
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
+use ProBackupBundle\Adapter\Database\DatabaseDriverResolver;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Event\BackupEvent;
 use ProBackupBundle\Event\BackupEvents;
@@ -486,7 +487,7 @@ class BackupManager
                     $connection = $adapter->getConnection();
 
                     // Create a resolver and get the specific database type
-                    $resolver = new \ProBackupBundle\Adapter\Database\DatabaseDriverResolver($connection, $this->logger);
+                    $resolver = new DatabaseDriverResolver($connection, $this->logger);
                     $specificType = $resolver->resolveDriverType();
 
                     $this->logger->info('Resolved database type', [
