@@ -7,6 +7,7 @@ namespace ProBackupBundle\Manager;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
 use ProBackupBundle\Adapter\Database\DatabaseDriverResolver;
+use ProBackupBundle\Adapter\Filesystem\FilesystemAdapter;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Event\BackupEvent;
 use ProBackupBundle\Event\BackupEvents;
@@ -169,12 +170,23 @@ class BackupManager
         try {
             // Perform the backup
             $startTime = microtime(true);
+
+            // Inject compression adapter for filesystem backups if available
+            if ($adapter instanceof FilesystemAdapter) {
+                $compressionName = $config->getCompression() ?? 'zip';
+                $compression = $this->compressionAdapters[$compressionName] ?? null;
+                if ($compression) {
+                    $adapter->setCompressionAdapter($compression);
+                }
+            }
+
             $result = $adapter->backup($config);
 
-            if ('database' === $config->getType()) {
+            // Apply compression for database backups only when the backup succeeded and a source path exists
+            if ('database' === $config->getType() && $result->isSuccess()) {
                 $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
 
-                if ($compression) {
+                if ($compression && null !== $result->getFilePath()) {
                     $targetPath = $compression->compress($result->getFilePath());
                     $result->setFileSize(filesize($targetPath));
                     $result->setFilePath($targetPath);

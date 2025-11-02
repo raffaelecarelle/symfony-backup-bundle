@@ -145,7 +145,7 @@ abstract class AbstractEndToEndTest extends TestCase
         $pdo = new \PDO('sqlite:'.$path);
 
         foreach ($tables as $tableName => $columns) {
-            $columnsDefinition = implode(', ', array_map(fn($column, $type) => "$column $type", array_keys($columns), array_values($columns)));
+            $columnsDefinition = implode(', ', array_map(fn ($column, $type) => "$column $type", array_keys($columns), array_values($columns)));
 
             $pdo->exec("CREATE TABLE $tableName ($columnsDefinition)");
         }

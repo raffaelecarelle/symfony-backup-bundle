@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Scheduler;
 
+use ProBackupBundle\Manager\BackupManager;
+use ProBackupBundle\Model\BackupResult;
+use ProBackupBundle\Model\BackupSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
@@ -13,14 +16,27 @@ use Symfony\Component\Scheduler\ScheduleProviderInterface;
  */
 class BackupScheduler implements ScheduleProviderInterface
 {
+    private ?array $scheduleConfig = null;
+
+    private ?BackupManager $manager = null;
+
+    /** @var BackupSchedule[] */
+    private array $schedules = [];
+
     /**
      * Constructor.
      *
-     * @param array $scheduleConfig The schedule configuration
+     * Supports two modes:
+     *  - Symfony Scheduler provider with array config
+     *  - In-memory scheduler with a BackupManager for E2E tests
      */
-    public function __construct(
-        private array $scheduleConfig,
-    ) {
+    public function __construct(array|BackupManager $arg)
+    {
+        if ($arg instanceof BackupManager) {
+            $this->manager = $arg;
+        } else {
+            $this->scheduleConfig = $arg;
+        }
     }
 
     /**
@@ -31,6 +47,10 @@ class BackupScheduler implements ScheduleProviderInterface
     public function getSchedule(): Schedule
     {
         $schedule = new Schedule();
+
+        if (null === $this->scheduleConfig) {
+            return $schedule; // No config provided in in-memory mode
+        }
 
         // Configure database backups if enabled
         if (isset($this->scheduleConfig['database']['enabled']) && $this->scheduleConfig['database']['enabled']) {
@@ -43,6 +63,61 @@ class BackupScheduler implements ScheduleProviderInterface
         }
 
         return $schedule;
+    }
+
+    /**
+     * In-memory: Add a schedule to the scheduler.
+     */
+    public function addSchedule(BackupSchedule $schedule): self
+    {
+        $this->schedules[] = $schedule;
+
+        return $this;
+    }
+
+    /**
+     * In-memory: Run all due schedules and return their results.
+     *
+     * @return BackupResult[]
+     */
+    public function runDue(): array
+    {
+        if (null === $this->manager) {
+            return [];
+        }
+
+        $now = new \DateTimeImmutable();
+        $results = [];
+
+        foreach ($this->schedules as $schedule) {
+            if (!$schedule->isEnabled()) {
+                continue;
+            }
+
+            $nextRun = $schedule->getNextRun();
+            if (null === $nextRun || $nextRun > $now) {
+                continue; // Not due yet
+            }
+
+            $config = $schedule->getConfiguration();
+            if (null === $config) {
+                continue;
+            }
+
+            $results[] = $this->manager->backup($config);
+
+            // Update next run based on frequency
+            $frequency = $schedule->getFrequency();
+            $updatedNextRun = match ($frequency) {
+                'daily' => $now->modify('+1 day'),
+                'weekly' => $now->modify('+1 week'),
+                'monthly' => $now->modify('+1 month'),
+                default => $now->modify('+1 day'),
+            };
+            $schedule->setNextRun($updatedNextRun);
+        }
+
+        return $results;
     }
 
     /**
