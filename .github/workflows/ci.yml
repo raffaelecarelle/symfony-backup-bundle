@@ -39,25 +39,27 @@ jobs:
                     --health-timeout=5s 
                     --health-retries=5
             mssql:
-                image: mcr.microsoft.com/mssql/server:2019-latest
+                image: mcr.microsoft.com/mssql/server:2022-latest
                 env:
                     ACCEPT_EULA: Y
                     SA_PASSWORD: "YourStrong!Passw0rd"
+                    MSSQL_PID: Developer
                 ports:
                     - 1433:1433
                 options: >-
                     --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1" 
-                    --health-interval=15s 
+                    --health-interval=20s 
                     --health-timeout=10s 
-                    --health-retries=10
+                    --health-retries=15
+                    --health-start-period=60s
         strategy:
             fail-fast: false
             matrix:
                 php: [ '8.1', '8.2', '8.3', '8.4' ]
                 symfony: [ '5.4', '6.4', '7.*' ]
                 exclude:
-                  - php: '8.1'
-                    symfony: '7.*'
+                    -   php: '8.1'
+                        symfony: '7.*'
         env:
             MYSQL_HOST: 127.0.0.1
             MYSQL_PORT: 3306
@@ -73,64 +75,64 @@ jobs:
             MSSQL_PORT: 1433
             MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+            -   name: Checkout repository
+                uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php }}
-                  coverage: none
-                  tools: composer:v2
-                  extensions: mbstring, intl, json, dom, curl, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, zip
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    coverage: none
+                    tools: composer:v2
+                    extensions: mbstring, intl, json, dom, curl, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, zip
 
-            - name: Get Composer cache directory
-              id: composer-cache
-              run: |
-                  echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+            -   name: Get Composer cache directory
+                id: composer-cache
+                run: |
+                    echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-            - name: Cache Composer dependencies
-              uses: actions/cache@v4
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-
-                      ${{ runner.os }}-composer-
+            -   name: Cache Composer dependencies
+                uses: actions/cache@v4
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-
+                        ${{ runner.os }}-composer-
 
-            - name: Configure dependencies for matrix
-              run: |
-                  composer require --no-interaction --no-update "symfony/framework-bundle:${{ matrix.symfony }}"
+            -   name: Configure dependencies for matrix
+                run: |
+                    composer require --no-interaction --no-update "symfony/framework-bundle:${{ matrix.symfony }}"
 
-            - name: Install dependencies
-              run: composer update --prefer-dist --no-interaction --no-progress --ansi
+            -   name: Install dependencies
+                run: composer update --prefer-dist --no-interaction --no-progress --ansi
 
-            - name: Validate composer
-              run: composer validate --ansi
+            -   name: Validate composer
+                run: composer validate --ansi
 
-            - name: PHP CS Fixer (dry-run)
-              run: vendor/bin/php-cs-fixer --version && vendor/bin/php-cs-fixer fix --dry-run --diff --ansi
+            -   name: PHP CS Fixer (dry-run)
+                run: vendor/bin/php-cs-fixer --version && vendor/bin/php-cs-fixer fix --dry-run --diff --ansi
 
-            - name: Rector (dry-run)
-              run: vendor/bin/rector --version && vendor/bin/rector process --dry-run --ansi
+            -   name: Rector (dry-run)
+                run: vendor/bin/rector --version && vendor/bin/rector process --dry-run --ansi
 
-            - name: PHPStan
-              run: vendor/bin/phpstan --version && vendor/bin/phpstan analyse --no-progress --ansi
+            -   name: PHPStan
+                run: vendor/bin/phpstan --version && vendor/bin/phpstan analyse --no-progress --ansi
 
-            - name: PHPUnit
-              run: |
-                  vendor/bin/phpunit --version
-                  vendor/bin/phpunit --testdox --colors=always
+            -   name: PHPUnit
+                run: |
+                    vendor/bin/phpunit --version
+                    vendor/bin/phpunit --testdox --colors=always
 
     release:
         name: Create Release
         runs-on: ubuntu-latest
         if: startsWith(github.ref, 'refs/tags/')
-        needs: [quality-and-tests]
+        needs: [ quality-and-tests ]
         permissions:
             contents: write
         steps:
-            - name: Create GitHub Release
-              uses: softprops/action-gh-release@v2
-              with:
-                  generate_release_notes: true
+            -   name: Create GitHub Release
+                uses: softprops/action-gh-release@v2
+                with:
+                    generate_release_notes: true
