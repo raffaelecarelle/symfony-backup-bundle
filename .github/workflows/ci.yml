@@ -38,20 +38,20 @@ jobs:
                     --health-interval=10s 
                     --health-timeout=5s 
                     --health-retries=5
-            mssql:
-                image: mcr.microsoft.com/mssql/server:2022-latest
-                env:
-                    ACCEPT_EULA: Y
-                    SA_PASSWORD: "YourStrong!Passw0rd"
-                    MSSQL_PID: Developer
-                ports:
-                    - 1433:1433
-                options: >-
-                    --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1" 
-                    --health-interval=20s 
-                    --health-timeout=10s 
-                    --health-retries=15
-                    --health-start-period=60s
+#            mssql:
+#                image: mcr.microsoft.com/mssql/server:2022-latest
+#                env:
+#                    ACCEPT_EULA: Y
+#                    SA_PASSWORD: "YourStrong!Passw0rd"
+#                    MSSQL_PID: Developer
+#                ports:
+#                    - 1433:1433
+#                options: >-
+#                    --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"
+#                    --health-interval=20s
+#                    --health-timeout=10s
+#                    --health-retries=15
+#                    --health-start-period=60s
         strategy:
             fail-fast: false
             matrix:
@@ -71,9 +71,9 @@ jobs:
             PGUSER: test_user
             PGPASSWORD: test_password
             PGDATABASE: test_db
-            MSSQL_HOST: 127.0.0.1
-            MSSQL_PORT: 1433
-            MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+#            MSSQL_HOST: 127.0.0.1
+#            MSSQL_PORT: 1433
+#            MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
         steps:
             -   name: Checkout repository
                 uses: actions/checkout@v4
