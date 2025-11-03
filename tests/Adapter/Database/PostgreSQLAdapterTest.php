@@ -213,7 +213,6 @@ class PostgreSQLAdapterTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(PostgreSQLAdapter::class);
         $method = $reflectionClass->getMethod('buildPgDumpCommand');
-        $method->setAccessible(true);
 
         $command = $method->invoke($this->adapter, $config, $filepath);
 
@@ -241,7 +240,6 @@ class PostgreSQLAdapterTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(PostgreSQLAdapter::class);
         $method = $reflectionClass->getMethod('buildPgRestoreCommand');
-        $method->setAccessible(true);
 
         $command = $method->invoke($this->adapter, $filepath, []);
 
@@ -268,7 +266,6 @@ class PostgreSQLAdapterTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(PostgreSQLAdapter::class);
         $method = $reflectionClass->getMethod('buildPgRestoreCommand');
-        $method->setAccessible(true);
 
         $command = $method->invoke($this->adapter, $filepath, []);
 

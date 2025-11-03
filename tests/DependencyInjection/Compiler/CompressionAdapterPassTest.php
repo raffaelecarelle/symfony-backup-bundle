@@ -133,7 +133,6 @@ class CompressionAdapterPassTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(CompressionAdapterPass::class);
         $method = $reflectionClass->getMethod('getNameFromServiceId');
-        $method->setAccessible(true);
 
         // Test with a service ID that has a dot
         $this->assertEquals('gzip', $method->invoke($this->compilerPass, 'pro_backup.compression.gzip'));

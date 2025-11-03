@@ -26,8 +26,6 @@ class S3Adapter implements StorageAdapterInterface
 
     private readonly Filesystem $filesystem;
 
-    private readonly LoggerInterface $logger;
-
     /**
      * Constructor.
      *
@@ -35,11 +33,10 @@ class S3Adapter implements StorageAdapterInterface
      * @param string           $bucket   S3 bucket name
      * @param string           $prefix   Base prefix for storing backups
      */
-    public function __construct(\Aws\S3\S3Client $s3Client, private readonly string $bucket, string $prefix = '', ?LoggerInterface $logger = null)
+    public function __construct(\Aws\S3\S3Client $s3Client, private readonly string $bucket, string $prefix = '', private readonly ?LoggerInterface $logger = new NullLogger())
     {
         $this->s3Client = $s3Client;
         $this->prefix = trim($prefix, '/');
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
 
         // Add trailing slash to prefix if not empty

@@ -10,11 +10,6 @@ namespace ProBackupBundle\Model;
 class BackupResult
 {
     /**
-     * @var \DateTimeImmutable When the backup was created
-     */
-    private \DateTimeImmutable $createdAt;
-
-    /**
      * @var string|null Unique identifier for the backup
      */
     private ?string $id = null;
@@ -34,12 +29,11 @@ class BackupResult
         private bool $success = false,
         private ?string $filePath = null,
         private ?int $fileSize = null,
-        ?\DateTimeImmutable $createdAt = null,
+        private ?\DateTimeImmutable $createdAt = new \DateTimeImmutable(),
         private ?float $duration = null,
         private ?string $error = null,
         private array $metadata = [],
     ) {
-        $this->createdAt = $createdAt ?? new \DateTimeImmutable();
         $this->id = uniqid('backup_', true);
     }
 

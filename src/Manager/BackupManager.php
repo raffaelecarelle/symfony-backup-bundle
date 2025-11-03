@@ -7,7 +7,6 @@ namespace ProBackupBundle\Manager;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
 use ProBackupBundle\Adapter\Database\DatabaseDriverResolver;
-use ProBackupBundle\Adapter\Filesystem\FilesystemAdapter;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Event\BackupEvent;
 use ProBackupBundle\Event\BackupEvents;
@@ -44,8 +43,6 @@ class BackupManager
      */
     private string $defaultStorage = 'local';
 
-    private readonly LoggerInterface $logger;
-
     private readonly Filesystem $filesystem;
 
     /**
@@ -59,11 +56,6 @@ class BackupManager
     private readonly string $backupDir;
 
     /**
-     * @var array List of available doctrine connections
-     */
-    private readonly array $doctrineConnections;
-
-    /**
      * Constructor.
      *
      * @param string $backupDir Base directory for backups
@@ -71,13 +63,14 @@ class BackupManager
     public function __construct(
         string $backupDir,
         private readonly ?EventDispatcherInterface $eventDispatcher = null,
-        ?LoggerInterface $logger = null,
-        array $doctrineConnections = [],
+        private readonly ?LoggerInterface $logger = new NullLogger(),
+        /**
+         * @var array List of available doctrine connections
+         */
+        private readonly array $doctrineConnections = [],
     ) {
         $this->backupDir = rtrim($backupDir, '/\\');
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
-        $this->doctrineConnections = $doctrineConnections;
     }
 
     /**
@@ -177,15 +170,6 @@ class BackupManager
         try {
             // Perform the backup
             $startTime = microtime(true);
-
-            // Inject compression adapter for filesystem backups if available
-            if ($adapter instanceof FilesystemAdapter) {
-                $compressionName = $config->getCompression() ?? 'zip';
-                $compression = $this->compressionAdapters[$compressionName] ?? null;
-                if ($compression) {
-                    $adapter->setCompressionAdapter($compression);
-                }
-            }
 
             $result = $adapter->backup($config);
 
@@ -507,7 +491,7 @@ class BackupManager
                 if (method_exists($adapter, 'getConnection')) {
                     $connection = $adapter->getConnection();
 
-                    if($connectionName) {
+                    if ($connectionName) {
                         $connection = $this->doctrineConnections[$connectionName] ?? throw new BackupException(\sprintf('Doctrine connection "%s" not found', $connectionName));
                     }
 

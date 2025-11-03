@@ -21,8 +21,6 @@ class PostgreSQLAdapter implements BackupAdapterInterface
 {
     use ProcessTrait;
 
-    private readonly LoggerInterface $logger;
-
     private readonly Filesystem $filesystem;
 
     /**
@@ -30,10 +28,9 @@ class PostgreSQLAdapter implements BackupAdapterInterface
      */
     public function __construct(
         private readonly Connection $connection,
-        ?LoggerInterface $logger = null,
+        private readonly ?LoggerInterface $logger = new NullLogger(),
         ?ProcessFactory $processFactory = null,
     ) {
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
         $this->processFactory = $processFactory;
     }

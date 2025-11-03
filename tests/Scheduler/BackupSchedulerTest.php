@@ -121,7 +121,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private method and verify the cron expression
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
         $method = $reflectionClass->getMethod('getCronExpression');
-        $method->setAccessible(true);
 
         $cronExpression = $method->invoke($scheduler, 'monthly', '04:30');
         $this->assertEquals('30 04 1 * *', $cronExpression);
@@ -143,7 +142,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private method and verify the cron expression
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
         $method = $reflectionClass->getMethod('getCronExpression');
-        $method->setAccessible(true);
 
         $cronExpression = $method->invoke($scheduler, 'weekly', '03:00');
         $this->assertEquals('00 03 * * 0', $cronExpression);
@@ -156,7 +154,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
         $method = $reflectionClass->getMethod('getCronExpression');
-        $method->setAccessible(true);
 
         $cronExpression = $method->invoke($scheduler, 'daily', '02:00');
         $this->assertEquals('00 02 * * *', $cronExpression);
@@ -169,7 +166,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
         $method = $reflectionClass->getMethod('getCronExpression');
-        $method->setAccessible(true);
 
         $cronExpression = $method->invoke($scheduler, 'weekly', '03:00');
         $this->assertEquals('00 03 * * 0', $cronExpression);
@@ -182,7 +178,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
         $method = $reflectionClass->getMethod('getCronExpression');
-        $method->setAccessible(true);
 
         $cronExpression = $method->invoke($scheduler, 'monthly', '04:00');
         $this->assertEquals('00 04 1 * *', $cronExpression);
@@ -195,7 +190,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
         $method = $reflectionClass->getMethod('getCronExpression');
-        $method->setAccessible(true);
 
         // Unknown frequency should default to daily
         $cronExpression = $method->invoke($scheduler, 'unknown', '05:00');
@@ -214,7 +208,6 @@ class BackupSchedulerTest extends TestCase
         // Use reflection to access the private property
         $reflectionClass = new \ReflectionClass(Schedule::class);
         $property = $reflectionClass->getProperty('messages');
-        $property->setAccessible(true);
 
         $scheduledMessages = $property->getValue($schedule);
 
@@ -223,13 +216,11 @@ class BackupSchedulerTest extends TestCase
                 // Use reflection to access the private provider property
                 $reflectionMessage = new \ReflectionClass(RecurringMessage::class);
                 $providerProperty = $reflectionMessage->getProperty('provider');
-                $providerProperty->setAccessible(true);
                 $provider = $providerProperty->getValue($scheduledMessage);
 
                 // Get messages from the provider using reflection
                 $reflectionProvider = new \ReflectionClass($provider);
                 $messagesProperty = $reflectionProvider->getProperty('messages');
-                $messagesProperty->setAccessible(true);
                 $providerMessages = $messagesProperty->getValue($provider);
 
                 // Add the first message from the provider

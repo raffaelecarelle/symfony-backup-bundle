@@ -15,17 +15,14 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 class BackupMessageHandler
 {
-    private readonly LoggerInterface $logger;
-
     /**
      * Constructor.
      *
      * @param BackupManager        $backupManager The backup manager service
      * @param LoggerInterface|null $logger        The logger service
      */
-    public function __construct(private readonly BackupManager $backupManager, ?LoggerInterface $logger = null)
+    public function __construct(private readonly BackupManager $backupManager, private readonly ?LoggerInterface $logger = new NullLogger())
     {
-        $this->logger = $logger ?? new NullLogger();
     }
 
     /**

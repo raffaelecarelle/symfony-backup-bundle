@@ -13,16 +13,11 @@ use Psr\Log\NullLogger;
  */
 class DatabaseDriverResolver
 {
-    private readonly LoggerInterface $logger;
-
     /**
      * Constructor.
      */
-    public function __construct(
-        private readonly Connection $connection,
-        ?LoggerInterface $logger = null,
-    ) {
-        $this->logger = $logger ?? new NullLogger();
+    public function __construct(private readonly Connection $connection, private readonly ?LoggerInterface $logger = new NullLogger())
+    {
     }
 
     /**

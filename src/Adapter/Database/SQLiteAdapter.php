@@ -18,16 +18,13 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class SQLiteAdapter implements BackupAdapterInterface
 {
-    private readonly LoggerInterface $logger;
-
     private readonly Filesystem $filesystem;
 
     /**
      * Constructor.
      */
-    public function __construct(private readonly Connection $connection, ?LoggerInterface $logger = null)
+    public function __construct(private readonly Connection $connection, private readonly ?LoggerInterface $logger = new NullLogger())
     {
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
     }
 
@@ -53,14 +50,18 @@ class SQLiteAdapter implements BackupAdapterInterface
             $this->filesystem->mkdir($outputPath, 0755);
         }
 
+        // Allow overriding the database path via configuration options
+        $overridePath = $config->getOption('connection')['path'] ?? null;
+        $dbPathForLog = $overridePath ?: $this->getDatabasePath();
+
         $this->logger->info('Starting SQLite backup', [
-            'database' => $this->getDatabasePath(),
+            'database' => $dbPathForLog,
             'output' => $filepath,
         ]);
 
         try {
             // For SQLite, we can simply copy the database file
-            $dbPath = $this->getDatabasePath();
+            $dbPath = $overridePath ?: $this->getDatabasePath();
 
             if (!$this->filesystem->exists($dbPath)) {
                 throw new BackupException(\sprintf('SQLite database file not found: %s', $dbPath));
@@ -106,24 +107,32 @@ class SQLiteAdapter implements BackupAdapterInterface
 
     public function restore(string $backupPath, array $options = []): bool
     {
+        // Determine target database path: allow override via options (used by tests)
+        $overridePath = $options['connection']['path'] ?? null;
+        $targetDbPath = $overridePath ?: $this->getDatabasePath();
+
         $this->logger->info('Starting SQLite restore', [
-            'database' => $this->getDatabasePath(),
+            'database' => $targetDbPath,
             'file' => $backupPath,
         ]);
 
         try {
-            $dbPath = $this->getDatabasePath();
+            // Ensure target directory exists
+            $targetDir = \dirname((string) $targetDbPath);
+            if (!$this->filesystem->exists($targetDir)) {
+                $this->filesystem->mkdir($targetDir, 0755);
+            }
 
             // Check if the database file exists and is writable
-            if ($this->filesystem->exists($dbPath)) {
-                if (!is_writable($dbPath)) {
-                    throw new BackupException(\sprintf('SQLite database file is not writable: %s', $dbPath));
+            if ($this->filesystem->exists($targetDbPath)) {
+                if (!is_writable($targetDbPath)) {
+                    throw new BackupException(\sprintf('SQLite database file is not writable: %s', $targetDbPath));
                 }
 
-                // Create a backup of the current database if requested
+                // Create a backup of the current database if requested (default true)
                 if ($options['backup_existing'] ?? true) {
-                    $backupExistingPath = $dbPath.'.bak.'.date('YmdHis');
-                    $this->filesystem->copy($dbPath, $backupExistingPath);
+                    $backupExistingPath = $targetDbPath.'.bak.'.date('YmdHis');
+                    $this->filesystem->copy($targetDbPath, $backupExistingPath);
                     $this->logger->info('Created backup of existing database', [
                         'backup_path' => $backupExistingPath,
                     ]);
@@ -131,10 +140,10 @@ class SQLiteAdapter implements BackupAdapterInterface
             }
 
             // Copy the backup file to the database location
-            $this->filesystem->copy($backupPath, $dbPath, true);
+            $this->filesystem->copy($backupPath, $targetDbPath, true);
 
             $this->logger->info('SQLite restore completed', [
-                'database' => $dbPath,
+                'database' => $targetDbPath,
             ]);
 
             return true;

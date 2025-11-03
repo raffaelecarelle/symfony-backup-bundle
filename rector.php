@@ -9,6 +9,7 @@ return RectorConfig::configure()
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])
+    ->withSkip(['tests/_fixtures'])
     // uncomment to reach your current PHP version
     ->withPhpSets()
     ->withTypeCoverageLevel(0)

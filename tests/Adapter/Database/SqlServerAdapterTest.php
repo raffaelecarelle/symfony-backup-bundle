@@ -274,7 +274,6 @@ class SqlServerAdapterTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(SqlServerAdapter::class);
         $method = $reflectionClass->getMethod('generateFilename');
-        $method->setAccessible(true);
 
         $filename = $method->invoke($this->adapter, $config);
 

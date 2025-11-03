@@ -17,16 +17,13 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class SqlServerAdapter implements BackupAdapterInterface
 {
-    private readonly LoggerInterface $logger;
-
     private readonly Filesystem $filesystem;
 
     /**
      * Constructor.
      */
-    public function __construct(private readonly Connection $connection, ?LoggerInterface $logger = null)
+    public function __construct(private readonly Connection $connection, private readonly ?LoggerInterface $logger = new NullLogger())
     {
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
     }
 

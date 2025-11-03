@@ -18,8 +18,6 @@ class ZipCompression implements CompressionAdapterInterface
 {
     private readonly Filesystem $filesystem;
 
-    private readonly LoggerInterface $logger;
-
     /**
      * @var int Compression level (0-9)
      */
@@ -31,10 +29,9 @@ class ZipCompression implements CompressionAdapterInterface
      * @param int  $compressionLevel Compression level (0-9, where 9 is highest)
      * @param bool $keepOriginal     Whether to keep the original file after compression
      */
-    public function __construct(int $compressionLevel = 6, private readonly bool $keepOriginal = false, ?LoggerInterface $logger = null)
+    public function __construct(int $compressionLevel = 6, private readonly bool $keepOriginal = false, private readonly ?LoggerInterface $logger = new NullLogger())
     {
         $this->compressionLevel = max(0, min(9, $compressionLevel));
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
     }
 

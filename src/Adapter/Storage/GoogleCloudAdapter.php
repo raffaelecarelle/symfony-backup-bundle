@@ -27,8 +27,6 @@ class GoogleCloudAdapter implements StorageAdapterInterface
 
     private readonly Filesystem $filesystem;
 
-    private readonly LoggerInterface $logger;
-
     /**
      * Constructor.
      *
@@ -36,12 +34,11 @@ class GoogleCloudAdapter implements StorageAdapterInterface
      * @param string        $bucketName    Google Cloud Storage bucket name
      * @param string        $prefix        Base prefix for storing backups
      */
-    public function __construct(StorageClient $storageClient, string $bucketName, string $prefix = '', ?LoggerInterface $logger = null)
+    public function __construct(StorageClient $storageClient, string $bucketName, string $prefix = '', private readonly ?LoggerInterface $logger = new NullLogger())
     {
         $this->storageClient = $storageClient;
         $this->bucket = $this->storageClient->bucket($bucketName);
         $this->prefix = trim($prefix, '/');
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
 
         // Add trailing slash to prefix if not empty

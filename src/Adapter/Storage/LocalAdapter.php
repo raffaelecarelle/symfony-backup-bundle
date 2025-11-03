@@ -20,10 +20,6 @@ class LocalAdapter implements StorageAdapterInterface
      */
     private readonly string $basePath;
 
-    private readonly Filesystem $filesystem;
-
-    private readonly LoggerInterface $logger;
-
     /**
      * Constructor.
      *
@@ -33,12 +29,10 @@ class LocalAdapter implements StorageAdapterInterface
     public function __construct(
         string $basePath,
         private readonly int $permissions = 0755,
-        ?LoggerInterface $logger = null,
-        ?Filesystem $filesystem = null,
+        private readonly ?LoggerInterface $logger = new NullLogger(),
+        private readonly ?Filesystem $filesystem = new Filesystem(),
     ) {
         $this->basePath = rtrim($basePath, '/\\');
-        $this->logger = $logger ?? new NullLogger();
-        $this->filesystem = $filesystem ?? new Filesystem();
 
         // Ensure the base directory exists
         if (!$this->filesystem->exists($this->basePath)) {

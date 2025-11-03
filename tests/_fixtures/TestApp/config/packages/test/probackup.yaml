@@ -10,7 +10,7 @@ pro_backup:
     retention_days: 7
 
   filesystem:
-    enabled: false
+    enabled: true
     compression: 'zip'
     paths: []
 

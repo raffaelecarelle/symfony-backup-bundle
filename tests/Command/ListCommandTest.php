@@ -269,7 +269,6 @@ class ListCommandTest extends TestCase
     {
         $reflectionClass = new \ReflectionClass(ListCommand::class);
         $method = $reflectionClass->getMethod('formatFileSize');
-        $method->setAccessible(true);
 
         // Test various file sizes
         $this->assertEquals('0 B', $method->invoke($this->command, 0));

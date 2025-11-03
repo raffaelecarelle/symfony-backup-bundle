@@ -23,13 +23,10 @@ abstract class AbstractEndToEndTest extends TestCase
     protected string $tempDir;
     protected Filesystem $filesystem;
 
-    /** @var Kernel */
     protected Kernel $kernel;
 
-    /** @var ContainerInterface */
     protected ContainerInterface $container;
 
-    /** @var SymfonyApplication */
     protected SymfonyApplication $application;
 
     protected function setUp(): void
@@ -91,5 +88,36 @@ abstract class AbstractEndToEndTest extends TestCase
         file_put_contents($path, $content);
 
         return $path;
+    }
+
+    /**
+     * Helper: create a temporary SQLite database with the provided schema.
+     *
+     * @param string                             $filename Target filename under the per-test temp dir
+     * @param array<string,array<string,string>> $schema   Table => column => type
+     *
+     * @return string Absolute path to the created SQLite database file
+     */
+    protected function createTempSQLiteDatabase(string $filename, array $schema): string
+    {
+        $dbPath = $this->tempDir.'/'.$filename;
+        $dir = \dirname($dbPath);
+        if (!$this->filesystem->exists($dir)) {
+            $this->filesystem->mkdir($dir, 0777);
+        }
+
+        $pdo = new \PDO('sqlite:'.$dbPath);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        foreach ($schema as $table => $columns) {
+            $colsSql = [];
+            foreach ($columns as $name => $type) {
+                $colsSql[] = \sprintf('%s %s', $name, $type);
+            }
+            $sql = \sprintf('CREATE TABLE IF NOT EXISTS %s (%s)', $table, implode(', ', $colsSql));
+            $pdo->exec($sql);
+        }
+
+        return $dbPath;
     }
 }

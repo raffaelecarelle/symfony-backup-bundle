@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ProBackupBundle\Adapter\Filesystem;
 
 use ProBackupBundle\Adapter\BackupAdapterInterface;
-use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;
@@ -20,26 +19,14 @@ use Symfony\Component\Process\Process;
  */
 class FilesystemAdapter implements BackupAdapterInterface
 {
-    private readonly LoggerInterface $logger;
-
     private readonly Filesystem $filesystem;
-
-    private readonly CompressionAdapterInterface $compressionAdapter;
 
     /**
      * Constructor.
      */
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct(private readonly ?LoggerInterface $logger = new NullLogger())
     {
-        $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
-    }
-
-    public function setCompressionAdapter(CompressionAdapterInterface $compressionAdapter): self
-    {
-        $this->compressionAdapter = $compressionAdapter;
-
-        return $this;
     }
 
     public function backup(BackupConfiguration $config): BackupResult
@@ -117,6 +104,10 @@ class FilesystemAdapter implements BackupAdapterInterface
                     if ($file->isDir()) {
                         $this->filesystem->mkdir($targetPath, 0755);
                     } else {
+                        $parent = \dirname($targetPath);
+                        if (!$this->filesystem->exists($parent)) {
+                            $this->filesystem->mkdir($parent, 0755);
+                        }
                         $this->filesystem->copy($file->getRealPath(), $targetPath, true);
                     }
                 }
@@ -280,9 +271,16 @@ class FilesystemAdapter implements BackupAdapterInterface
      */
     private function createArchive(string $sourceDir, string $targetPath, string $compression): string
     {
+        // Ensure parent directory exists
+        $dir = \dirname($targetPath);
+        if (!$this->filesystem->exists($dir)) {
+            $this->filesystem->mkdir($dir, 0755);
+        }
+
         if ('zip' === $compression) {
             $command = \sprintf('cd %s && zip -r %s .', escapeshellarg($sourceDir), escapeshellarg($targetPath));
         } else {
+            // default to gzip (tar.gz)
             $command = \sprintf('cd %s && tar -czf %s .', escapeshellarg($sourceDir), escapeshellarg($targetPath));
         }
 

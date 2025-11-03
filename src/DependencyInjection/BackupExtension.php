@@ -210,7 +210,7 @@ class BackupExtension extends Extension
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
         ]);
         $filesystemDef->addTag('pro_backup.database_adapter');
-        $filesystemDef->addMethodCall('setCompressionAdapter', [new Reference('pro_backup.compression.'.$config['filesystem']['compression'])]);
+        //        $filesystemDef->addMethodCall('setCompressionAdapter', [new Reference('pro_backup.compression.'.$config['filesystem']['compression'])]);
 
         // Set paths in options
         $container->setParameter('pro_backup.filesystem.paths', $config['filesystem']['paths']);

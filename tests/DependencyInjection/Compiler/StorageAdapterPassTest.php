@@ -133,7 +133,6 @@ class StorageAdapterPassTest extends TestCase
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(StorageAdapterPass::class);
         $method = $reflectionClass->getMethod('getNameFromServiceId');
-        $method->setAccessible(true);
 
         // Test with a service ID that has a dot
         $this->assertEquals('local', $method->invoke($this->compilerPass, 'pro_backup.storage.local'));

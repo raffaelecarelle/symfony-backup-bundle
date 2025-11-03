@@ -69,7 +69,7 @@ class FilesystemBackupTest extends AbstractEndToEndTest
         $this->assertTrue($restoreResult, 'Restore should be successful');
 
         // Verify restored files
-        $this->assertTrue($this->filesystem->exists($restoreDir.'/'.$result->getId().'/file1.txt'), 'file1.txt should exist');
+        $this->assertTrue($this->filesystem->exists($restoreDir.'/file1.txt'), 'file1.txt should exist');
         $this->assertTrue($this->filesystem->exists($restoreDir.'/file2.txt'), 'file2.txt should exist');
         $this->assertTrue($this->filesystem->exists($restoreDir.'/subdir/file3.txt'), 'subdir/file3.txt should exist');
         $this->assertTrue($this->filesystem->exists($restoreDir.'/subdir/file4.txt'), 'subdir/file4.txt should exist');

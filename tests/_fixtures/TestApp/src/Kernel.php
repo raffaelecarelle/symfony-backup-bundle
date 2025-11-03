@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TestApp;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -24,7 +26,7 @@ class Kernel extends BaseKernel
 
     public function getProjectDir(): string
     {
-        return dirname(__DIR__);
+        return \dirname(__DIR__);
     }
 
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void

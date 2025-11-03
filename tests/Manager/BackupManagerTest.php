@@ -130,7 +130,6 @@ class BackupManagerTest extends TestCase
         // Mock the getBackup method using reflection
         $reflectionClass = new \ReflectionClass(BackupManager::class);
         $method = $reflectionClass->getMethod('getBackup');
-        $method->setAccessible(true);
 
         $backupManagerMock = $this->getMockBuilder(BackupManager::class)
             ->setConstructorArgs([$this->tempDir, $this->mockEventDispatcher, $this->mockLogger])

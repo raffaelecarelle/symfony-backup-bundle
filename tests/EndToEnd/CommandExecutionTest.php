@@ -17,10 +17,10 @@ class CommandExecutionTest extends AbstractEndToEndTest
     {
         // Seed the SQLite database used by Doctrine default connection in TestApp
         // The sqlite connection is configured at tests/_fixtures/TestApp/config/packages/doctrine.yaml
-        $projectDir = dirname(__DIR__).'/_fixtures/TestApp';
+        $projectDir = \dirname(__DIR__).'/_fixtures/TestApp';
         $sqlitePath = $projectDir.'/var/test.sqlite';
-        if (!is_dir(dirname($sqlitePath))) {
-            mkdir(dirname($sqlitePath), 0777, true);
+        if (!is_dir(\dirname($sqlitePath))) {
+            mkdir(\dirname($sqlitePath), 0777, true);
         }
 
         $pdo = new \PDO('sqlite:'.$sqlitePath);
@@ -55,8 +55,8 @@ class CommandExecutionTest extends AbstractEndToEndTest
 
         $output = $tester->getDisplay();
         $this->assertStringContainsString('Backup created successfully', $output);
-        // SQLite adapter creates a .sqlite file, then manager may compress with gzip => .sqlite.gz
-        $this->assertMatchesRegularExpression('/File: .*\.sqlite(\.gz)?/m', $output);
+        // The console may wrap long lines; allow any whitespace between 'File:' and the path
+        $this->assertMatchesRegularExpression('/File:\s+.*\\.sqlite(\\.gz)?/ms', $output);
         $this->assertEquals(0, $tester->getStatusCode());
     }
 
@@ -104,7 +104,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $this->assertEquals(0, $tester->getStatusCode());
 
         // Verify restored database content by reading the sqlite used by the app
-        $projectDir = dirname(__DIR__).'/_fixtures/TestApp';
+        $projectDir = \dirname(__DIR__).'/_fixtures/TestApp';
         $sqlitePath = $projectDir.'/var/test.sqlite';
         $pdo = new \PDO('sqlite:'.$sqlitePath);
         $stmt = $pdo->query('SELECT COUNT(*) FROM users');
