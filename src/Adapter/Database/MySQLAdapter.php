@@ -83,7 +83,7 @@ class MySQLAdapter implements BackupAdapterInterface
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
                 null,
-                ['compression' => $config->getCompression()]
+                ['compression' => $config->getCompression() ?? '(none)']
             );
         } catch (\Throwable $e) {
             $this->logger->error('MySQL backup failed', [

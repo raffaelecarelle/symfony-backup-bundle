@@ -197,6 +197,7 @@ class BackupManager
                     $targetPath = $compression->compress($result->getFilePath());
                     $result->setFileSize(filesize($targetPath));
                     $result->setFilePath($targetPath);
+                    $result->setMetadataValue('compression', $config->getCompression());
                 }
             }
 
@@ -297,7 +298,7 @@ class BackupManager
 
         try {
             // Find an adapter that supports this backup type
-            $adapter = $this->getAdapter($backup['type']);
+            $adapter = $this->getAdapter($backup['type'], $options['connection_name'] ?? null);
 
             // Retrieve from remote storage if needed
             $backupPath = $backup['file_path'];

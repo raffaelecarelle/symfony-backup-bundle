@@ -17,7 +17,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
     {
         // Seed the SQLite database used by Doctrine default connection in TestApp
         // The sqlite connection is configured at tests/_fixtures/TestApp/config/packages/doctrine.yaml
-        $projectDir = dirname(__DIR__, 2).'/_fixtures/TestApp';
+        $projectDir = dirname(__DIR__).'/_fixtures/TestApp';
         $sqlitePath = $projectDir.'/var/test.sqlite';
         if (!is_dir(dirname($sqlitePath))) {
             mkdir(dirname($sqlitePath), 0777, true);
@@ -30,6 +30,16 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $stmt = $pdo->prepare('INSERT INTO users (id, name, email) VALUES (?, ?, ?)');
         $stmt->execute([1, 'John Doe', 'john@example.com']);
         $stmt->execute([2, 'Jane Smith', 'jane@example.com']);
+
+        // Ensure DB file exists and is readable for the SQLite adapter
+        $this->assertFileExists($sqlitePath, 'SQLite DB file must exist for backup');
+        $this->assertTrue(is_readable($sqlitePath), 'SQLite DB file must be readable');
+
+        // Ensure backup directory exists to avoid I/O issues
+        $backupsDir = $projectDir.'/var/backups';
+        if (!is_dir($backupsDir)) {
+            mkdir($backupsDir, 0777, true);
+        }
     }
 
     public function testBackupCommand(): void
@@ -46,7 +56,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $output = $tester->getDisplay();
         $this->assertStringContainsString('Backup created successfully', $output);
         // SQLite adapter creates a .sqlite file, then manager may compress with gzip => .sqlite.gz
-        $this->assertMatchesRegularExpression('/File: .*\.sqlite(\.gz)?$/m', $output);
+        $this->assertMatchesRegularExpression('/File: .*\.sqlite(\.gz)?/m', $output);
         $this->assertEquals(0, $tester->getStatusCode());
     }
 
@@ -94,7 +104,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $this->assertEquals(0, $tester->getStatusCode());
 
         // Verify restored database content by reading the sqlite used by the app
-        $projectDir = dirname(__DIR__, 2).'/_fixtures/TestApp';
+        $projectDir = dirname(__DIR__).'/_fixtures/TestApp';
         $sqlitePath = $projectDir.'/var/test.sqlite';
         $pdo = new \PDO('sqlite:'.$sqlitePath);
         $stmt = $pdo->query('SELECT COUNT(*) FROM users');

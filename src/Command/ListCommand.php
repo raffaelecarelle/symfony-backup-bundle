@@ -108,7 +108,7 @@ EOF
                 $this->formatFileSize($backup['file_size']),
                 $backup['created_at']->format('Y-m-d H:i:s'),
                 $backup['storage'],
-                $backup['metadata']['compression'] ?? null,
+                $backup['metadata']['compression'] ?? '(none)',
             ];
         }
 

@@ -10,7 +10,7 @@ doctrine:
         url: '%env(resolve:TESTAPP_DATABASE_URL_PGSQL)%'
       sqlite:
         driver: 'pdo_sqlite'
-        url: 'sqlite:///%kernel.project_dir%/var/test.sqlite'
+        path: '%kernel.project_dir%/var/test.sqlite'
       sqlsrv:
         driver: 'pdo_sqlsrv'
         url: '%env(resolve:TESTAPP_DATABASE_URL_SQLSRV)%'

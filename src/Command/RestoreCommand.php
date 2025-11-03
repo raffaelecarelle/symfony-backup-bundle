@@ -36,6 +36,7 @@ class RestoreCommand extends Command
             ->addOption('single-user', null, InputOption::VALUE_NONE, 'Set database to single user mode during restore (SQL Server only)')
             ->addOption('recovery', null, InputOption::VALUE_REQUIRED, 'Recovery option (SQL Server only): recovery|norecovery')
             ->addOption('backup-existing', null, InputOption::VALUE_NONE, 'Create a backup of the existing database before restore (SQLite only)')
+            ->addOption('connection-name', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Doctrine connection name to use')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command restores a backup:
 
@@ -64,6 +65,7 @@ EOF
 
         $backupId = $input->getArgument('backup-id');
         $force = $input->getOption('force');
+        $connectionName = $input->getOption('connection-name');
 
         // Get the backup details
         $backup = $this->backupManager->getBackup($backupId);
@@ -112,6 +114,10 @@ EOF
 
         if ($input->getOption('backup-existing')) {
             $options['backup_existing'] = true;
+        }
+
+        if ($connectionName) {
+            $options['connection_name'] = $connectionName;
         }
 
         $io->section('Starting restore process');
