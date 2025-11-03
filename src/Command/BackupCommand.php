@@ -36,6 +36,7 @@ class BackupCommand extends Command
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Backup name')
             ->addOption('storage', 's', InputOption::VALUE_REQUIRED, 'Storage adapter to use')
             ->addOption('compression', 'c', InputOption::VALUE_REQUIRED, 'Compression type (gzip|zip)')
+            ->addOption('connection-name', 'C', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Doctrine connection name to use')
             ->addOption('output-path', 'o', InputOption::VALUE_REQUIRED, 'Custom output path for the backup file')
             ->addOption('path', 'p', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Paths to backup (for filesystem type)')
             ->addOption('exclude', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Tables or paths to exclude')
@@ -81,6 +82,7 @@ EOF
         $name = $input->getOption('name') ?: \sprintf('%s_%s', $type, date('Y-m-d_H-i-s'));
         $storage = $input->getOption('storage');
         $compression = $input->getOption('compression');
+        $connectionName = $input->getOption('connection-name');
 
         // If compression is not provided as a parameter, get it from the configuration
         if (null === $compression) {
@@ -113,6 +115,10 @@ EOF
         $config = new BackupConfiguration();
         $config->setType($type);
         $config->setName($name);
+
+        if ($connectionName) {
+            $config->setConnectionName($connectionName);
+        }
 
         if ($storage) {
             $config->setStorage($storage);

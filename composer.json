@@ -47,10 +47,11 @@
         }
     },
     "autoload-dev": {
-        "psr-4": {
-            "ProBackupBundle\\Tests\\": "tests/"
-        }
-    },
+    "psr-4": {
+      "ProBackupBundle\\Tests\\": "tests/",
+      "TestApp\\": "tests/_fixtures/TestApp/src/"
+    }
+  },
     "extra": {
         "branch-alias": {
             "dev-main": "1.0-dev"

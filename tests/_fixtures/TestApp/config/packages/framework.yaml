@@ -1,0 +1,5 @@
+framework:
+  secret: '%env(APP_SECRET)%'
+  test: true
+  php_errors:
+    log: true

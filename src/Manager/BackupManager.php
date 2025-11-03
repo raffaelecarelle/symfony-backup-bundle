@@ -59,6 +59,11 @@ class BackupManager
     private readonly string $backupDir;
 
     /**
+     * @var array List of available doctrine connections
+     */
+    private readonly array $doctrineConnections;
+
+    /**
      * Constructor.
      *
      * @param string $backupDir Base directory for backups
@@ -67,10 +72,12 @@ class BackupManager
         string $backupDir,
         private readonly ?EventDispatcherInterface $eventDispatcher = null,
         ?LoggerInterface $logger = null,
+        array $doctrineConnections = [],
     ) {
         $this->backupDir = rtrim($backupDir, '/\\');
         $this->logger = $logger ?? new NullLogger();
         $this->filesystem = new Filesystem();
+        $this->doctrineConnections = $doctrineConnections;
     }
 
     /**
@@ -149,7 +156,7 @@ class BackupManager
         }
 
         // Find an adapter that supports this backup type
-        $adapter = $this->getAdapter($config->getType());
+        $adapter = $this->getAdapter($config->getType(), $config->getConnectionName());
 
         // Validate the configuration
         $errors = $adapter->validate($config);
@@ -490,7 +497,7 @@ class BackupManager
      *
      * @throws BackupException If no adapter supports the backup type
      */
-    private function getAdapter(string $type): BackupAdapterInterface
+    private function getAdapter(string $type, ?string $connectionName): BackupAdapterInterface
     {
         // If type is 'database', try to determine the specific database type
         if ('database' === $type) {
@@ -498,6 +505,10 @@ class BackupManager
             foreach ($this->adapters as $adapter) {
                 if (method_exists($adapter, 'getConnection')) {
                     $connection = $adapter->getConnection();
+
+                    if($connectionName) {
+                        $connection = $this->doctrineConnections[$connectionName] ?? throw new BackupException(\sprintf('Doctrine connection "%s" not found', $connectionName));
+                    }
 
                     // Create a resolver and get the specific database type
                     $resolver = new DatabaseDriverResolver($connection, $this->logger);

@@ -1,0 +1,23 @@
+pro_backup:
+  backup_dir: '%kernel.project_dir%/var/backups'
+  default_storage: 'local'
+
+  database:
+    enabled: true
+    # Use the sqlite Doctrine connection of the TestApp
+    connections: ['sqlite']
+    compression: 'gzip'
+    retention_days: 7
+
+  filesystem:
+    enabled: false
+    compression: 'zip'
+    paths: []
+
+  compression:
+    gzip:
+      level: 6
+      keep_original: false
+    zip:
+      level: 6
+      keep_original: false

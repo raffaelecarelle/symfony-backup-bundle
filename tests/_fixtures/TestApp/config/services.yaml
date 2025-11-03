@@ -1,0 +1,9 @@
+parameters: {}
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  # Controllers or services for the test app can be declared here when needed

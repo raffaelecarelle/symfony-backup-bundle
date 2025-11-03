@@ -1,0 +1,40 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\ErrorHandler\Debug;
+use Symfony\Component\HttpFoundation\Request;
+
+// Ensure errors are shown in test mode
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
+// Project root vendor autoload (4 levels up from this file)
+$autoload = __DIR__ . '/../../../../vendor/autoload.php';
+if (!file_exists($autoload)) {
+    fwrite(STDERR, "Cannot find vendor/autoload.php at $autoload\n");
+    exit(1);
+}
+require $autoload;
+
+// Load env for tests if available
+$env = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? 'test';
+$debug = (bool) ($_SERVER['APP_DEBUG'] ?? $_ENV['APP_DEBUG'] ?? ($env !== 'prod'));
+
+if ($debug) {
+    umask(0000);
+    Debug::enable();
+}
+
+// Optionally load .env.test if Dotenv is available and file exists
+$envFile = __DIR__ . '/../.env.' . $env;
+if (class_exists(Dotenv::class) && file_exists($envFile)) {
+    (new Dotenv())->usePutenv(true)->load($envFile);
+}
+
+require_once __DIR__ . '/../src/Kernel.php';
+
+$kernel = new TestApp\Kernel($env, $debug);
+$application = new Application($kernel);
+$application->run();

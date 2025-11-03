@@ -45,6 +45,11 @@ class BackupConfiguration
     private ?string $outputPath = null;
 
     /**
+     * @var string|null Connection name to use for database backups
+     */
+    private ?string $connectionName = null;
+
+    /**
      * Constructor.
      */
     public function __construct(string $type = '', string $name = '')
@@ -208,6 +213,18 @@ class BackupConfiguration
     public function setOutputPath(string $outputPath): self
     {
         $this->outputPath = $outputPath;
+
+        return $this;
+    }
+
+    public function getConnectionName(): ?string
+    {
+        return $this->connectionName;
+    }
+
+    public function setConnectionName(?string $connectionName): self
+    {
+        $this->connectionName = $connectionName;
 
         return $this;
     }
