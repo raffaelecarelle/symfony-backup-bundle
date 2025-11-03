@@ -103,7 +103,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $this->assertStringContainsString('gzip', $output);
 
         // Extract backup ID from the output and store it for later tests
-        preg_match('/\| ([a-f0-9]+) \|/', $output, $matches);
+        preg_match('/^\s+(backup_[a-f0-9._]+)\s+database/m', $output, $matches);
         $this->assertCount(2, $matches, 'Should find a backup ID');
         $this->backupId = $matches[1];
     }
@@ -125,6 +125,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         // Execute the restore command
         $commandTester->execute([
             'backup-id' => $this->backupId,
+            '--force' => true,
         ]);
 
         // Verify the output
