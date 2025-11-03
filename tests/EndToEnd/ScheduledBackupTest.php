@@ -60,7 +60,7 @@ class ScheduledBackupTest extends AbstractEndToEndTest
 
         // Verify results
         $this->assertCount(1, $results, 'Should have one result');
-        $this->assertTrue($results[0]->isSuccessful(), 'Backup should be successful');
+        $this->assertTrue($results[0]->isSuccess(), 'Backup should be successful');
 
         // Verify the backup file exists
         $this->assertTrue($this->filesystem->exists($results[0]->getFilePath()), 'Backup file should exist');
@@ -169,7 +169,7 @@ class ScheduledBackupTest extends AbstractEndToEndTest
 
         // Verify results
         $this->assertCount(2, $results, 'Should have two results');
-        $this->assertTrue($results[0]->isSuccessful(), 'First backup should be successful');
-        $this->assertTrue($results[1]->isSuccessful(), 'Second backup should be successful');
+        $this->assertTrue($results[0]->isSuccess(), 'First backup should be successful');
+        $this->assertTrue($results[1]->isSuccess(), 'Second backup should be successful');
     }
 }

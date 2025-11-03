@@ -3,19 +3,67 @@ networks:
 
 services:
 
-    composer:
-        image: composer:latest
+    workspace:
+        build:
+            context: ./.docker
+        container_name: symfony-backup-workspace
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         volumes:
             - .:/app
         working_dir: /app
+        tty: true
+        depends_on:
+            mysql:
+                condition: service_healthy
+            postgres:
+                condition: service_healthy
         networks:
             - net
 
     mysql:
-        image: mysql:latest
+        image: mysql:8.0
+        container_name: symfony-backup-mysql
+        command: --default-authentication-plugin=mysql_native_password --ssl=0
         environment:
-            - MYSQL_ROOT_PASSWORD=root
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: test_db
+            MYSQL_USER: test_user
+            MYSQL_PASSWORD: test_password
         ports:
-            - 3306:3306
+            - "3306:3306"
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-proot" ]
+            interval: 5s
+            timeout: 3s
+            retries: 20
         networks:
             - net
+
+    postgres:
+        image: postgres:15-alpine
+        container_name: symfony-backup-postgres
+        environment:
+            POSTGRES_PASSWORD: root
+            POSTGRES_USER: test_user
+            POSTGRES_DB: test_db
+        ports:
+            - "5433:5432"
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+            interval: 5s
+            timeout: 3s
+            retries: 20
+        networks:
+            - net
+
+#    mssql:
+#        image: mcr.microsoft.com/mssql/server:2019-latest
+#        container_name: symfony-backup-mssql
+#        environment:
+#            ACCEPT_EULA: "Y"
+#            SA_PASSWORD: "YourStrong!Passw0rd"
+#        ports:
+#            - "1433:1433"
+#        networks:
+#            - net

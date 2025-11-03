@@ -225,6 +225,7 @@ class BackupManager
                     'file_size' => $result->getFileSize(),
                     'created_at' => $result->getCreatedAt(),
                     'storage' => $config->getStorage(),
+                    'metadata' => $result->getMetadata(),
                 ];
             } else {
                 $this->logger->error('Backup failed', ['error' => $result->getError()]);

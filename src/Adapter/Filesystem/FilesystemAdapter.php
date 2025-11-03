@@ -138,7 +138,9 @@ class FilesystemAdapter implements BackupAdapterInterface
                 $archivePath,
                 filesize($archivePath),
                 new \DateTimeImmutable(),
-                microtime(true) - $startTime
+                microtime(true) - $startTime,
+                null,
+                ['compression' => $config->getCompression()]
             );
         } catch (\Throwable $e) {
             $this->logger->error('Filesystem backup failed', [

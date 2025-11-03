@@ -119,11 +119,11 @@ class SQLiteDatabaseBackupTest extends AbstractEndToEndTest
         // Find our backup in the list
         $found = false;
         foreach ($backups as $backup) {
-            if ($backup['path'] === $result->getFilePath()) {
+            if ($backup['file_path'] === $result->getFilePath()) {
                 $found = true;
                 $this->assertEquals('sqlite_list_test', $backup['name']);
                 $this->assertEquals('database', $backup['type']);
-                $this->assertEquals('gzip', $backup['compression']);
+                $this->assertEquals('gzip', $backup['metadata']['compression']);
                 break;
             }
         }
@@ -149,7 +149,7 @@ class SQLiteDatabaseBackupTest extends AbstractEndToEndTest
         $backups = $this->backupManager->listBackups($config);
         $backupId = null;
         foreach ($backups as $backup) {
-            if ($backup['path'] === $result->getFilePath()) {
+            if ($backup['file_path'] === $result->getFilePath()) {
                 $backupId = $backup['id'];
                 break;
             }

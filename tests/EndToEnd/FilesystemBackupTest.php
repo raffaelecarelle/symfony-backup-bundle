@@ -62,14 +62,14 @@ class FilesystemBackupTest extends AbstractEndToEndTest
         $restoreDir = $this->tempDir.'/restored_files';
         $this->filesystem->mkdir($restoreDir);
 
-        $restoreResult = $this->backupManager->restore($result->getFilePath(), [
-            'output_path' => $restoreDir,
+        $restoreResult = $this->backupManager->restore($result->getId(), [
+            'target_dir' => $restoreDir,
         ]);
 
         $this->assertTrue($restoreResult, 'Restore should be successful');
 
         // Verify restored files
-        $this->assertTrue($this->filesystem->exists($restoreDir.'/file1.txt'), 'file1.txt should exist');
+        $this->assertTrue($this->filesystem->exists($restoreDir.'/'.$result->getId().'/file1.txt'), 'file1.txt should exist');
         $this->assertTrue($this->filesystem->exists($restoreDir.'/file2.txt'), 'file2.txt should exist');
         $this->assertTrue($this->filesystem->exists($restoreDir.'/subdir/file3.txt'), 'subdir/file3.txt should exist');
         $this->assertTrue($this->filesystem->exists($restoreDir.'/subdir/file4.txt'), 'subdir/file4.txt should exist');
@@ -115,8 +115,8 @@ class FilesystemBackupTest extends AbstractEndToEndTest
         $restoreDir = $this->tempDir.'/restored_custom';
         $this->filesystem->mkdir($restoreDir);
 
-        $restoreResult = $this->backupManager->restore($result->getFilePath(), [
-            'output_path' => $restoreDir,
+        $restoreResult = $this->backupManager->restore($result->getId(), [
+            'target_dir' => $restoreDir,
         ]);
 
         $this->assertTrue($restoreResult, 'Restore should be successful');
@@ -154,11 +154,12 @@ class FilesystemBackupTest extends AbstractEndToEndTest
         // Find our backup in the list
         $found = false;
         foreach ($backups as $backup) {
-            if ($backup['path'] === $result->getFilePath()) {
+            if ($backup['file_path'] === $result->getFilePath()) {
                 $found = true;
                 $this->assertEquals('filesystem_list_test', $backup['name']);
                 $this->assertEquals('filesystem', $backup['type']);
-                $this->assertEquals('zip', $backup['compression']);
+                $this->assertEquals('zip', $backup['metadata']['compression']);
+                $this->assertEquals('local', $backup['storage']);
                 break;
             }
         }
