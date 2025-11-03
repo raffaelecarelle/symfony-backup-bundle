@@ -108,6 +108,7 @@ EOF
                 $this->formatFileSize($backup['file_size']),
                 $backup['created_at']->format('Y-m-d H:i:s'),
                 $backup['storage'],
+                $backup['metadata']['compression'] ?? null,
             ];
         }
 
@@ -116,7 +117,7 @@ EOF
             'json' => $this->outputJson($output, $backups),
             'csv' => $this->outputCsv($output, $rows),
             default => $io->table(
-                ['ID', 'Type', 'Name', 'Size', 'Created', 'Storage'],
+                ['ID', 'Type', 'Name', 'Size', 'Created', 'Storage', 'Compression'],
                 $rows
             ),
         };

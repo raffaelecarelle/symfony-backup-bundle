@@ -67,7 +67,7 @@ class SQLiteDatabaseBackupTest extends AbstractEndToEndTest
 
         // Test restore functionality
         $restoreDbPath = $this->tempDir.'/restored.db';
-        $restoreResult = $this->backupManager->restore($result->getFilePath(), [
+        $restoreResult = $this->backupManager->restore($result->getId(), [
             'connection' => [
                 'driver' => 'sqlite',
                 'path' => $restoreDbPath,

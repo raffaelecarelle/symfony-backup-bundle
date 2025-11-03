@@ -112,7 +112,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 // Copy files to temporary directory
                 foreach ($finder as $file) {
                     $relativePath = $file->getRelativePathname();
-                    $targetPath = $tempDir.'/'.basename((string) $sourcePath).'/'.$relativePath;
+                    $targetPath = $tempDir.'/'.$relativePath;
 
                     if ($file->isDir()) {
                         $this->filesystem->mkdir($targetPath, 0755);
@@ -122,7 +122,9 @@ class FilesystemAdapter implements BackupAdapterInterface
                 }
             }
 
-            $archivePath = $this->compressionAdapter->compress($tempDir, $filepath);
+            // Create archive from the temporary directory using the requested compression
+            $compression = $config->getCompression() ?? 'zip';
+            $archivePath = $this->createArchive($tempDir, $filepath, $compression);
 
             // Clean up temporary directory
             $this->filesystem->remove($tempDir);
