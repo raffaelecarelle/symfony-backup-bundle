@@ -340,7 +340,6 @@ class BackupManager
         }
 
         try {
-            // Find an adapter that supports this backup type
             $adapter = $this->getAdapter($backup['type'], $options['connection_name'] ?? null);
 
             // Retrieve from remote storage if needed
@@ -349,7 +348,6 @@ class BackupManager
                 $backupPath = $this->retrieveFromRemote($backup);
             }
 
-            $recompressor = null;
             $recompressSource = null;
 
             if ('database' === $backup['type']) {

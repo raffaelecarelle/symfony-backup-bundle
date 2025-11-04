@@ -116,8 +116,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 }
             }
 
-            // Do NOT compress here: just return the prepared temporary directory.
-            // Compression is handled centrally by the BackupManager.
+
             $this->logger->info('Filesystem staging completed (no compression)', [
                 'staging_dir' => $tempDir,
                 'duration' => microtime(true) - $startTime,
@@ -126,7 +125,7 @@ class FilesystemAdapter implements BackupAdapterInterface
             return new BackupResult(
                 true,
                 $tempDir,
-                null,
+                $this->getDirectorySize($tempDir),
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
                 null,
@@ -156,6 +155,29 @@ class FilesystemAdapter implements BackupAdapterInterface
                 $e->getMessage()
             );
         }
+    }
+
+    /**
+     * Calculate the total size of a directory recursively.
+     *
+     * @param string $path Path to the directory or file
+     * @return int Total size in bytes
+     */
+    private function getDirectorySize(string $path): int
+    {
+        if (!is_dir($path)) {
+            return filesize($path);
+        }
+
+        $finder = new Finder();
+        $finder->files()->in($path);
+
+        $size = 0;
+        foreach ($finder as $file) {
+            $size += $file->getSize();
+        }
+
+        return $size;
     }
 
     public function restore(string $backupPath, array $options = []): bool
