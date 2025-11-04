@@ -20,7 +20,7 @@ class BackupConfiguration
     private string $name = '';
 
     /**
-     * @var array Additional options for the backup
+     * @var array<string, mixed> Additional options for the backup
      */
     private array $options = [];
 
@@ -35,7 +35,7 @@ class BackupConfiguration
     private ?string $compression = null;
 
     /**
-     * @var array Tables or paths to exclude
+     * @var array<int, string> Tables or paths to exclude
      */
     private array $exclusions = [];
 
@@ -101,6 +101,8 @@ class BackupConfiguration
 
     /**
      * Get the backup options.
+     *
+     * @return array<string, mixed>
      */
     public function getOptions(): array
     {
@@ -109,6 +111,8 @@ class BackupConfiguration
 
     /**
      * Set the backup options.
+     *
+     * @param array<string, mixed> $options
      */
     public function setOptions(array $options): self
     {
@@ -119,6 +123,9 @@ class BackupConfiguration
 
     /**
      * Get a specific option.
+     *
+     * @param mixed $default
+     * @return mixed
      */
     public function getOption(string $key, $default = null)
     {
@@ -127,6 +134,8 @@ class BackupConfiguration
 
     /**
      * Set a specific option.
+     *
+     * @param mixed $value
      */
     public function setOption(string $key, $value): self
     {

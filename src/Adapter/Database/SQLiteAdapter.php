@@ -44,6 +44,9 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
         $startTime = microtime(true);
         $filename = $this->generateFilename($config);
         $outputPath = $config->getOutputPath();
+        if (null === $outputPath) {
+            throw new BackupException('Output path is not specified');
+        }
         $filepath = $outputPath.'/'.$filename;
 
         // Ensure the output directory exists

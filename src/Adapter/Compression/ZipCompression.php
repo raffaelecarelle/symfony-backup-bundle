@@ -254,9 +254,13 @@ class ZipCompression implements CompressionAdapterInterface
         // If the file exists, check its content (magic bytes)
         if ($this->filesystem->exists($filePath)) {
             $handle = fopen($filePath, 'r');
-            if ($handle) {
+            if (false !== $handle) {
                 $header = fread($handle, 4);
                 fclose($handle);
+
+                if (false === $header) {
+                    return false;
+                }
 
                 // Zip files start with the magic bytes 'PK\x03\x04'
                 return '504b0304' === bin2hex($header);

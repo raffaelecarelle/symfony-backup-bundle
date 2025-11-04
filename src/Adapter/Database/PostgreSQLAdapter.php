@@ -51,6 +51,9 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
         $startTime = microtime(true);
         $filename = $this->generateFilename($config);
         $outputPath = $config->getOutputPath();
+        if (null === $outputPath) {
+            throw new \ProBackupBundle\Exception\BackupException('Output path is not specified');
+        }
         $filepath = $outputPath.'/'.$filename;
 
         // Ensure the output directory exists
@@ -68,16 +71,19 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
 
             $this->executeCommand($command);
 
+            $size = filesize($filepath);
+            $size = false === $size ? 0 : $size;
+
             $this->logger->info('PostgreSQL backup completed', [
                 'file' => $filepath,
-                'size' => filesize($filepath),
+                'size' => $size,
                 'duration' => microtime(true) - $startTime,
             ]);
 
             return new BackupResult(
                 true,
                 $filepath,
-                filesize($filepath),
+                $size,
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime
             );
@@ -230,6 +236,8 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
 
     /**
      * Build the pg_restore command.
+     *
+     * @param array<string, mixed> $options
      */
     private function buildPgRestoreCommand(string $filepath, array $options): string
     {

@@ -45,6 +45,9 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
         $startTime = microtime(true);
         $filename = $this->generateFilename($config);
         $outputPath = $config->getOutputPath();
+        if (null === $outputPath) {
+            throw new \ProBackupBundle\Exception\BackupException('Output path is not specified');
+        }
         $filepath = $outputPath.'/'.$filename;
 
         // Ensure the output directory exists
@@ -68,16 +71,19 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
                 throw new ProcessFailedException($process);
             }
 
+            $size = filesize($filepath);
+            $size = false === $size ? 0 : $size;
+
             $this->logger->info('MySQL backup completed', [
                 'file' => $filepath,
-                'size' => filesize($filepath),
+                'size' => $size,
                 'duration' => microtime(true) - $startTime,
             ]);
 
             return new BackupResult(
                 true,
                 $filepath,
-                filesize($filepath),
+                $size,
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
                 null,
@@ -223,6 +229,8 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
 
     /**
      * Build the mysql restore command.
+     *
+     * @param array<string, mixed> $options
      */
     private function buildMysqlRestoreCommand(string $filepath, array $options): string
     {

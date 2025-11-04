@@ -23,7 +23,7 @@ class BackupResult
      * @param \DateTimeImmutable|null $createdAt When the backup was created
      * @param float|null              $duration  Duration of the backup operation in seconds
      * @param string|null             $error     Error message if the backup failed
-     * @param array                   $metadata  Additional metadata
+     * @param array<string, mixed>    $metadata  Additional metadata
      */
     public function __construct(
         private bool $success = false,

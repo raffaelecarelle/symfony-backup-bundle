@@ -21,7 +21,7 @@ class BackupMessageHandler
      * @param BackupManager        $backupManager The backup manager service
      * @param LoggerInterface|null $logger        The logger service
      */
-    public function __construct(private readonly BackupManager $backupManager, private readonly ?LoggerInterface $logger = new NullLogger())
+    public function __construct(private readonly BackupManager $backupManager, private readonly LoggerInterface $logger = new NullLogger())
     {
     }
 
