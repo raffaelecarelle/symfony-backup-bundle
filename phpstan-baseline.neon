@@ -1,0 +1,397 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Offset ''url'' on array\{application_name\?\: string, charset\?\: string, dbname\?\: string, defaultTableOptions\?\: array\<string, mixed\>, driver\?\: ''ibm_db2''\|''mysqli''\|''oci8''\|''pdo_mysql''\|''pdo_oci''\|''pdo_pgsql''\|''pdo_sqlite''\|''pdo_sqlsrv''\|''pgsql''\|''sqlite3''\|''sqlsrv'', driverClass\?\: class\-string\<Doctrine\\DBAL\\Driver\>, driverOptions\?\: array\<mixed\>, host\?\: string, \.\.\.\} in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 1
+			path: src/Adapter/Database/SQLiteAdapter.php
+
+		-
+			message: '#^Method ProBackupBundle\\Adapter\\Filesystem\\FilesystemAdapter\:\:createArchive\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: src/Adapter/Filesystem/FilesystemAdapter.php
+
+		-
+			message: '#^Method ProBackupBundle\\Adapter\\Filesystem\\FilesystemAdapter\:\:extractArchive\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: src/Adapter/Filesystem/FilesystemAdapter.php
+
+		-
+			message: '#^Variable \$filepath in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: src/Adapter/Filesystem/FilesystemAdapter.php
+
+		-
+			message: '#^Call to method bucket\(\) on an unknown class Google\\Cloud\\Storage\\StorageClient\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Call to method name\(\) on an unknown class Google\\Cloud\\Storage\\Bucket\.$#'
+			identifier: class.notFound
+			count: 10
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Call to method object\(\) on an unknown class Google\\Cloud\\Storage\\Bucket\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Call to method objects\(\) on an unknown class Google\\Cloud\\Storage\\Bucket\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Call to method upload\(\) on an unknown class Google\\Cloud\\Storage\\Bucket\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Method ProBackupBundle\\Adapter\\Storage\\GoogleCloudAdapter\:\:list\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Parameter \$storageClient of method ProBackupBundle\\Adapter\\Storage\\GoogleCloudAdapter\:\:__construct\(\) has invalid type Google\\Cloud\\Storage\\StorageClient\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Property ProBackupBundle\\Adapter\\Storage\\GoogleCloudAdapter\:\:\$bucket has unknown class Google\\Cloud\\Storage\\Bucket as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Property ProBackupBundle\\Adapter\\Storage\\GoogleCloudAdapter\:\:\$storageClient has unknown class Google\\Cloud\\Storage\\StorageClient as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/GoogleCloudAdapter.php
+
+		-
+			message: '#^Method ProBackupBundle\\Adapter\\Storage\\LocalAdapter\:\:list\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Adapter/Storage/LocalAdapter.php
+
+		-
+			message: '#^Call to method deleteObject\(\) on an unknown class Aws\\S3\\S3Client\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Call to method doesObjectExist\(\) on an unknown class Aws\\S3\\S3Client\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Call to method getObject\(\) on an unknown class Aws\\S3\\S3Client\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Call to method listObjectsV2\(\) on an unknown class Aws\\S3\\S3Client\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Call to method putObject\(\) on an unknown class Aws\\S3\\S3Client\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Method ProBackupBundle\\Adapter\\Storage\\S3Adapter\:\:list\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Parameter \$s3Client of method ProBackupBundle\\Adapter\\Storage\\S3Adapter\:\:__construct\(\) has invalid type Aws\\S3\\S3Client\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Property ProBackupBundle\\Adapter\\Storage\\S3Adapter\:\:\$s3Client has unknown class Aws\\S3\\S3Client as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Adapter/Storage/S3Adapter.php
+
+		-
+			message: '#^Method ProBackupBundle\\Adapter\\Storage\\StorageAdapterInterface\:\:list\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Adapter/Storage/StorageAdapterInterface.php
+
+		-
+			message: '#^Method ProBackupBundle\\Command\\BackupCommand\:\:__construct\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Command/BackupCommand.php
+
+		-
+			message: '#^Method ProBackupBundle\\Command\\ListCommand\:\:outputCsv\(\) has parameter \$rows with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Command/ListCommand.php
+
+		-
+			message: '#^Method ProBackupBundle\\Command\\ListCommand\:\:outputJson\(\) has parameter \$backups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Command/ListCommand.php
+
+		-
+			message: '#^Method ProBackupBundle\\DataCollector\\BackupDataCollector\:\:getBackups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataCollector/BackupDataCollector.php
+
+		-
+			message: '#^Method ProBackupBundle\\DataCollector\\BackupDataCollector\:\:getLastBackup\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataCollector/BackupDataCollector.php
+
+		-
+			message: '#^Method ProBackupBundle\\DataCollector\\BackupDataCollector\:\:getStorageUsage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataCollector/BackupDataCollector.php
+
+		-
+			message: '#^Method ProBackupBundle\\DependencyInjection\\BackupExtension\:\:configureCompressionAdapters\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DependencyInjection/BackupExtension.php
+
+		-
+			message: '#^Method ProBackupBundle\\DependencyInjection\\BackupExtension\:\:configureDatabaseAdapters\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DependencyInjection/BackupExtension.php
+
+		-
+			message: '#^Method ProBackupBundle\\DependencyInjection\\BackupExtension\:\:configureFilesystemAdapter\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DependencyInjection/BackupExtension.php
+
+		-
+			message: '#^Method ProBackupBundle\\DependencyInjection\\BackupExtension\:\:configureStorageAdapters\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DependencyInjection/BackupExtension.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/DependencyInjection/Configuration.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:generateRemotePath\(\) has parameter \$backup with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:getBackup\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:getLastBackup\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:getStorageUsage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:listBackups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:loadExistingBackups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:restore\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Manager\\BackupManager\:\:retrieveFromRemote\(\) has parameter \$backup with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Parameter \#1 \$configuration of method ProBackupBundle\\Manager\\BackupManager\:\:listBackups\(\) expects ProBackupBundle\\Model\\BackupConfiguration\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Property ProBackupBundle\\Manager\\BackupManager\:\:\$backups type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and mixed will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type ProBackupBundle\\Model\\BackupConfiguration\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Manager/BackupManager.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupConfiguration\:\:getExclusions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/BackupConfiguration.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupConfiguration\:\:getOption\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Model/BackupConfiguration.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupConfiguration\:\:getOption\(\) has parameter \$default with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/BackupConfiguration.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupConfiguration\:\:setExclusions\(\) has parameter \$exclusions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/BackupConfiguration.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupConfiguration\:\:setOption\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/BackupConfiguration.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupResult\:\:getMetadata\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/BackupResult.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupResult\:\:getMetadataValue\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Model/BackupResult.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupResult\:\:getMetadataValue\(\) has parameter \$default with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/BackupResult.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupResult\:\:setMetadata\(\) has parameter \$metadata with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/BackupResult.php
+
+		-
+			message: '#^Method ProBackupBundle\\Model\\BackupResult\:\:setMetadataValue\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/BackupResult.php
+
+		-
+			message: '#^Method ProBackupBundle\\Process\\Factory\\ProcessFactory\:\:createFromShellCommandline\(\) has parameter \$env with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Process/Factory/ProcessFactory.php
+
+		-
+			message: '#^Method ProBackupBundle\\Scheduler\\BackupMessage\:\:getExclusions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Scheduler/BackupMessage.php
+
+		-
+			message: '#^Method ProBackupBundle\\Scheduler\\BackupMessage\:\:setExclusions\(\) has parameter \$exclusions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Scheduler/BackupMessage.php
+
+		-
+			message: '#^Property ProBackupBundle\\Scheduler\\BackupMessage\:\:\$exclusions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Scheduler/BackupMessage.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$logger with type Psr\\Log\\LoggerInterface\|null is not subtype of native type Psr\\Log\\LoggerInterface\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Scheduler/BackupMessageHandler.php
+
+		-
+			message: '#^PHPDoc type for property ProBackupBundle\\Scheduler\\BackupMessageHandler\:\:\$logger with type Psr\\Log\\LoggerInterface\|null is not subtype of native type Psr\\Log\\LoggerInterface\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Scheduler/BackupMessageHandler.php
+
+		-
+			message: '#^Method ProBackupBundle\\Scheduler\\BackupScheduler\:\:__construct\(\) has parameter \$arg with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Scheduler/BackupScheduler.php
+
+		-
+			message: '#^Property ProBackupBundle\\Scheduler\\BackupScheduler\:\:\$scheduleConfig type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Scheduler/BackupScheduler.php

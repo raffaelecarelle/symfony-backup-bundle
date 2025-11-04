@@ -123,9 +123,6 @@ class BackupConfiguration
 
     /**
      * Get a specific option.
-     *
-     * @param mixed $default
-     * @return mixed
      */
     public function getOption(string $key, $default = null)
     {
@@ -134,8 +131,6 @@ class BackupConfiguration
 
     /**
      * Set a specific option.
-     *
-     * @param mixed $value
      */
     public function setOption(string $key, $value): self
     {

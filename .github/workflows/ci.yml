@@ -104,7 +104,7 @@ jobs:
                 run: vendor/bin/rector --version && vendor/bin/rector process --dry-run --ansi
 
             -   name: PHPStan
-                run: vendor/bin/phpstan --version && vendor/bin/phpstan analyse --no-progress --ansi
+                run: vendor/bin/phpstan --version && vendor/bin/phpstan analyse --no-progress --ansi --memory-limit=1G
 
             -   name: PHPUnit
                 run: |
