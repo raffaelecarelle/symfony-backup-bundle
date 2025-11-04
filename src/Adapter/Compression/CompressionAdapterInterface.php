@@ -12,9 +12,9 @@ interface CompressionAdapterInterface
     /**
      * Compress a file.
      *
-     * @param string      $sourcePath Path to the file to compress
-     * @param string|null $targetPath Path where the compressed file should be stored (if null, will use sourcePath + extension)
-     * @param array       $options    Additional options for the compression
+     * @param string               $sourcePath Path to the file to compress
+     * @param string|null          $targetPath Path where the compressed file should be stored (if null, will use sourcePath + extension)
+     * @param array<string, mixed> $options    Additional options for the compression
      *
      * @return string Path to the compressed file
      *
@@ -25,9 +25,9 @@ interface CompressionAdapterInterface
     /**
      * Decompress a file.
      *
-     * @param string      $sourcePath Path to the file to decompress
-     * @param string|null $targetPath Path where the decompressed file should be stored (if null, will use sourcePath without extension)
-     * @param array       $options    Additional options for the decompression
+     * @param string               $sourcePath Path to the file to decompress
+     * @param string|null          $targetPath Path where the decompressed file should be stored (if null, will use sourcePath without extension)
+     * @param array<string, mixed> $options    Additional options for the decompression
      *
      * @return string Path to the decompressed file
      *

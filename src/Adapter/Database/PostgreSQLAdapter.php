@@ -29,7 +29,7 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
      */
     public function __construct(
         private readonly Connection $connection,
-        private readonly ?LoggerInterface $logger = new NullLogger(),
+        private readonly LoggerInterface $logger = new NullLogger(),
         ?ProcessFactory $processFactory = null,
     ) {
         $this->filesystem = new Filesystem();

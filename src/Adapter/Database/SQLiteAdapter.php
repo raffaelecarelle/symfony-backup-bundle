@@ -24,7 +24,7 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
     /**
      * Constructor.
      */
-    public function __construct(private readonly Connection $connection, private readonly ?LoggerInterface $logger = new NullLogger())
+    public function __construct(private readonly Connection $connection, private readonly LoggerInterface $logger = new NullLogger())
     {
         $this->filesystem = new Filesystem();
     }

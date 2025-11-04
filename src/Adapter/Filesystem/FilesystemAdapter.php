@@ -26,7 +26,7 @@ class FilesystemAdapter implements BackupAdapterInterface
     /**
      * Constructor.
      */
-    public function __construct(private readonly ?LoggerInterface $logger = new NullLogger())
+    public function __construct(private readonly LoggerInterface $logger = new NullLogger())
     {
         $this->filesystem = new Filesystem();
     }

@@ -29,8 +29,8 @@ class LocalAdapter implements StorageAdapterInterface
     public function __construct(
         string $basePath,
         private readonly int $permissions = 0755,
-        private readonly ?LoggerInterface $logger = new NullLogger(),
-        private readonly ?Filesystem $filesystem = new Filesystem(),
+        private readonly LoggerInterface $logger = new NullLogger(),
+        private readonly Filesystem $filesystem = new Filesystem(),
     ) {
         $this->basePath = rtrim($basePath, '/\\');
 

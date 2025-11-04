@@ -24,8 +24,8 @@ interface BackupAdapterInterface
     /**
      * Restore from a backup.
      *
-     * @param string $backupPath Path to the backup file
-     * @param array  $options    Additional options for the restore operation
+     * @param string               $backupPath Path to the backup file
+     * @param array<string, mixed> $options    Additional options for the restore operation
      *
      * @return bool True if restore was successful, false otherwise
      */
@@ -45,7 +45,7 @@ interface BackupAdapterInterface
      *
      * @param BackupConfiguration $config Configuration to validate
      *
-     * @return array Array of validation errors, empty if valid
+     * @return array<string> Array of validation error messages, empty if valid
      */
     public function validate(BackupConfiguration $config): array;
 }

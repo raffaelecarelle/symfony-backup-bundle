@@ -7,7 +7,6 @@ namespace ProBackupBundle\DependencyInjection\Compiler;
 use ProBackupBundle\Adapter\Database\MySQLAdapter;
 use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
 use ProBackupBundle\Adapter\Database\SQLiteAdapter;
-use ProBackupBundle\Adapter\Database\SqlServerAdapter;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -83,7 +82,6 @@ class DatabaseAdapterPass implements CompilerPassInterface
             'pdo_mysql' => $this->registerMySQLAdapter($container, $connectionName, $connectionServiceId),
             'pdo_pgsql' => $this->registerPostgreSQLAdapter($container, $connectionName, $connectionServiceId),
             'pdo_sqlite' => $this->registerSQLiteAdapter($container, $connectionName, $connectionServiceId),
-            'pdo_sqlsrv', 'sqlsrv' => $this->registerSqlServerAdapter($container, $connectionName, $connectionServiceId),
             default => null,
         };
     }
@@ -135,21 +133,5 @@ class DatabaseAdapterPass implements CompilerPassInterface
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
         ]);
         $sqliteDef->addTag('pro_backup.database_adapter');
-    }
-
-    private function registerSqlServerAdapter(ContainerBuilder $container, string $connectionName, string $connectionServiceId): void
-    {
-        $serviceId = 'pro_backup.database.sqlserver.'.$connectionName;
-
-        if ($container->has($serviceId)) {
-            return;
-        }
-
-        $sqlServerDef = $container->register($serviceId, SqlServerAdapter::class);
-        $sqlServerDef->setArguments([
-            new Reference($connectionServiceId),
-            new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-        ]);
-        $sqlServerDef->addTag('pro_backup.database_adapter');
     }
 }

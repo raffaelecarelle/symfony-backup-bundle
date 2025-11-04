@@ -29,7 +29,7 @@ class ZipCompression implements CompressionAdapterInterface
      * @param int  $compressionLevel Compression level (0-9, where 9 is highest)
      * @param bool $keepOriginal     Whether to keep the original file after compression
      */
-    public function __construct(int $compressionLevel = 6, private readonly bool $keepOriginal = false, private readonly ?LoggerInterface $logger = new NullLogger())
+    public function __construct(int $compressionLevel = 6, private readonly bool $keepOriginal = false, private readonly LoggerInterface $logger = new NullLogger())
     {
         $this->compressionLevel = max(0, min(9, $compressionLevel));
         $this->filesystem = new Filesystem();
@@ -135,9 +135,10 @@ class ZipCompression implements CompressionAdapterInterface
         }
 
         // Determine target directory if not provided
-        $targetDir = null;
         $extractSingleFile = false;
+        $resolvedTargetPath = null;
 
+        // Compute target directory; always a string after this block
         if (null === $targetPath) {
             // Extract to the same directory as the zip file
             $targetDir = \dirname($sourcePath);
@@ -152,6 +153,7 @@ class ZipCompression implements CompressionAdapterInterface
                 // Target is a file, extract only the first file in the zip
                 $targetDir = \dirname($targetPath);
                 $extractSingleFile = true;
+                $resolvedTargetPath = $targetPath; // non-null when extracting a single file
             }
         }
 
@@ -217,18 +219,19 @@ class ZipCompression implements CompressionAdapterInterface
 
             // Return the path to the extracted file or directory
             if ($extractSingleFile) {
-                return $targetPath;
+                // $resolvedTargetPath is set when extracting a single file
+                return (string) $resolvedTargetPath;
             } else {
                 // Get the list of extracted files
                 $files = glob($targetDir.'/*');
 
                 // If there's only one file and it's not a directory, return it
-                if (1 === \count($files) && !is_dir($files[0])) {
-                    return $files[0];
+                if (1 === \count($files) && isset($files[0]) && !is_dir($files[0])) {
+                    return (string) $files[0];
                 }
 
                 // Otherwise return the target directory
-                return $targetDir;
+                return (string) $targetDir;
             }
         } catch (\Throwable $e) {
             $this->logger->error('Zip decompression failed', [

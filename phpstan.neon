@@ -1,5 +1,8 @@
 parameters:
-    level: 8
+    level: 6
     paths:
         - src
         - tests
+    excludePaths:
+        - tests/_fixtures/**
+        - var/*

@@ -29,7 +29,7 @@ class GzipCompression implements CompressionAdapterInterface
      * @param int  $compressionLevel Compression level (1-9, where 9 is highest)
      * @param bool $keepOriginal     Whether to keep the original file after compression
      */
-    public function __construct(int $compressionLevel = 6, private readonly bool $keepOriginal = false, private readonly ?LoggerInterface $logger = new NullLogger())
+    public function __construct(int $compressionLevel = 6, private readonly bool $keepOriginal = false, private readonly LoggerInterface $logger = new NullLogger())
     {
         $this->compressionLevel = max(1, min(9, $compressionLevel));
         $this->filesystem = new Filesystem();
@@ -130,8 +130,12 @@ class GzipCompression implements CompressionAdapterInterface
             }
         }
 
+        // At this point targetPath is guaranteed to be a string
+        /** @var string $resolvedTargetPath */
+        $resolvedTargetPath = (string) $targetPath;
+
         // Ensure target directory exists
-        $targetDir = \dirname((string) $targetPath);
+        $targetDir = \dirname($resolvedTargetPath);
         if (!$this->filesystem->exists($targetDir)) {
             $this->filesystem->mkdir($targetDir, 0755);
         }
@@ -144,7 +148,7 @@ class GzipCompression implements CompressionAdapterInterface
             $command = \sprintf(
                 'gunzip -c %s > %s',
                 escapeshellarg($sourcePath),
-                escapeshellarg((string) $targetPath)
+                escapeshellarg($resolvedTargetPath)
             );
 
             $process = Process::fromShellCommandline($command);
@@ -160,7 +164,7 @@ class GzipCompression implements CompressionAdapterInterface
                 $this->filesystem->remove($sourcePath);
             }
 
-            return $targetPath;
+            return $resolvedTargetPath;
         } catch (\Throwable $e) {
             $this->logger->error('Gzip decompression failed', [
                 'source' => $sourcePath,
@@ -169,7 +173,7 @@ class GzipCompression implements CompressionAdapterInterface
             ]);
 
             // Clean up any partial target file
-            if ($this->filesystem->exists($targetPath)) {
+            if (null !== $targetPath && $this->filesystem->exists($targetPath)) {
                 $this->filesystem->remove($targetPath);
             }
 
@@ -187,9 +191,13 @@ class GzipCompression implements CompressionAdapterInterface
         // If the file exists, check its content (magic bytes)
         if ($this->filesystem->exists($filePath)) {
             $handle = fopen($filePath, 'r');
-            if ($handle) {
+            if (false !== $handle) {
                 $header = fread($handle, 2);
                 fclose($handle);
+
+                if (false === $header) {
+                    return false;
+                }
 
                 // Gzip files start with the magic bytes 0x1F 0x8B
                 return '1f8b' === bin2hex($header);
