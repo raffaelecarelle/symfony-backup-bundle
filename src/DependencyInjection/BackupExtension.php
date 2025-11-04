@@ -147,52 +147,12 @@ class BackupExtension extends Extension
 
     /**
      * Configure database adapters.
+     * The actual registration of adapters based on driver is done in DatabaseAdapterPass.
      */
     private function configureDatabaseAdapters(ContainerBuilder $container, array $config): void
     {
-        if (!$config['database']['enabled']) {
-            return;
-        }
-
-        // Get Doctrine connections
-        $connections = $config['database']['connections'];
-
-        foreach ($connections as $connectionName) {
-            $connectionServiceId = 'doctrine.dbal.'.$connectionName.'_connection';
-
-            // MySQL adapter
-            $mysqlDef = $container->register('pro_backup.database.mysql.'.$connectionName, MySQLAdapter::class);
-            $mysqlDef->setArguments([
-                new Reference($connectionServiceId),
-                new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-            ]);
-            $mysqlDef->addTag('pro_backup.database_adapter');
-
-            // PostgreSQL adapter
-            $pgDef = $container->register('pro_backup.database.postgresql.'.$connectionName, PostgreSQLAdapter::class);
-            $pgDef->setArguments([
-                new Reference($connectionServiceId),
-                new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-                new Reference('pro_backup.process.factory'),
-            ]);
-            $pgDef->addTag('pro_backup.database_adapter');
-
-            // SQLite adapter
-            $sqliteDef = $container->register('pro_backup.database.sqlite.'.$connectionName, SQLiteAdapter::class);
-            $sqliteDef->setArguments([
-                new Reference($connectionServiceId),
-                new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-            ]);
-            $sqliteDef->addTag('pro_backup.database_adapter');
-
-            // SQL Server adapter
-            $sqlServerDef = $container->register('pro_backup.database.sqlserver.'.$connectionName, SqlServerAdapter::class);
-            $sqlServerDef->setArguments([
-                new Reference($connectionServiceId),
-                new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-            ]);
-            $sqlServerDef->addTag('pro_backup.database_adapter');
-        }
+        // Database adapter registration is handled by DatabaseAdapterPass compiler pass
+        // which has access to the actual Doctrine connection configuration
     }
 
     /**

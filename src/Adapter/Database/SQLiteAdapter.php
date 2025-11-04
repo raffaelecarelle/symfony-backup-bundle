@@ -6,6 +6,7 @@ namespace ProBackupBundle\Adapter\Database;
 
 use Doctrine\DBAL\Connection;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\DatabaseConnectionInterface;
 use ProBackupBundle\Exception\BackupException;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
@@ -16,7 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * Adapter for SQLite database backups.
  */
-class SQLiteAdapter implements BackupAdapterInterface
+class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterface
 {
     private readonly Filesystem $filesystem;
 

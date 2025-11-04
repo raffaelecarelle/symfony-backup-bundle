@@ -10,7 +10,7 @@
             <argument>%kernel.project_dir%/var/backups</argument> <!-- backup_dir -->
             <argument type="service" id="event_dispatcher" on-invalid="null" />
             <argument type="service" id="logger" on-invalid="null" />
-            <argument>%doctrine.connections%</argument>
+            <argument type="service" id="doctrine" />
 
             <!-- Storage adapters will be added by the extension -->
             <!-- Database adapters will be added by the extension -->

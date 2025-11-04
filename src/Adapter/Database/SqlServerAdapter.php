@@ -6,6 +6,7 @@ namespace ProBackupBundle\Adapter\Database;
 
 use Doctrine\DBAL\Connection;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\DatabaseConnectionInterface;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;
@@ -15,7 +16,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * Adapter for SQL Server database backups.
  */
-class SqlServerAdapter implements BackupAdapterInterface
+class SqlServerAdapter implements BackupAdapterInterface, DatabaseConnectionInterface
 {
     private readonly Filesystem $filesystem;
 

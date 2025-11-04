@@ -4,8 +4,7 @@ pro_backup:
 
   database:
     enabled: true
-    # Use the sqlite Doctrine connection of the TestApp
-    connections: ['sqlite']
+    connections: ['sqlite', 'mysql', 'postgresql', 'sqlsrv']
     compression: 'gzip'
     retention_days: 7
 

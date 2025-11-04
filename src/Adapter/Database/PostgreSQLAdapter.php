@@ -6,6 +6,7 @@ namespace ProBackupBundle\Adapter\Database;
 
 use Doctrine\DBAL\Connection;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\DatabaseConnectionInterface;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use ProBackupBundle\Process\Factory\ProcessFactory;
@@ -17,7 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * Adapter for PostgreSQL database backups.
  */
-class PostgreSQLAdapter implements BackupAdapterInterface
+class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterface
 {
     use ProcessTrait;
 

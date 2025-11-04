@@ -6,6 +6,7 @@ namespace ProBackupBundle\Adapter\Database;
 
 use Doctrine\DBAL\Connection;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\DatabaseConnectionInterface;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;
@@ -17,7 +18,7 @@ use Symfony\Component\Process\Process;
 /**
  * Adapter for MySQL database backups.
  */
-class MySQLAdapter implements BackupAdapterInterface
+class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterface
 {
     private readonly Filesystem $filesystem;
 
@@ -183,7 +184,7 @@ class MySQLAdapter implements BackupAdapterInterface
         $command = \sprintf(
             'mysqldump --host=%s --port=%s --user=%s',
             escapeshellarg($host),
-            escapeshellarg($port),
+            escapeshellarg((string) $port),
             escapeshellarg($user)
         );
 
@@ -228,7 +229,7 @@ class MySQLAdapter implements BackupAdapterInterface
         $params = $this->connection->getParams();
 
         $host = $params['host'] ?? 'localhost';
-        $port = $params['port'] ?? 3306;
+        $port = $params['port'] ?? '3306';
         $user = $params['user'] ?? 'root';
         $password = $params['password'] ?? '';
         $database = $this->connection->getDatabase();
@@ -236,7 +237,7 @@ class MySQLAdapter implements BackupAdapterInterface
         $command = \sprintf(
             'mysql --host=%s --port=%s --user=%s',
             escapeshellarg($host),
-            escapeshellarg($port),
+            escapeshellarg((string) $port),
             escapeshellarg($user)
         );
 
