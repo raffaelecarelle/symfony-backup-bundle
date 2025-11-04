@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace ProBackupBundle\Adapter\Filesystem;
 
 use ProBackupBundle\Adapter\BackupAdapterInterface;
+use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
+use ProBackupBundle\Adapter\Compression\GzipCompression;
+use ProBackupBundle\Adapter\Compression\ZipCompression;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;

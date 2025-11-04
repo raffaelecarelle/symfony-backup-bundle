@@ -67,16 +67,26 @@ class ZipCompression implements CompressionAdapterInterface
 
         try {
             // Use zip command line tool for compression
-            $sourceDir = \dirname($sourcePath);
-            $sourceFile = basename($sourcePath);
+            if (is_dir($sourcePath)) {
+                // Zip the contents of the directory (without adding the top-level folder)
+                $sourceDir = $sourcePath;
+                $sourceSpec = '.'; // zip current directory contents
+                $recursiveFlag = ' -r';
+            } else {
+                // Zip a single file
+                $sourceDir = \dirname($sourcePath);
+                $sourceSpec = basename($sourcePath);
+                $recursiveFlag = '';
+            }
 
             // Change to the source directory to avoid full paths in the zip file
             $command = \sprintf(
-                'cd %s && zip -%d %s %s',
+                'cd %s && zip -%d%s %s %s',
                 escapeshellarg($sourceDir),
                 $level,
+                $recursiveFlag,
                 escapeshellarg($targetPath),
-                escapeshellarg($sourceFile)
+                escapeshellarg($sourceSpec)
             );
 
             $process = Process::fromShellCommandline($command);
