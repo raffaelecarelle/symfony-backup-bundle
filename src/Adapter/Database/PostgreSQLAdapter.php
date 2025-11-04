@@ -210,7 +210,7 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
             $command .= ' --clean';
         }
 
-        if ($options['create'] ?? true) {
+        if ($options['create'] ?? false) {
             $command .= ' --create';
         }
 
@@ -276,6 +276,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
                 $command .= ' --no-owner';
             }
 
+            if ($options['disable_triggers'] ?? false) {
+                $command .= ' --disable-triggers';
+            }
+
             $command .= ' '.escapeshellarg($filepath);
         } else {
             // Use psql for plain format
@@ -287,7 +291,12 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
                 escapeshellarg((string) $database)
             );
 
-            if ($options['single_transaction'] ?? true) {
+            // Optionally stop on first error for clearer diagnostics
+            $command .= ' --set=ON_ERROR_STOP=1';
+            if ($options['on_error_stop'] ?? false) {
+            }
+
+            if ($options['single_transaction'] ?? false) {
                 $command .= ' --single-transaction';
             }
 

@@ -33,6 +33,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
             return true;
         } catch (\Throwable $e) {
             dump($e->getMessage());
+
             return false;
         }
     }
@@ -51,17 +52,17 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
 
         // Create users table
-        $pdo->exec("
+        $pdo->exec('
             CREATE TABLE users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-        ");
+        ');
 
         // Create posts table
-        $pdo->exec("
+        $pdo->exec('
             CREATE TABLE posts (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
@@ -70,7 +71,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-        ");
+        ');
 
         $pdo = null;
     }
@@ -155,11 +156,11 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
 
         // Modify the database
         $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
-        $pdo->exec("DELETE FROM posts");
-        $pdo->exec("DELETE FROM users");
+        $pdo->exec('DELETE FROM posts');
+        $pdo->exec('DELETE FROM users');
 
         // Verify data is gone
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
+        $stmt = $pdo->query('SELECT COUNT(*) as count FROM users');
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->assertEquals(0, $row['count'], 'Users table should be empty');
         $pdo = null;
@@ -175,12 +176,12 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
 
         // Check users
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
+        $stmt = $pdo->query('SELECT COUNT(*) as count FROM users');
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->assertEquals(3, $row['count'], 'Should have 3 users after restore');
 
         // Check posts
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM posts");
+        $stmt = $pdo->query('SELECT COUNT(*) as count FROM posts');
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->assertEquals(4, $row['count'], 'Should have 4 posts after restore');
 
@@ -189,7 +190,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->assertEquals('John Doe', $row['name'], 'User data should match');
 
-        $stmt = $pdo->query("SELECT title FROM posts WHERE user_id = 3");
+        $stmt = $pdo->query('SELECT title FROM posts WHERE user_id = 3');
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->assertEquals('MySQL Backup Test', $row['title'], 'Post data should match');
 

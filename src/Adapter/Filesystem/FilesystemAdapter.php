@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ProBackupBundle\Adapter\Filesystem;
 
 use ProBackupBundle\Adapter\BackupAdapterInterface;
-use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
 use ProBackupBundle\Adapter\Compression\GzipCompression;
 use ProBackupBundle\Adapter\Compression\ZipCompression;
 use ProBackupBundle\Model\BackupConfiguration;
@@ -116,7 +115,6 @@ class FilesystemAdapter implements BackupAdapterInterface
                 }
             }
 
-
             $this->logger->info('Filesystem staging completed (no compression)', [
                 'staging_dir' => $tempDir,
                 'duration' => microtime(true) - $startTime,
@@ -161,6 +159,7 @@ class FilesystemAdapter implements BackupAdapterInterface
      * Calculate the total size of a directory recursively.
      *
      * @param string $path Path to the directory or file
+     *
      * @return int Total size in bytes
      */
     private function getDirectorySize(string $path): int

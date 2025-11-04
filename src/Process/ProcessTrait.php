@@ -22,6 +22,7 @@ trait ProcessTrait
         $process->run();
 
         if (!$process->isSuccessful()) {
+            dump($process->getErrorOutput());
             throw new ProcessFailedException($process);
         }
 

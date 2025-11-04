@@ -282,11 +282,11 @@ class ArchiveManagerTest extends TestCase
 
         // Create tar file
         $tarPath = $this->tempDir.'/test.tar';
-        $tarCmd = sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($testDir));
+        $tarCmd = \sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($testDir));
         exec($tarCmd);
 
         // Create gz file from tar
-        $gzCmd = sprintf('gzip -c %s > %s', escapeshellarg($tarPath), escapeshellarg($archivePath));
+        $gzCmd = \sprintf('gzip -c %s > %s', escapeshellarg($tarPath), escapeshellarg($archivePath));
         exec($gzCmd);
 
         // Clean up tar file
@@ -298,7 +298,7 @@ class ArchiveManagerTest extends TestCase
             ->method('decompress')
             ->willReturnCallback(function ($source, $target) {
                 // Simulate decompressing the .gz file to .tar
-                $gzCmd = sprintf('gzip -dc %s > %s', escapeshellarg($source), escapeshellarg($target));
+                $gzCmd = \sprintf('gzip -dc %s > %s', escapeshellarg($source), escapeshellarg($target));
                 exec($gzCmd);
 
                 return $target;

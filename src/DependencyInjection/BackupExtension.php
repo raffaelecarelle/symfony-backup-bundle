@@ -6,10 +6,6 @@ namespace ProBackupBundle\DependencyInjection;
 
 use ProBackupBundle\Adapter\Compression\GzipCompression;
 use ProBackupBundle\Adapter\Compression\ZipCompression;
-use ProBackupBundle\Adapter\Database\MySQLAdapter;
-use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
-use ProBackupBundle\Adapter\Database\SQLiteAdapter;
-use ProBackupBundle\Adapter\Database\SqlServerAdapter;
 use ProBackupBundle\Adapter\Filesystem\FilesystemAdapter;
 use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
 use ProBackupBundle\Adapter\Storage\LocalAdapter;

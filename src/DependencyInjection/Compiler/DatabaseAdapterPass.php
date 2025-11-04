@@ -59,12 +59,12 @@ class DatabaseAdapterPass implements CompilerPassInterface
             $arguments = $connectionDefinition->getArguments();
 
             $driver = null;
-            if (isset($arguments[0]) && is_array($arguments[0])) {
+            if (isset($arguments[0]) && \is_array($arguments[0])) {
                 $params = $arguments[0];
                 $driver = $params['driver'] ?? null;
             }
 
-            if(!$driver) {
+            if (!$driver) {
                 throw new \RuntimeException('Driver not found for connection '.$connectionName);
             }
 
@@ -77,7 +77,7 @@ class DatabaseAdapterPass implements CompilerPassInterface
         ContainerBuilder $container,
         string $driver,
         string $connectionName,
-        string $connectionServiceId
+        string $connectionServiceId,
     ): void {
         match ($driver) {
             'pdo_mysql' => $this->registerMySQLAdapter($container, $connectionName, $connectionServiceId),

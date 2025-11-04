@@ -32,7 +32,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     private function isPostgreSQLAvailable(): bool
     {
         try {
-            $dsn = sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
+            $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
             $pdo = new \PDO($dsn, $this->user, $this->password);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -45,7 +45,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     private function createPostgreSQLTestDatabase(): void
     {
         // Connect to postgres database
-        $dsn = sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -62,22 +62,22 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         $pdo->exec("CREATE DATABASE {$this->testDatabase} WITH ENCODING 'UTF8'");
 
         // Connect to the new database
-        $dsn = sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         // Create users table
-        $pdo->exec("
+        $pdo->exec('
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        ");
+        ');
 
         // Create posts table
-        $pdo->exec("
+        $pdo->exec('
             CREATE TABLE posts (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -85,15 +85,15 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
                 content TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        ");
+        ');
 
         // Create index
-        $pdo->exec("CREATE INDEX idx_posts_user_id ON posts(user_id)");
+        $pdo->exec('CREATE INDEX idx_posts_user_id ON posts(user_id)');
     }
 
     private function seedPostgreSQLTestData(): void
     {
-        $dsn = sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -185,12 +185,14 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         $config->setCompression('gzip');
         $config->setName('postgres_restore_test');
         $config->setOption('format', 'plain');
+        $config->setOption('data_only', true);
+        $config->setOption('verbose', true);
 
         $result = $this->backupManager->backup($config);
         $this->assertTrue($result->isSuccess(), 'Backup should be successful');
 
         // Modify the database
-        $dsn = sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -204,7 +206,8 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
 
         // Restore from backup
         $restoreResult = $this->backupManager->restore($result->getId(), [
-            'connection_name' => 'postgres',
+            'connection_name' => 'pgsql',
+            'keep_original' => true,
         ]);
 
         $this->assertTrue($restoreResult, 'Restore should be successful');
@@ -264,7 +267,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         // Cleanup test database
         if ($this->isPostgreSQLAvailable()) {
             try {
-                $dsn = sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
+                $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
                 $pdo = new \PDO($dsn, $this->user, $this->password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 

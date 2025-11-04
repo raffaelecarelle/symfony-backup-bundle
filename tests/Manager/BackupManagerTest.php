@@ -131,12 +131,8 @@ class BackupManagerTest extends TestCase
                 [$this->isInstanceOf(BackupEvent::class), BackupEvents::POST_RESTORE]
             );
 
-        // Mock the getBackup method using reflection
-        $reflectionClass = new \ReflectionClass(BackupManager::class);
-        $method = $reflectionClass->getMethod('getBackup');
-
         $backupManagerMock = $this->getMockBuilder(BackupManager::class)
-            ->setConstructorArgs([$this->tempDir, $this->mockEventDispatcher, $this->mockLogger])
+            ->setConstructorArgs([$this->tempDir, $this->mockEventDispatcher, $this->mockLogger, $this->mockDoctrine])
             ->onlyMethods(['getBackup'])
             ->getMock();
 

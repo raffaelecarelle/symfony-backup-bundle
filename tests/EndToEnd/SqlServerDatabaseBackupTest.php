@@ -32,7 +32,7 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
     private function isSqlServerAvailable(): bool
     {
         try {
-            $dsn = sprintf('sqlsrv:Server=%s,%d;Database=master', $this->host, $this->port);
+            $dsn = \sprintf('sqlsrv:Server=%s,%d;Database=master', $this->host, $this->port);
             $pdo = new \PDO($dsn, $this->user, $this->password);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -45,7 +45,7 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
     private function createSqlServerTestDatabase(): void
     {
         // Connect to master database
-        $dsn = sprintf('sqlsrv:Server=%s,%d;Database=master', $this->host, $this->port);
+        $dsn = \sprintf('sqlsrv:Server=%s,%d;Database=master', $this->host, $this->port);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -66,22 +66,22 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
         $pdo->exec("CREATE DATABASE [{$this->testDatabase}]");
 
         // Connect to the new database
-        $dsn = sprintf('sqlsrv:Server=%s,%d;Database=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('sqlsrv:Server=%s,%d;Database=%s', $this->host, $this->port, $this->testDatabase);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         // Create users table
-        $pdo->exec("
+        $pdo->exec('
             CREATE TABLE users (
                 id INT IDENTITY(1,1) PRIMARY KEY,
                 name NVARCHAR(255) NOT NULL,
                 email NVARCHAR(255) NOT NULL UNIQUE,
                 created_at DATETIME2 DEFAULT GETDATE()
             )
-        ");
+        ');
 
         // Create posts table
-        $pdo->exec("
+        $pdo->exec('
             CREATE TABLE posts (
                 id INT IDENTITY(1,1) PRIMARY KEY,
                 user_id INT NOT NULL,
@@ -90,7 +90,7 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
                 created_at DATETIME2 DEFAULT GETDATE(),
                 CONSTRAINT FK_posts_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
-        ");
+        ');
 
         // Create index
         $pdo->exec('CREATE INDEX idx_posts_user_id ON posts(user_id)');
@@ -98,7 +98,7 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
 
     private function seedSqlServerTestData(): void
     {
-        $dsn = sprintf('sqlsrv:Server=%s,%d;Database=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('sqlsrv:Server=%s,%d;Database=%s', $this->host, $this->port, $this->testDatabase);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -194,7 +194,7 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($result->isSuccess(), 'Backup should be successful');
 
         // Modify the database
-        $dsn = sprintf('sqlsrv:Server=%s,%d;Database=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('sqlsrv:Server=%s,%d;Database=%s', $this->host, $this->port, $this->testDatabase);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -262,7 +262,7 @@ class SqlServerDatabaseBackupTest extends AbstractEndToEndTest
         // Cleanup test database
         if ($this->isSqlServerAvailable()) {
             try {
-                $dsn = sprintf('sqlsrv:Server=%s,%d;Database=master', $this->host, $this->port);
+                $dsn = \sprintf('sqlsrv:Server=%s,%d;Database=master', $this->host, $this->port);
                 $pdo = new \PDO($dsn, $this->user, $this->password);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 

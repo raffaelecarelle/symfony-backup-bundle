@@ -38,10 +38,10 @@ class ArchiveManager
     /**
      * Compress a source (file or directory) into a target archive.
      *
-     * @param string      $source          Path to source file or directory
-     * @param string      $targetPath      Path where the archive should be created
-     * @param string      $compressionType Type of compression (zip, gzip)
-     * @param bool        $removeSource    Whether to remove the source after compression
+     * @param string $source          Path to source file or directory
+     * @param string $targetPath      Path where the archive should be created
+     * @param string $compressionType Type of compression (zip, gzip)
+     * @param bool   $removeSource    Whether to remove the source after compression
      *
      * @return string Path to the created archive
      *
@@ -50,8 +50,8 @@ class ArchiveManager
     public function compress(string $source, string $targetPath, string $compressionType, bool $removeSource = false): string
     {
         // Ensure output directory exists
-        if (!$this->filesystem->exists(dirname($targetPath))) {
-            $this->filesystem->mkdir(dirname($targetPath), 0755);
+        if (!$this->filesystem->exists(\dirname($targetPath))) {
+            $this->filesystem->mkdir(\dirname($targetPath), 0755);
         }
 
         $compressionType = strtolower($compressionType);
@@ -82,7 +82,7 @@ class ArchiveManager
                 $tarPath = preg_replace('/\.gz$/', '', $targetPath) ?: ($targetPath.'.tar');
 
                 // Create tar from source directory contents (without top-level folder)
-                $tarCmd = sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($source));
+                $tarCmd = \sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($source));
                 $proc = \Symfony\Component\Process\Process::fromShellCommandline($tarCmd);
                 $proc->setTimeout(3600);
                 $proc->run();
@@ -112,15 +112,15 @@ class ArchiveManager
             return $source.'.gz';
         }
 
-        throw new BackupException(sprintf('Unsupported compression type: %s', $compressionType));
+        throw new BackupException(\sprintf('Unsupported compression type: %s', $compressionType));
     }
 
     /**
      * Decompress an archive into a target location.
      *
-     * @param string      $archivePath    Path to the archive
-     * @param string|null $targetPath     Target directory or file path (null for same directory)
-     * @param bool        $keepOriginal   Whether to keep the original archive
+     * @param string      $archivePath  Path to the archive
+     * @param string|null $targetPath   Target directory or file path (null for same directory)
+     * @param bool        $keepOriginal Whether to keep the original archive
      *
      * @return string Path to the decompressed content (file or directory)
      *
@@ -167,7 +167,7 @@ class ArchiveManager
                     $gzip->decompress($archivePath, $tarPath, ['keep_original' => $keepOriginal]);
 
                     // Extract tar into the target directory
-                    $tarCmd = sprintf('tar -xf %s -C %s', escapeshellarg($tarPath), escapeshellarg($targetPath));
+                    $tarCmd = \sprintf('tar -xf %s -C %s', escapeshellarg($tarPath), escapeshellarg($targetPath));
                     $proc = \Symfony\Component\Process\Process::fromShellCommandline($tarCmd);
                     $proc->setTimeout(3600);
                     $proc->run();

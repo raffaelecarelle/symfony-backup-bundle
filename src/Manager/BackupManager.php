@@ -53,8 +53,6 @@ class BackupManager
 
     private readonly ArchiveManager $archiveManager;
 
-    private ?ManagerRegistry $doctrine;
-
     /**
      * Constructor.
      *
@@ -64,13 +62,11 @@ class BackupManager
         string $backupDir,
         private readonly ?EventDispatcherInterface $eventDispatcher = null,
         private readonly ?LoggerInterface $logger = new NullLogger(),
-        ManagerRegistry $doctrine = null,
+        private readonly ?ManagerRegistry $doctrine = null,
     ) {
         $this->backupDir = rtrim($backupDir, '/\\');
         $this->filesystem = new Filesystem();
         $this->archiveManager = new ArchiveManager();
-
-        $this->doctrine = $doctrine;
     }
 
     /**
@@ -180,7 +176,7 @@ class BackupManager
                 $timestamp = date('Y-m-d_H-i-s');
                 $name = $config->getName() ?: $config->getType();
                 $extension = 'zip' === $config->getCompression() ? 'zip' : 'tar.gz';
-                $filename = sprintf('%s_%s.%s', $name, $timestamp, $extension);
+                $filename = \sprintf('%s_%s.%s', $name, $timestamp, $extension);
                 $targetPath = rtrim((string) $config->getOutputPath(), '/').'/'.$filename;
 
                 // Compress using ArchiveManager
@@ -474,7 +470,7 @@ class BackupManager
      */
     private function getAdapter(string $type, ?string $connectionName): BackupAdapterInterface
     {
-        $connectionName = $connectionName ?? $this->doctrine->getDefaultConnectionName() ?? throw new BackupException('No Doctrine connection found');
+        $connectionName ??= $this->doctrine->getDefaultConnectionName() ?? throw new BackupException('No Doctrine connection found');
 
         // Look for a database adapter that has a resolver
         foreach ($this->adapters as $adapter) {
@@ -488,7 +484,7 @@ class BackupManager
                 return $adapter;
             }
 
-            if($adapter->supports($type)) {
+            if ($adapter->supports($type)) {
                 return $adapter;
             }
         }

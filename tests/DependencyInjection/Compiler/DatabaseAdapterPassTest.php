@@ -27,8 +27,8 @@ class DatabaseAdapterPassTest extends TestCase
         $this->containerBuilder->setParameter('pro_backup.config', [
             'database' => [
                 'enabled' => true,
-                'connections' => []
-            ]
+                'connections' => [],
+            ],
         ]);
     }
 

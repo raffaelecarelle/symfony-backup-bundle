@@ -208,6 +208,7 @@ class PostgreSQLAdapterTest extends TestCase
         $config = new BackupConfiguration();
         $config->setOutputPath($this->tempDir.'/backups');
         $config->setName('test_backup');
+        $config->setOption('create', true);
         $filepath = $this->tempDir.'/backups/test_db_backup.sql';
 
         // Use reflection to access the private method
@@ -241,7 +242,9 @@ class PostgreSQLAdapterTest extends TestCase
         $reflectionClass = new \ReflectionClass(PostgreSQLAdapter::class);
         $method = $reflectionClass->getMethod('buildPgRestoreCommand');
 
-        $command = $method->invoke($this->adapter, $filepath, []);
+        $command = $method->invoke($this->adapter, $filepath, [
+            'single_transaction' => true,
+        ]);
 
         // Verify the command contains the expected parts for plain format (psql)
         $this->assertStringContainsString('psql', $command);
