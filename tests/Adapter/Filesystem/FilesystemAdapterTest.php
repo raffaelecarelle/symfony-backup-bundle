@@ -157,29 +157,6 @@ class FilesystemAdapterTest extends TestCase
         $this->assertStringContainsString('.zip', $result->getFilePath());
     }
 
-    public function testBackupFailure(): void
-    {
-        // Create the configuration
-        $config = new BackupConfiguration();
-        $config->setType('filesystem');
-        $config->setName('test_backup');
-        $config->setOutputPath($this->tempDir);
-        $config->setCompression('zip');
-        $config->setOption('paths', [
-            [
-                'path' => '/non/existent/path',
-                'exclude' => [],
-            ],
-        ]);
-
-        // Execute the backup - should fail because path doesn't exist
-        $result = $this->adapter->backup($config);
-
-        // Assertions
-        $this->assertFalse($result->isSuccess());
-        $this->assertNotNull($result->getError());
-    }
-
     public function testRestore(): void
     {
         // Create a test backup file

@@ -173,15 +173,74 @@ class BackupManager
 
             $result = $adapter->backup($config);
 
-            // Apply compression for database backups only when the backup succeeded and a source path exists
-            if ('database' === $config->getType() && $result->isSuccess()) {
-                $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
+            // Apply compression centrally per type (database and filesystem)
+            if ($result->isSuccess()) {
+                if ('database' === $config->getType() && null !== $result->getFilePath()) {
+                    $compression = $this->compressionAdapters[$config->getCompression()] ?? null;
+                    if ($compression) {
+                        $targetPath = $compression->compress($result->getFilePath(), null, ['keep_original' => false]);
+                        $result->setFileSize(filesize($targetPath));
+                        $result->setFilePath($targetPath);
+                        $result->setMetadataValue('compression', $config->getCompression());
+                    }
+                } elseif ('filesystem' === $config->getType() && null !== $result->getFilePath()) {
+                    // The filesystem adapter returns a staging directory. Create the final archive here.
+                    $stagingDir = $result->getFilePath();
 
-                if ($compression && null !== $result->getFilePath()) {
-                    $targetPath = $compression->compress($result->getFilePath());
-                    $result->setFileSize(filesize($targetPath));
+                    // Build output filename consistent with previous behavior
+                    $timestamp = date('Y-m-d_H-i-s');
+                    $name = $config->getName() ?: 'filesystem';
+                    $extension = 'zip' === $config->getCompression() ? 'zip' : 'tar.gz';
+                    $filename = sprintf('%s_%s.%s', $name, $timestamp, $extension);
+                    $targetPath = rtrim((string) $config->getOutputPath(), '/').'/'.$filename;
+
+                    // Ensure output directory exists
+                    if (!$this->filesystem->exists(dirname($targetPath))) {
+                        $this->filesystem->mkdir(dirname($targetPath), 0755);
+                    }
+
+                    $compressionName = $config->getCompression() ?? 'zip';
+                    if ('zip' === strtolower($compressionName)) {
+                        $zip = $this->compressionAdapters['zip'] ?? null;
+                        if (!$zip) {
+                            throw new BackupException('Zip compression adapter not available');
+                        }
+                        $zip->compress($stagingDir, $targetPath, ['keep_original' => true]);
+                    } else {
+                        // gzip requires a tar first, then gzip it
+                        $gzip = $this->compressionAdapters['gzip'] ?? null;
+                        if (!$gzip) {
+                            throw new BackupException('Gzip compression adapter not available');
+                        }
+                        $tarPath = preg_replace('/\.gz$/', '', $targetPath) ?: ($targetPath.'.tar');
+
+                        // Create tar from staging directory contents (without top-level folder)
+                        $tarCmd = sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($stagingDir));
+                        $proc = \Symfony\Component\Process\Process::fromShellCommandline($tarCmd);
+                        $proc->setTimeout(3600);
+                        $proc->run();
+                        if (!$proc->isSuccessful()) {
+                            throw new \Symfony\Component\Process\Exception\ProcessFailedException($proc);
+                        }
+
+                        try {
+                            $gzip->compress($tarPath, $targetPath, ['keep_original' => false]);
+                        } finally {
+                            if ($this->filesystem->exists($tarPath)) {
+                                $this->filesystem->remove($tarPath);
+                            }
+                        }
+                    }
+
+                    // Update result and cleanup staging directory
                     $result->setFilePath($targetPath);
+                    $result->setFileSize(filesize($targetPath));
                     $result->setMetadataValue('compression', $config->getCompression());
+
+                    // Remove staging directory
+                    if ($this->filesystem->exists($stagingDir)) {
+                        $this->filesystem->remove($stagingDir);
+                    }
                 }
             }
 
@@ -290,6 +349,9 @@ class BackupManager
                 $backupPath = $this->retrieveFromRemote($backup);
             }
 
+            $recompressor = null;
+            $recompressSource = null;
+
             if ('database' === $backup['type']) {
                 $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
                 $decompressionName = null;
@@ -304,8 +366,57 @@ class BackupManager
                 $compression = $this->compressionAdapters[$decompressionName] ?? null;
 
                 if ($compression) {
-                    $backupPath = $compression->decompress($backupPath);
+                    // Decompress while keeping the original archive, then schedule recompress to restore state
+                    $backupPath = $compression->decompress($backupPath, null, ['keep_original' => true]);
+                    $recompressor = $compression;
+                    $recompressSource = $backupPath; // the decompressed file to re-compress later
                 }
+            } elseif ('filesystem' === $backup['type']) {
+                // For filesystem, extract the archive to a temporary directory
+                $extension = pathinfo((string) $backupPath, \PATHINFO_EXTENSION);
+                $tempExtractDir = sys_get_temp_dir().'/restore_'.uniqid('', true);
+                $this->filesystem->mkdir($tempExtractDir, 0755);
+
+                if ('zip' === strtolower((string) $extension)) {
+                    $zip = $this->compressionAdapters['zip'] ?? null;
+                    if (!$zip) {
+                        throw new BackupException('Zip compression adapter not available for restore');
+                    }
+                    // Extract into the temp directory, keep original archive intact
+                    $zip->decompress($backupPath, $tempExtractDir, ['keep_original' => true]);
+                    $backupPath = $tempExtractDir;
+                } elseif ('gz' === strtolower((string) $extension)) {
+                    // Expect .tar.gz: first gunzip to a tar, then extract tar
+                    $gzip = $this->compressionAdapters['gzip'] ?? null;
+                    if (!$gzip) {
+                        throw new BackupException('Gzip compression adapter not available for restore');
+                    }
+                    $tarPath = preg_replace('/\.gz$/', '', (string) $backupPath) ?: ($backupPath.'.tar');
+                    try {
+                        $gzip->decompress((string) $backupPath, $tarPath, ['keep_original' => true]);
+                        // Extract tar into the temp directory
+                        $tarCmd = sprintf('tar -xf %s -C %s', escapeshellarg((string) $tarPath), escapeshellarg($tempExtractDir));
+                        $proc = \Symfony\Component\Process\Process::fromShellCommandline($tarCmd);
+                        $proc->setTimeout(3600);
+                        $proc->run();
+                        if (!$proc->isSuccessful()) {
+                            throw new \Symfony\Component\Process\Exception\ProcessFailedException($proc);
+                        }
+                    } finally {
+                        if (isset($tarPath) && $this->filesystem->exists((string) $tarPath)) {
+                            $this->filesystem->remove((string) $tarPath);
+                        }
+                    }
+                    $backupPath = $tempExtractDir;
+                } else {
+                    // Unknown extension: pass-through (could be a plain directory already)
+                    if (!is_dir((string) $backupPath)) {
+                        throw new BackupException('Unsupported filesystem backup format: '.$extension);
+                    }
+                }
+
+                // Ensure cleanup of extracted directory after restore
+                $cleanupExtractDir = $backupPath;
             }
 
             // Perform the restore
@@ -345,10 +456,17 @@ class BackupManager
 
             return false;
         } finally {
-            if (isset($compression, $backupPath)) {
-                $compression->compress($backupPath);
+            // Cleanup any temporary resources created during restore preparation
+            if (isset($cleanupExtractDir) && is_dir((string) $cleanupExtractDir) && $this->filesystem->exists((string) $cleanupExtractDir)) {
+                $this->filesystem->remove((string) $cleanupExtractDir);
+            }
+            if (isset($recompressSource) && null !== $recompressSource && $this->filesystem->exists((string) $recompressSource)) {
+                // We kept the original archive untouched; remove the temporary decompressed file
+                $this->filesystem->remove((string) $recompressSource);
             }
         }
+
+        return isset($success) ? (bool) $success : false;
     }
 
     /**
