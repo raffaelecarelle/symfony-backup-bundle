@@ -41,7 +41,7 @@ services:
             - net
 
     postgres:
-        image: postgres:15-alpine
+        image: postgres:17-alpine
         container_name: symfony-backup-postgres
         environment:
             POSTGRES_PASSWORD: root
