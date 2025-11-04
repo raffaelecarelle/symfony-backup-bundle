@@ -4,7 +4,7 @@ pro_backup:
 
   database:
     enabled: true
-    connections: ['sqlite', 'mysql', 'pgsql', 'sqlsrv']
+    connections: ['sqlite', 'mysql', 'pgsql']
     compression: 'gzip'
     retention_days: 7
 

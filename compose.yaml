@@ -56,14 +56,3 @@ services:
             retries: 20
         networks:
             - net
-
-#    mssql:
-#        image: mcr.microsoft.com/mssql/server:2019-latest
-#        container_name: symfony-backup-mssql
-#        environment:
-#            ACCEPT_EULA: "Y"
-#            SA_PASSWORD: "YourStrong!Passw0rd"
-#        ports:
-#            - "1433:1433"
-#        networks:
-#            - net
