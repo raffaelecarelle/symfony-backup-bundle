@@ -11,7 +11,7 @@ use ProBackupBundle\Model\BackupConfiguration;
  */
 class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
 {
-    private string $testDatabase = 'test_postgres_backup';
+    private string $testDatabase = 'test_db';
     private string $host = 'postgres';
     private int $port = 5432;
     private string $user = 'postgres';
@@ -119,7 +119,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     {
         // Create backup configuration
         $config = new BackupConfiguration('database');
-        $config->setConnectionName('postgres');
+        $config->setConnectionName('pgsql');
         $config->setCompression('gzip');
         $config->setName('postgres_backup_test');
         $config->setOption('format', 'plain'); // Use plain format for pg_dump
@@ -144,7 +144,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     {
         // Create backup configuration
         $config = new BackupConfiguration('database');
-        $config->setConnectionName('postgres');
+        $config->setConnectionName('pgsql');
         $config->setCompression('zip');
         $config->setName('postgres_backup_zip_test');
         $config->setOption('format', 'plain');
@@ -164,7 +164,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     {
         // Create backup configuration with custom format
         $config = new BackupConfiguration('database');
-        $config->setConnectionName('postgres');
+        $config->setConnectionName('pgsql');
         $config->setCompression('gzip');
         $config->setName('postgres_custom_format_test');
         $config->setOption('format', 'custom'); // Use custom format
@@ -181,7 +181,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     {
         // Create backup
         $config = new BackupConfiguration('database');
-        $config->setConnectionName('postgres');
+        $config->setConnectionName('pgsql');
         $config->setCompression('gzip');
         $config->setName('postgres_restore_test');
         $config->setOption('format', 'plain');
@@ -236,7 +236,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     public function testPostgreSQLBackupWithExcludedTables(): void
     {
         $config = new BackupConfiguration('database');
-        $config->setConnectionName('postgres');
+        $config->setConnectionName('pgsql');
         $config->setCompression('gzip');
         $config->setName('postgres_exclude_test');
         $config->setOption('format', 'plain');
@@ -249,7 +249,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
     public function testPostgreSQLBackupSchemaOnly(): void
     {
         $config = new BackupConfiguration('database');
-        $config->setConnectionName('postgres');
+        $config->setConnectionName('pgsql');
         $config->setCompression('gzip');
         $config->setName('postgres_schema_only_test');
         $config->setOption('format', 'plain');
