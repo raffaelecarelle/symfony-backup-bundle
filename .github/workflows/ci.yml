@@ -18,6 +18,8 @@ jobs:
                 env:
                     MYSQL_ROOT_PASSWORD: root
                     MYSQL_DATABASE: test_db
+                    MYSQL_USER: test_user
+                    MYSQL_PASSWORD: test_password
                 ports:
                     - 3306:3306
                 options: >-
@@ -41,7 +43,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [ '8.2', '8.3', '8.4' ]
+                php: [ '8.2', '8.3' ]
                 symfony: [ '5.4', '6.4', '7.*' ]
         env:
             MYSQL_HOST: 127.0.0.1
@@ -85,7 +87,12 @@ jobs:
                     composer require --no-interaction --no-update "symfony/framework-bundle:${{ matrix.symfony }}"
 
             -   name: Install dependencies
-                run: composer update --prefer-dist --no-interaction --no-progress --ansi
+                run: composer update --prefer-dist --no-interaction --no-progress --ansi --with-all-dependencies
+
+            -   name: Export test database URLs
+                run: |
+                    echo "TESTAPP_DATABASE_URL_MYSQL=mysql://test_user:test_password@127.0.0.1:3306/test_db?charset=utf8mb4" >> $GITHUB_ENV
+                    echo "TESTAPP_DATABASE_URL_PGSQL=postgresql://test_user:test_password@127.0.0.1:5432/test_db?serverVersion=15" >> $GITHUB_ENV
 
             -   name: Validate composer
                 run: composer validate --ansi

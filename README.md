@@ -4,18 +4,23 @@ A Symfony bundle for database and filesystem backup/restore management.
 
 ## Overview
 
-The Symfony Backup Bundle provides a complete and configurable system for automatic and manual backups of databases and filesystems, with native integration in the Symfony Profiler for development operations.
+The Symfony Backup Bundle provides a complete and configurable system for automatic and manual backups of databases and filesystems, with optional Symfony Profiler integration for development.
 
 ## Features
 
 - Database backup and restore (MySQL, PostgreSQL, SQLite, SQL Server)
 - Filesystem backup and restore
 - Multiple storage adapters (Local, S3, Google Cloud)
-- Compression support (Gzip, Zip)
-- Scheduled backups
+- Compression support (gzip, zip)
+- Retention policy helpers
+- Scheduler/Messenger integration for automated backups (Symfony 7.3+)
 - Event system for backup/restore operations
-- Symfony Profiler integration
-- Command-line interface
+- Command-line interface and programmatic API
+
+## Requirements
+
+- PHP: >= 8.2
+- Symfony: 5.4+
 
 ## Installation
 
@@ -25,19 +30,20 @@ composer require raffaelecarelle/symfony-backup-bundle
 
 ## Configuration
 
-Create a configuration file at `config/packages/backup.yaml`:
+Create a configuration file at `config/packages/pro_backup.yaml`:
 
 ```yaml
 pro_backup:
     default_storage: 'local'
-    
+    backup_dir: '%kernel.project_dir%/var/backups'
+
     storage:
         local:
             adapter: 'local'
             options:
                 path: '%kernel.project_dir%/var/backups'
                 permissions: 0755
-        
+
         s3:
             adapter: 's3'
             options:
@@ -46,18 +52,18 @@ pro_backup:
                 credentials:
                     key: '%env(AWS_ACCESS_KEY_ID)%'
                     secret: '%env(AWS_SECRET_ACCESS_KEY)%'
-        
+
         google_cloud:
             adapter: 'google_cloud'
             options:
                 bucket: 'my-app-backups'
                 project_id: '%env(GOOGLE_CLOUD_PROJECT_ID)%'
                 key_file: '%env(GOOGLE_CLOUD_KEY_FILE)%'
-    
+
     database:
         enabled: true
-        connections: ['default'] # List of Doctrine connections
-        compression: 'gzip'
+        connections: ['default'] # Doctrine connection names
+        compression: 'gzip'      # gzip|zip|null
         retention_days: 30
         exclude_tables: ['cache_items', 'sessions']
         options:
@@ -68,7 +74,7 @@ pro_backup:
             postgresql:
                 format: 'custom'
                 verbose: true
-    
+
     filesystem:
         enabled: false
         paths:
@@ -76,7 +82,7 @@ pro_backup:
             - { path: '%kernel.project_dir%/config', exclude: ['secrets/'] }
         compression: 'zip'
         retention_days: 7
-    
+
     schedule:
         database:
             frequency: 'daily' # daily, weekly, monthly, cron expression
@@ -84,16 +90,11 @@ pro_backup:
         filesystem:
             frequency: 'weekly'
             time: '03:00'
-    
-    notifications:
-        on_success: false
-        on_failure: true
-        channels: ['email'] # email, slack, webhook
 ```
 
 ## Usage
 
-### Command Line
+### Console commands
 
 Create a database backup:
 
@@ -113,40 +114,40 @@ List available backups:
 php bin/console backup:list
 ```
 
-### Programmatic Usage
+### Programmatic usage
 
 ```php
-use Symfony\Component\Backup\Model\BackupConfiguration;
-use Symfony\Component\Backup\Manager\BackupManager;
+use ProBackupBundle\Model\BackupConfiguration;
+use ProBackupBundle\Manager\BackupManager;
 
 // Create a backup
-$config = new BackupConfiguration();
-$config->setType('database');
-$config->setName('my_backup');
+$config = (new BackupConfiguration())
+    ->setType('database')
+    ->setName('my_backup');
 
 $backupManager = $container->get(BackupManager::class);
 $result = $backupManager->backup($config);
 
 if ($result->isSuccess()) {
-    echo "Backup created: " . $result->getFilePath();
+    echo 'Backup created: ' . $result->getFilePath();
 } else {
-    echo "Backup failed: " . $result->getError();
+    echo 'Backup failed: ' . $result->getError();
 }
 
 // Restore a backup
 $backupId = 'backup_123';
-$success = $backupManager->restore($backupId);
+$success = $backupManager->restore($backupId, []);
 
 if ($success) {
-    echo "Backup restored successfully";
+    echo 'Backup restored successfully';
 } else {
-    echo "Restore failed";
+    echo 'Restore failed';
 }
 ```
 
 ## Events
 
-The bundle dispatches the following events:
+The bundle dispatches the following events (see `ProBackupBundle\Event\BackupEvents`):
 
 - `backup.pre_backup`: Before a backup operation
 - `backup.post_backup`: After a successful backup operation
@@ -155,13 +156,13 @@ The bundle dispatches the following events:
 - `backup.post_restore`: After a successful restore operation
 - `backup.restore_failed`: When a restore operation fails
 
-## Testing
+## Development
 
-Run the PHPUnit tests:
+- Run CS fixer (dry-run): `vendor/bin/php-cs-fixer fix --dry-run --diff`
+- Run static analysis: `vendor/bin/phpstan analyse`
+- Run tests: `vendor/bin/phpunit`
 
-```bash
-vendor/bin/phpunit
-```
+CI runs on GitHub Actions with MySQL and PostgreSQL services and a matrix of PHP/Symfony versions compatible with this bundle.
 
 ## License
 
