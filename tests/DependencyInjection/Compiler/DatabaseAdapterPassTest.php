@@ -24,6 +24,12 @@ class DatabaseAdapterPassTest extends TestCase
         // Create a mock manager definition
         $this->managerDefinition = new Definition();
         $this->containerBuilder->setDefinition('pro_backup.manager', $this->managerDefinition);
+        $this->containerBuilder->setParameter('pro_backup.config', [
+            'database' => [
+                'enabled' => true,
+                'connections' => []
+            ]
+        ]);
     }
 
     public function testProcessWithNoTaggedServices(): void

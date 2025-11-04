@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\Manager;
 
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
@@ -24,6 +25,7 @@ class BackupManagerTest extends TestCase
     private $mockEventDispatcher;
     private $mockLogger;
     private $tempDir;
+    private $mockDoctrine;
 
     protected function setUp(): void
     {
@@ -34,11 +36,13 @@ class BackupManagerTest extends TestCase
         $this->mockStorageAdapter = $this->createMock(StorageAdapterInterface::class);
         $this->mockEventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->mockLogger = $this->createMock(LoggerInterface::class);
+        $this->mockDoctrine = $this->createMock(ManagerRegistry::class);
 
         $this->backupManager = new BackupManager(
             $this->tempDir,
             $this->mockEventDispatcher,
-            $this->mockLogger
+            $this->mockLogger,
+            $this->mockDoctrine
         );
 
         $this->backupManager->addAdapter($this->mockAdapter);
