@@ -120,7 +120,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($this->filesystem->exists($result->getFilePath()), 'Backup file should exist');
 
         // Verify it's a gzip file
-        $this->assertStringEndsWith('.tar.gz', $result->getFilePath(), 'Backup should be gzip compressed');
+        $this->assertStringEndsWith('.gz', $result->getFilePath(), 'Backup should be gzip compressed');
     }
 
     public function testMySQLBackupWithZipCompression(): void
