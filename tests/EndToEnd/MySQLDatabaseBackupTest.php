@@ -11,7 +11,7 @@ use ProBackupBundle\Model\BackupConfiguration;
  */
 class MySQLDatabaseBackupTest extends AbstractEndToEndTest
 {
-    private string $testDatabase = 'test_mysql_backup';
+    private string $testDatabase = 'test_db';
 
     protected function setupTest(): void
     {

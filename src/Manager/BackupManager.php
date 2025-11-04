@@ -7,7 +7,6 @@ namespace ProBackupBundle\Manager;
 use Doctrine\Persistence\ManagerRegistry;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
-use ProBackupBundle\Adapter\Database\DatabaseDriverResolver;
 use ProBackupBundle\Adapter\DatabaseConnectionInterface;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Event\BackupEvent;
@@ -54,7 +53,7 @@ class BackupManager
 
     private readonly ArchiveManager $archiveManager;
 
-    private ManagerRegistry $doctrine;
+    private ?ManagerRegistry $doctrine;
 
     /**
      * Constructor.
@@ -65,7 +64,7 @@ class BackupManager
         string $backupDir,
         private readonly ?EventDispatcherInterface $eventDispatcher = null,
         private readonly ?LoggerInterface $logger = new NullLogger(),
-        ManagerRegistry $doctrine,
+        ManagerRegistry $doctrine = null,
     ) {
         $this->backupDir = rtrim($backupDir, '/\\');
         $this->filesystem = new Filesystem();
@@ -99,7 +98,6 @@ class BackupManager
      */
     public function addCompressionAdapter(string $name, CompressionAdapterInterface $adapter): self
     {
-        $this->compressionAdapters[$name] = $adapter;
         $this->archiveManager->addCompressionAdapter($name, $adapter);
 
         return $this;
