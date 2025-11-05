@@ -77,9 +77,6 @@ class BackupExtensionTest extends TestCase
 
     public function testLoadThrowsExceptionForMissingAWSSDK(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('AWS SDK is not installed. Run "composer require aws/aws-sdk-php".');
-
         $configs = [
             'backup_dir' => '/path/to/backups',
             'default_storage' => 'local',
@@ -99,14 +96,21 @@ class BackupExtensionTest extends TestCase
             ],
         ];
 
+        if (class_exists(\Aws\S3\S3Client::class)) {
+            $this->backupExtension->load([$configs], $this->containerBuilder);
+            $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.aws_s3_client'));
+            $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.storage.s3'));
+
+            return;
+        }
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('AWS SDK is not installed. Run "composer require aws/aws-sdk-php".');
         $this->backupExtension->load([$configs], $this->containerBuilder);
     }
 
     public function testLoadThrowsExceptionForMissingGoogleSDK(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Google Cloud SDK is not installed. Run "composer require google/cloud-storage".');
-
         $configs = [
             'backup_dir' => '/path/to/backups',
             'default_storage' => 'local',
@@ -123,6 +127,16 @@ class BackupExtensionTest extends TestCase
             ],
         ];
 
+        if (class_exists(\Google\Cloud\Storage\StorageClient::class)) {
+            $this->backupExtension->load([$configs], $this->containerBuilder);
+            $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.google_cloud_client'));
+            $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.storage.google_cloud'));
+
+            return;
+        }
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Google Cloud SDK is not installed. Run "composer require google/cloud-storage".');
         $this->backupExtension->load([$configs], $this->containerBuilder);
     }
 

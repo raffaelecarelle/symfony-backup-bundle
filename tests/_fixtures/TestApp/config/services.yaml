@@ -6,4 +6,14 @@ services:
     autoconfigure: true
     public: false
 
+  # Register an additional Local storage adapter to act as a "remote" storage in tests
+  pro_backup.storage.remote_local:
+    class: ProBackupBundle\Adapter\Storage\LocalAdapter
+    arguments:
+      - '%kernel.project_dir%/var/remote_storage'
+      - 0755
+      - '@?logger'
+    tags:
+      - { name: 'pro_backup.storage_adapter' }
+
   # Controllers or services for the test app can be declared here when needed

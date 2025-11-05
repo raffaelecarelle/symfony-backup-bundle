@@ -34,7 +34,9 @@
         "symfony/phpunit-bridge": "5.4.*|6.4.*|^7.0",
         "symfony/twig-bundle": "5.4.*|6.4.*|^7.0",
         "symfony/web-profiler-bundle": "5.4.*|6.4.*|^7.0",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "aws/aws-sdk-php": "*",
+        "google/cloud-storage": "*"
     },
     "suggest": {
         "aws/aws-sdk-php": "For S3 storage adapter",

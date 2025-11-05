@@ -16,8 +16,6 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class GoogleCloudAdapter implements StorageAdapterInterface
 {
-    private readonly StorageClient $storageClient;
-
     private readonly Bucket $bucket;
 
     /**
@@ -34,9 +32,8 @@ class GoogleCloudAdapter implements StorageAdapterInterface
      * @param string        $bucketName    Google Cloud Storage bucket name
      * @param string        $prefix        Base prefix for storing backups
      */
-    public function __construct(StorageClient $storageClient, string $bucketName, string $prefix = '', private readonly LoggerInterface $logger = new NullLogger())
+    public function __construct(private readonly StorageClient $storageClient, string $bucketName, string $prefix = '', private readonly LoggerInterface $logger = new NullLogger())
     {
-        $this->storageClient = $storageClient;
         $this->bucket = $this->storageClient->bucket($bucketName);
         $this->prefix = trim($prefix, '/');
         $this->filesystem = new Filesystem();
@@ -157,6 +154,9 @@ class GoogleCloudAdapter implements StorageAdapterInterface
         }
     }
 
+    /**
+     * @return array<int, array{path: string, size: int, modified: \DateTimeImmutable}>
+     */
     public function list(string $prefix = ''): array
     {
         $this->logger->info('Listing files in Google Cloud Storage', [

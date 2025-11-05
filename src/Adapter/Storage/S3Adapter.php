@@ -15,11 +15,6 @@ use Symfony\Component\Filesystem\Filesystem;
 class S3Adapter implements StorageAdapterInterface
 {
     /**
-     * @var \Aws\S3\S3Client
-     */
-    private $s3Client;
-
-    /**
      * @var string Base prefix for storing backups
      */
     private string $prefix;
@@ -33,9 +28,8 @@ class S3Adapter implements StorageAdapterInterface
      * @param string           $bucket   S3 bucket name
      * @param string           $prefix   Base prefix for storing backups
      */
-    public function __construct(\Aws\S3\S3Client $s3Client, private readonly string $bucket, string $prefix = '', private readonly LoggerInterface $logger = new NullLogger())
+    public function __construct(private readonly \Aws\S3\S3Client $s3Client, private readonly string $bucket, string $prefix = '', private readonly LoggerInterface $logger = new NullLogger())
     {
-        $this->s3Client = $s3Client;
         $this->prefix = trim($prefix, '/');
         $this->filesystem = new Filesystem();
 
@@ -159,6 +153,9 @@ class S3Adapter implements StorageAdapterInterface
         }
     }
 
+    /**
+     * @return array<int, array{path: string, size: int, modified: \DateTimeImmutable}>
+     */
     public function list(string $prefix = ''): array
     {
         $this->logger->info('Listing files in S3', [
