@@ -477,7 +477,10 @@ class BackupManager
             if ($adapter instanceof DatabaseConnectionInterface) {
                 $connection = $adapter->getConnection();
 
-                if ($this->doctrine->getConnection($connectionName) !== $connection) {
+                if (
+                    $this->doctrine->getConnection($connectionName) !== $connection
+                    && $this->doctrine->getConnection($connectionName)->getDatabasePlatform() !== $connection->getDatabasePlatform()
+                ) {
                     continue;
                 }
 

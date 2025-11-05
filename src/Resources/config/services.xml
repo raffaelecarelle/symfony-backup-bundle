@@ -39,5 +39,10 @@
 
         <service id="pro_backup.process.factory" class="ProBackupBundle\Process\Factory\ProcessFactory">
         </service>
+
+        <service id="pro_backup.database.adapter_factory" class="ProBackupBundle\Adapter\Database\DatabaseAdapterFactory">
+            <argument type="service" id="logger" on-invalid="null" />
+            <argument type="service" id="pro_backup.process.factory" on-invalid="null" />
+        </service>
     </services>
 </container>

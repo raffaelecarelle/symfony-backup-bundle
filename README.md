@@ -145,6 +145,28 @@ if ($success) {
 }
 ```
 
+## Architecture
+
+### Database Adapter Auto-Detection
+
+The bundle automatically detects the database type from your Doctrine DBAL connection configuration using a factory pattern. The `DatabaseAdapterFactory` inspects the database platform at runtime using `Connection::getDatabasePlatform()` and creates the appropriate adapter (MySQL, PostgreSQL, SQLite).
+
+This approach is robust and works with:
+- Modern DSN-based configuration (`postgresql://user:pass@host/db`)
+- Legacy driver-based configuration (`pdo_pgsql`, `pdo_mysql`)
+- Multiple database connections
+- Any Doctrine-supported database platform
+
+No manual adapter selection is required - the bundle automatically uses the correct backup tool (`mysqldump`, `pg_dump`, `sqlite3`) based on your connection type.
+
+### Supported Database Platforms
+
+- **MySQL/MariaDB**: Uses `mysqldump` and `mysql` for backup/restore
+- **PostgreSQL**: Uses `pg_dump` and `pg_restore`/`psql` for backup/restore
+- **SQLite**: Uses file-based backup with `sqlite3` CLI
+
+Make sure the corresponding CLI tools are available in your system PATH.
+
 ## Events
 
 The bundle dispatches the following events (see `ProBackupBundle\Event\BackupEvents`):
