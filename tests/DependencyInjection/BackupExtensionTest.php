@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace ProBackupBundle\Tests\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
-use ProBackupBundle\DependencyInjection\BackupExtension;
+use ProBackupBundle\DependencyInjection\ProBackupExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class BackupExtensionTest extends TestCase
 {
-    private BackupExtension $backupExtension;
+    private ProBackupExtension $backupExtension;
 
     private ContainerBuilder $containerBuilder;
 
     protected function setUp(): void
     {
-        $this->backupExtension = new BackupExtension();
+        $this->backupExtension = new ProBackupExtension();
         $this->containerBuilder = new ContainerBuilder();
     }
 

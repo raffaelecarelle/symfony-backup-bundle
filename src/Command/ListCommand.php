@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Command to list available backups.
  */
-#[AsCommand(name: 'backup:list')]
+#[AsCommand(name: 'pro:backup:list')]
 class ListCommand extends Command
 {
     /**

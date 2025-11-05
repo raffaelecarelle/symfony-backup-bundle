@@ -44,7 +44,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
 
     public function testBackupCommand(): void
     {
-        $command = $this->application->find('backup:create');
+        $command = $this->application->find('pro:backup:create');
         $tester = new CommandTester($command);
 
         $tester->execute([
@@ -65,7 +65,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         // Ensure a backup exists
         $this->testBackupCommand();
 
-        $command = $this->application->find('backup:list');
+        $command = $this->application->find('pro:backup:list');
         $tester = new CommandTester($command);
         $tester->execute([
             '--type' => 'database',
@@ -91,7 +91,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
 
         $this->assertNotNull($this->backupId, 'Backup ID should be set');
 
-        $command = $this->application->find('backup:restore');
+        $command = $this->application->find('pro:backup:restore');
         $tester = new CommandTester($command);
 
         $tester->execute([

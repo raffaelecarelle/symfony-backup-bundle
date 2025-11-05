@@ -16,8 +16,11 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
-class BackupExtension extends Extension
+class ProBackupExtension extends Extension
 {
+    /**
+     * @param array<int, mixed> $configs
+     */
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
@@ -63,6 +66,9 @@ class BackupExtension extends Extension
     /**
      * Configure storage adapters.
      */
+    /**
+     * @param array<string, mixed> $config
+     */
     private function configureStorageAdapters(ContainerBuilder $container, array $config): void
     {
         // Configure local storage adapter (sempre configurato come fallback)
@@ -81,13 +87,13 @@ class BackupExtension extends Extension
             $s3Config = $config['storage']['s3'];
 
             // Check if AWS SDK is available
-            if (!class_exists('Aws\S3\S3Client')) {
+            if (!class_exists(\Aws\S3\S3Client::class)) {
                 throw new \RuntimeException('AWS SDK is not installed. Run "composer require aws/aws-sdk-php".');
             }
 
             // Create S3 client
-            $s3ClientDef = $container->register('pro_backup.aws_s3_client', 'Aws\S3\S3Client');
-            $s3ClientDef->setFactory(['Aws\S3\S3Client', 'factory']);
+            $s3ClientDef = $container->register('pro_backup.aws_s3_client', \Aws\S3\S3Client::class);
+            $s3ClientDef->setFactory([\Aws\S3\S3Client::class, 'factory']);
             $s3ClientDef->setArguments([[
                 'version' => 'latest',
                 'region' => $s3Config['options']['region'],
@@ -114,12 +120,12 @@ class BackupExtension extends Extension
             $gcConfig = $config['storage']['google_cloud'];
 
             // Check if Google Cloud SDK is available
-            if (!class_exists('Google\Cloud\Storage\StorageClient')) {
+            if (!class_exists(\Google\Cloud\Storage\StorageClient::class)) {
                 throw new \RuntimeException('Google Cloud SDK is not installed. Run "composer require google/cloud-storage".');
             }
 
             // Create Google Cloud client
-            $gcClientDef = $container->register('pro_backup.google_cloud_client', 'Google\Cloud\Storage\StorageClient');
+            $gcClientDef = $container->register('pro_backup.google_cloud_client', \Google\Cloud\Storage\StorageClient::class);
             $gcClientDef->setArguments([[
                 'projectId' => $gcConfig['options']['project_id'],
                 'keyFilePath' => $gcConfig['options']['key_file'],
@@ -145,6 +151,9 @@ class BackupExtension extends Extension
      * Configure database adapters.
      * The actual registration of adapters based on driver is done in DatabaseAdapterPass.
      */
+    /**
+     * @param array<string, mixed> $config
+     */
     private function configureDatabaseAdapters(ContainerBuilder $container, array $config): void
     {
         // Database adapter registration is handled by DatabaseAdapterPass compiler pass
@@ -153,6 +162,9 @@ class BackupExtension extends Extension
 
     /**
      * Configure filesystem adapter.
+     */
+    /**
+     * @param array<string, mixed> $config
      */
     private function configureFilesystemAdapter(ContainerBuilder $container, array $config): void
     {
@@ -174,6 +186,9 @@ class BackupExtension extends Extension
 
     /**
      * Configure compression adapters.
+     */
+    /**
+     * @param array<string, mixed> $config
      */
     private function configureCompressionAdapters(ContainerBuilder $container, array $config): void
     {

@@ -99,19 +99,19 @@ pro_backup:
 Create a database backup:
 
 ```bash
-php bin/console backup:create --type=database
+php bin/console pro:backup:create --type=database
 ```
 
 Restore a backup:
 
 ```bash
-php bin/console backup:restore <backup-id>
+php bin/console pro:backup:restore <backup-id>
 ```
 
 List available backups:
 
 ```bash
-php bin/console backup:list
+php bin/console pro:backup:list
 ```
 
 ### Programmatic usage

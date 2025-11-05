@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace ProBackupBundle;
 
-use ProBackupBundle\DependencyInjection\BackupExtension;
 use ProBackupBundle\DependencyInjection\Compiler\CompressionAdapterPass;
 use ProBackupBundle\DependencyInjection\Compiler\DatabaseAdapterPass;
 use ProBackupBundle\DependencyInjection\Compiler\StorageAdapterPass;
+use ProBackupBundle\DependencyInjection\ProBackupExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -20,7 +20,7 @@ class ProBackupBundle extends Bundle
     public function getContainerExtension(): ?ExtensionInterface
     {
         if (null === $this->extension) {
-            $this->extension = new BackupExtension();
+            $this->extension = new ProBackupExtension();
         }
 
         return $this->extension;

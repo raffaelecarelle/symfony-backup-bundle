@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Command to restore a backup.
  */
-#[AsCommand(name: 'backup:restore')]
+#[AsCommand(name: 'pro:backup:restore')]
 class RestoreCommand extends Command
 {
     /**

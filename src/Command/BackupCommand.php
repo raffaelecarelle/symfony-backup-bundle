@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Command to create a backup.
  */
-#[AsCommand(name: 'backup:create')]
+#[AsCommand(name: 'pro:backup:create')]
 class BackupCommand extends Command
 {
     /**

@@ -1,5 +1,5 @@
 {
-    "name": "raffaelecarelle/symfony-backup-bundle",
+    "name": "raffaelecarelle/symfony-pro-backup-bundle",
     "description": "Symfony bundle for database and filesystem backup/restore management",
     "type": "symfony-bundle",
     "license": "MIT",
