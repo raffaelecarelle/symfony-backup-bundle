@@ -28,6 +28,16 @@ The Symfony Backup Bundle provides a complete and configurable system for automa
 composer require raffaelecarelle/symfony-backup-bundle
 ```
 
+### Profiler
+
+If you enabled profiler section import the profiler routing file:
+
+```yaml
+# config/routes/profiler.yaml
+_profiler_pro_backup:
+    resource: "@ProBackupBundle/Resources/config/routes.xml"
+```
+
 ## Configuration
 
 Create a configuration file at `config/packages/pro_backup.yaml`:

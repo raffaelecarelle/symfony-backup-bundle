@@ -19,6 +19,6 @@ return (new Config())
             ->ignoreDotFiles(false)
             ->ignoreVCSIgnored(true)
             ->in(['src', 'tests'])
-        ->exclude('tests/_fixtures')
+            ->notPath('_fixtures')
     )
     ;

@@ -25,6 +25,7 @@
         <ini name="error_reporting" value="-1"/>
         <ini name="display_errors" value="On"/>
         <ini name="display_startup_errors" value="On"/>
+        <env name="KERNEL_CLASS" value="TestApp\Kernel"/>
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
         <!-- Environment variables for DB URLs are intentionally NOT set here.
              Defaults go to tests/_fixtures/TestApp/.env.test.dist and can be overridden by
