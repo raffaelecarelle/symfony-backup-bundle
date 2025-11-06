@@ -91,7 +91,7 @@ jobs:
 
             -   name: Export test database URLs
                 run: |
-                    echo "TESTAPP_DATABASE_URL_MYSQL=mysql://test_user:test_password@127.0.0.1:3306/test_db?charset=utf8mb4" >> $GITHUB_ENV
+                    echo "TESTAPP_DATABASE_URL_MYSQL=mysql://test_user:test_password@127.0.0.1:3306/test_db?serverVersion=8.0.1&charset=utf8mb4" >> $GITHUB_ENV
                     echo "TESTAPP_DATABASE_URL_PGSQL=postgresql://test_user:test_password@127.0.0.1:5432/test_db?serverVersion=15" >> $GITHUB_ENV
 
             -   name: Validate composer
