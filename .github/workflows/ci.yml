@@ -45,6 +45,9 @@ jobs:
             matrix:
                 php: [ '8.2', '8.3', '8.4' ]
                 symfony: [ '6.4', '7.3' ]
+                exclude:
+                    -   php: '8.4'
+                        symfony: '6.4'
         env:
             MYSQL_HOST: 127.0.0.1
             MYSQL_PORT: 3306
@@ -105,12 +108,12 @@ jobs:
 
             -   name: PHPStan
                 run: vendor/bin/phpstan --version && vendor/bin/phpstan analyse --no-progress --ansi --memory-limit=1G
-            
+
             -   name: Install PostgreSQL client tools
                 run: |
                     sudo apt-get update
                     sudo apt-get install -y postgresql-client
-            
+
             -   name: PHPUnit
                 run: |
                     vendor/bin/simple-phpunit --testdox --colors=always
