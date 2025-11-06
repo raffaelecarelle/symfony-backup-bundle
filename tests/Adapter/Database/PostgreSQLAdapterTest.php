@@ -139,66 +139,6 @@ class PostgreSQLAdapterTest extends TestCase
     }
 
     /**
-     * Test backup method with mocked process.
-     *
-     * Note: This is a partial test that mocks the process execution
-     * In a real environment, we would use a test database or a more
-     * sophisticated approach to test the actual pg_dump command
-     */
-    public function testBackupWithMockedProcess(): void
-    {
-        // Skip this test if we can't mock the Process class
-        $this->markTestSkipped('This test requires mocking static methods which is not directly supported in PHPUnit');
-
-        // Mock the process execution
-        $this->mockSuccessfulProcess();
-
-        // Create a temporary file that will be "created" by our mocked process
-        $outputPath = $this->tempDir.'/backups';
-        $this->filesystem->mkdir($outputPath);
-
-        $config = new BackupConfiguration();
-        $config->setOutputPath($outputPath);
-        $config->setName('test_backup');
-
-        // Execute the backup
-        $result = $this->adapter->backup($config);
-
-        // Since we mocked the process, we need to manually create the output file
-        $expectedFilePath = $outputPath.'/test_db_test_backup_'.date('Y-m-d').'_*.sql';
-        $this->filesystem->touch($expectedFilePath);
-
-        // Verify the result
-        $this->assertTrue($result->isSuccess());
-    }
-
-    /**
-     * Test restore method with mocked process.
-     *
-     * Note: This is a partial test that mocks the process execution
-     * In a real environment, we would use a test database or a more
-     * sophisticated approach to test the actual pg_restore command
-     */
-    public function testRestoreWithMockedProcess(): void
-    {
-        // Skip this test if we can't mock the Process class
-        $this->markTestSkipped('This test requires mocking static methods which is not directly supported in PHPUnit');
-
-        // Mock the process execution
-        $this->mockSuccessfulProcess();
-
-        // Create a backup file
-        $backupPath = $this->tempDir.'/test_backup.sql';
-        file_put_contents($backupPath, '-- PostgreSQL backup file');
-
-        // Execute the restore
-        $result = $this->adapter->restore($backupPath);
-
-        // Verify the result
-        $this->assertTrue($result);
-    }
-
-    /**
      * Test the command building functionality for pg_dump.
      *
      * This test uses reflection to access the private method
