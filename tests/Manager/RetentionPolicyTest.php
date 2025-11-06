@@ -9,6 +9,7 @@ use ProBackupBundle\Adapter\Storage\LocalAdapter;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
+use Psr\Log\NullLogger;
 use Symfony\Component\Filesystem\Filesystem;
 
 class RetentionPolicyTest extends TestCase
@@ -33,7 +34,7 @@ class RetentionPolicyTest extends TestCase
 
     private function createManagerWithLocal(string $backupDir, array $config): BackupManager
     {
-        $manager = new BackupManager($backupDir, null, null, null);
+        $manager = new BackupManager($backupDir, null, new NullLogger(), null);
         $local = new LocalAdapter($backupDir);
         $manager->addStorageAdapter('local', $local);
         $manager->setDefaultStorage('local');
