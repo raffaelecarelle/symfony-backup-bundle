@@ -38,6 +38,14 @@ abstract class AbstractEndToEndTest extends TestCase
         $this->tempDir = sys_get_temp_dir().'/probackup_e2e_tests_'.uniqid('', true);
         $this->filesystem->mkdir($this->tempDir);
 
+        // Ensure TestApp default sqlite file exists to satisfy tests using Doctrine default connection
+        $testAppDir = __DIR__.'/../_fixtures/TestApp';
+        $defaultSqlite = $testAppDir.'/var/test.sqlite';
+        $this->filesystem->mkdir(\dirname($defaultSqlite));
+        if (!file_exists($defaultSqlite)) {
+            touch($defaultSqlite);
+        }
+
         // Boot the TestApp kernel
         $this->kernel = new Kernel('test', true);
         $this->kernel->boot();

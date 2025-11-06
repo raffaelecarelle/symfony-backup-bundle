@@ -11,45 +11,63 @@ use ProBackupBundle\Model\BackupConfiguration;
  */
 class MySQLDatabaseBackupTest extends AbstractEndToEndTest
 {
-    private string $testDatabase = 'test_db';
+    private string $testDatabase;
+    private string $host;
+    private string $port;
+    private string $user;
+    private string $password;
 
     protected function setupTest(): void
     {
+        // Read connection params from env (CI uses 127.0.0.1; local Docker uses service name)
+        $this->host = getenv('MYSQL_HOST') ?: 'mysql';
+        $this->port = (string) (getenv('MYSQL_PORT') ?: '3306');
+        $this->user = getenv('MYSQL_USER') ?: 'root';
+        $this->password = getenv('MYSQL_PASSWORD') ?: 'root';
+        $this->testDatabase = getenv('MYSQL_DATABASE') ?: 'test_db';
+
         // Skip test if MySQL is not available
         if (!$this->isMySQLAvailable()) {
             $this->markTestSkipped('MySQL is not available');
         }
 
-        // Create test database and tables
-        $this->createMySQLTestDatabase();
+        // Prepare schema and seed data on target database
+        $this->prepareMySQLSchema();
         $this->seedMySQLTestData();
     }
 
     private function isMySQLAvailable(): bool
     {
         try {
-            $pdo = new \PDO('mysql:host=mysql;port=3306;dbname=mysql', 'root', 'root');
+            $dsn = \sprintf('mysql:host=%s;port=%d;dbname=information_schema', $this->host, $this->port);
+            $pdo = new \PDO($dsn, $this->user, $this->password);
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
             return true;
-        } catch (\Throwable $e) {
-            dump($e->getMessage());
-
+        } catch (\Throwable) {
+            // echo instead of dump to avoid noisy output in CI
+            // echo 'MySQL availability check failed: '.$e->getMessage()."\n";
             return false;
         }
     }
 
-    private function createMySQLTestDatabase(): void
+    private function prepareMySQLSchema(): void
     {
-        $pdo = new \PDO('mysql:host=mysql;port=3306;dbname=mysql', 'root', 'root');
+        // Ensure target database exists first
+        $serverDsn = \sprintf('mysql:host=%s;port=%d;dbname=information_schema', $this->host, (int) $this->port);
+        $serverPdo = new \PDO($serverDsn, $this->user, $this->password);
+        $serverPdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $dbName = str_replace('`', '', $this->testDatabase);
+        $serverPdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
-        // Drop database if exists
-        $pdo->exec("DROP DATABASE IF EXISTS `{$this->testDatabase}`");
+        // Now connect to the target database and prepare schema
+        $dsn = \sprintf('mysql:host=%s;port=%d;dbname=%s', $this->host, (int) $this->port, $this->testDatabase);
+        $pdo = new \PDO($dsn, $this->user, $this->password);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        // Create database
-        $pdo->exec("CREATE DATABASE `{$this->testDatabase}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-
-        // Connect to the new database
-        $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
+        // Drop tables if they exist to ensure a clean state
+        $pdo->exec('DROP TABLE IF EXISTS posts');
+        $pdo->exec('DROP TABLE IF EXISTS users');
 
         // Create users table
         $pdo->exec('
@@ -72,13 +90,13 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ');
-
-        $pdo = null;
     }
 
     private function seedMySQLTestData(): void
     {
-        $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
+        $dsn = \sprintf('mysql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
+        $pdo = new \PDO($dsn, $this->user, $this->password);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         // Insert test users
         $pdo->exec("
@@ -96,8 +114,6 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
             (2, 'Hello World', 'Hello world from Jane'),
             (3, 'MySQL Backup Test', 'Testing MySQL backup functionality')
         ");
-
-        $pdo = null;
     }
 
     public function testMySQLBackupWithGzipCompression(): void
@@ -155,7 +171,8 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($result->isSuccess(), 'Backup should be successful');
 
         // Modify the database
-        $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
+        $pdo = new \PDO(\sprintf('mysql:host=%s;port=%d;dbname=%s', $this->host, (int) $this->port, $this->testDatabase), $this->user, $this->password);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $pdo->exec('DELETE FROM posts');
         $pdo->exec('DELETE FROM users');
 
@@ -173,7 +190,8 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($restoreResult, 'Restore should be successful');
 
         // Verify data is restored
-        $pdo = new \PDO("mysql:host=mysql;port=3306;dbname={$this->testDatabase}", 'root', 'root');
+        $pdo = new \PDO(\sprintf('mysql:host=%s;port=%d;dbname=%s', $this->host, (int) $this->port, $this->testDatabase), $this->user, $this->password);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         // Check users
         $stmt = $pdo->query('SELECT COUNT(*) as count FROM users');

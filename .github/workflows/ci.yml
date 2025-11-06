@@ -105,7 +105,12 @@ jobs:
 
             -   name: PHPStan
                 run: vendor/bin/phpstan --version && vendor/bin/phpstan analyse --no-progress --ansi --memory-limit=1G
-
+            
+            -   name: Install PostgreSQL client tools
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install -y postgresql-client
+            
             -   name: PHPUnit
                 run: |
                     vendor/bin/phpunit --version

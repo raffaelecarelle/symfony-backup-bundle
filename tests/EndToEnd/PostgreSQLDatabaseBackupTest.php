@@ -11,28 +11,38 @@ use ProBackupBundle\Model\BackupConfiguration;
  */
 class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
 {
-    private string $testDatabase = 'test_db';
-    private string $host = 'postgres';
-    private int $port = 5432;
-    private string $user = 'postgres';
-    private string $password = 'root';
+    private string $dbName;
+    private string $host;
+    private string $port;
+    private string $user;
+    private string $password;
 
     protected function setupTest(): void
     {
+        // Read connection params from env; CI exposes services on 127.0.0.1
+        $this->host = getenv('PGHOST') ?: 'postgres';
+        $this->port = (string) (getenv('PGPORT') ?: '5432');
+        $this->user = getenv('PGUSER') ?: 'postgres';
+        $this->password = getenv('PGPASSWORD') ?: 'root';
+        $this->dbName = getenv('PGDATABASE') ?: 'test_db';
+
         // Skip test if PostgreSQL is not available
         if (!$this->isPostgreSQLAvailable()) {
             $this->markTestSkipped('PostgreSQL is not available');
         }
 
-        // Create test database and tables
-        $this->createPostgreSQLTestDatabase();
+        // Ensure the target database exists before preparing schema/seed
+        $this->ensurePostgreSQLDatabaseExists();
+
+        // Create test schema and seed data in target database
+        $this->preparePostgreSQLSchema();
         $this->seedPostgreSQLTestData();
     }
 
     private function isPostgreSQLAvailable(): bool
     {
         try {
-            $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
+            $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, (int) $this->port);
             $pdo = new \PDO($dsn, $this->user, $this->password);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -42,29 +52,38 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         }
     }
 
-    private function createPostgreSQLTestDatabase(): void
+    private function ensurePostgreSQLDatabaseExists(): void
     {
-        // Connect to postgres database
-        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, $this->port);
+        // Connect to maintenance DB to check/create target database
+        $maintenanceDsn = \sprintf('pgsql:host=%s;port=%d;dbname=postgres', $this->host, (int) $this->port);
+        $pdo = new \PDO($maintenanceDsn, $this->user, $this->password);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        // Check if database exists
+        $stmt = $pdo->prepare('SELECT 1 FROM pg_database WHERE datname = :name');
+        $stmt->execute(['name' => $this->dbName]);
+        $exists = (bool) $stmt->fetchColumn();
+
+        if (!$exists) {
+            try {
+                // Quote database name safely (avoid double quotes injection)
+                $dbName = str_replace('"', '', $this->dbName);
+                $pdo->exec('CREATE DATABASE "'.$dbName.'" WITH ENCODING \'UTF8\'');
+            } catch (\Throwable) {
+                // Ignore creation failure (e.g., insufficient privileges); later connection may still succeed in CI where DB is pre-created
+            }
+        }
+    }
+
+    private function preparePostgreSQLSchema(): void
+    {
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->dbName);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        // Drop database if exists (terminate existing connections first)
-        $pdo->exec("
-            SELECT pg_terminate_backend(pg_stat_activity.pid)
-            FROM pg_stat_activity
-            WHERE pg_stat_activity.datname = '{$this->testDatabase}'
-            AND pid <> pg_backend_pid()
-        ");
-        $pdo->exec("DROP DATABASE IF EXISTS {$this->testDatabase}");
-
-        // Create database
-        $pdo->exec("CREATE DATABASE {$this->testDatabase} WITH ENCODING 'UTF8'");
-
-        // Connect to the new database
-        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
-        $pdo = new \PDO($dsn, $this->user, $this->password);
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        // Ensure clean state
+        $pdo->exec('DROP TABLE IF EXISTS posts');
+        $pdo->exec('DROP TABLE IF EXISTS users');
 
         // Create users table
         $pdo->exec('
@@ -93,7 +112,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
 
     private function seedPostgreSQLTestData(): void
     {
-        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->dbName);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -192,7 +211,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($result->isSuccess(), 'Backup should be successful');
 
         // Modify the database
-        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->testDatabase);
+        $dsn = \sprintf('pgsql:host=%s;port=%d;dbname=%s', $this->host, $this->port, $this->dbName);
         $pdo = new \PDO($dsn, $this->user, $this->password);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -275,10 +294,10 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
                 $pdo->exec("
                     SELECT pg_terminate_backend(pg_stat_activity.pid)
                     FROM pg_stat_activity
-                    WHERE pg_stat_activity.datname = '{$this->testDatabase}'
+                    WHERE pg_stat_activity.datname = '{$this->dbName}'
                     AND pid <> pg_backend_pid()
                 ");
-                $pdo->exec("DROP DATABASE IF EXISTS {$this->testDatabase}");
+                $pdo->exec("DROP DATABASE IF EXISTS {$this->dbName}");
             } catch (\Throwable) {
                 // Ignore cleanup errors
             }

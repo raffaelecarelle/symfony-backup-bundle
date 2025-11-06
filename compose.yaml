@@ -32,6 +32,8 @@ services:
             MYSQL_PASSWORD: test_password
         ports:
             - "3306:3306"
+        tmpfs:
+            -   /var/lib/mysql:rw
         healthcheck:
             test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-proot" ]
             interval: 5s
@@ -47,6 +49,8 @@ services:
             POSTGRES_PASSWORD: root
             POSTGRES_USER: postgres
             POSTGRES_DB: test_db
+        tmpfs:
+            -   /var/lib/postgresql/data:rw
         ports:
             - "5432:5432"
         healthcheck:
