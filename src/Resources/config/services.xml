@@ -37,6 +37,11 @@
             <tag name="console.command" />
         </service>
 
+        <service id="pro_backup.command.purge" class="ProBackupBundle\Command\PurgeCommand">
+            <argument type="service" id="pro_backup.manager" />
+            <tag name="console.command" />
+        </service>
+
         <service id="pro_backup.process.factory" class="ProBackupBundle\Process\Factory\ProcessFactory">
         </service>
 

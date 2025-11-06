@@ -24,6 +24,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class BackupManager
 {
+    /** @var array<string,mixed> */
+    private array $config = [];
     /**
      * @var BackupAdapterInterface[] List of backup adapters
      */
@@ -104,11 +106,27 @@ class BackupManager
      */
     public function setDefaultStorage(string $name): self
     {
+        // Do not throw here because DI may call this before adapters are registered.
+        // We validate lazily when the storage is actually used.
         if (!isset($this->storageAdapters[$name])) {
-            throw new BackupException(\sprintf('Storage adapter "%s" not found', $name));
+            $this->defaultStorage = $name; // set anyway; will be validated on first use if needed
+
+            return $this;
         }
 
         $this->defaultStorage = $name;
+
+        return $this;
+    }
+
+    /**
+     * Inject full bundle configuration (used for retention, scheduler context, etc.).
+     *
+     * @param array<string,mixed> $config
+     */
+    public function setConfig(array $config): self
+    {
+        $this->config = $config;
 
         return $this;
     }
@@ -120,7 +138,7 @@ class BackupManager
      */
     public function backup(BackupConfiguration $config): BackupResult
     {
-        $this->logger->info('Starting backup', ['type' => $config->getType()]);
+        $this->logger?->info('Starting backup', ['type' => $config->getType()]);
 
         // Set default storage if not specified
         if (!$config->getStorage()) {
@@ -222,6 +240,16 @@ class BackupManager
                     'storage' => $config->getStorage(),
                     'metadata' => $result->getMetadata(),
                 ];
+
+                // Apply retention policy for this backup type
+                try {
+                    $this->applyRetentionPolicy($config->getType());
+                } catch (\Throwable $e) {
+                    $this->logger->error('Failed to apply retention policy', [
+                        'type' => $config->getType(),
+                        'exception' => $e->getMessage(),
+                    ]);
+                }
             } else {
                 $this->logger->error('Backup failed', ['error' => $result->getError()]);
 
@@ -470,26 +498,41 @@ class BackupManager
      */
     private function getAdapter(string $type, ?string $connectionName): BackupAdapterInterface
     {
-        $connectionName ??= $this->doctrine->getDefaultConnectionName() ?? throw new BackupException('No Doctrine connection found');
-
-        // Look for a database adapter that has a resolver
+        // Pass 1: Prefer non-DB adapters that explicitly support the type (e.g., filesystem, custom)
         foreach ($this->adapters as $adapter) {
-            if ($adapter instanceof DatabaseConnectionInterface) {
-                $connection = $adapter->getConnection();
-
-                if (
-                    $this->doctrine->getConnection($connectionName) !== $connection
-                    && $this->doctrine->getConnection($connectionName)->getDatabasePlatform() !== $connection->getDatabasePlatform()
-                ) {
-                    continue;
-                }
-
+            if (!($adapter instanceof DatabaseConnectionInterface) && $adapter->supports($type)) {
                 return $adapter;
             }
+        }
 
-            if ($adapter->supports($type)) {
-                return $adapter;
+        // Pass 2: Consider DB adapters (require Doctrine context if available)
+        foreach ($this->adapters as $adapter) {
+            if (!($adapter instanceof DatabaseConnectionInterface)) {
+                continue;
             }
+
+            $doctrine = $this->doctrine ?? null;
+            $resolvedConnectionName = $connectionName;
+            if (null === $resolvedConnectionName) {
+                $resolvedConnectionName = $doctrine?->getDefaultConnectionName();
+            }
+
+            if (null === $doctrine || null === $resolvedConnectionName) {
+                // No Doctrine context available -> skip DB adapters
+                continue;
+            }
+
+            $connection = $adapter->getConnection();
+            $requestedConnection = $doctrine->getConnection($resolvedConnectionName);
+
+            if (
+                $requestedConnection !== $connection
+                && $requestedConnection->getDatabasePlatform() !== $connection->getDatabasePlatform()
+            ) {
+                continue;
+            }
+
+            return $adapter;
         }
 
         throw new BackupException(\sprintf('No adapter found for backup type "%s"', $type));
@@ -592,6 +635,80 @@ class BackupManager
         $type = $backup['type'];
 
         return \sprintf('%s/%s', $type, $fileName);
+    }
+
+    /**
+     * Apply retention policy by deleting old backups beyond configured retention days.
+     *
+     * @param string|null $type   'database' | 'filesystem' (null = both)
+     * @param bool        $dryRun If true, only logs actions without deleting
+     */
+    public function applyRetentionPolicy(?string $type = null, bool $dryRun = false): void
+    {
+        $types = $type ? [$type] : ['database', 'filesystem'];
+
+        foreach ($types as $t) {
+            $days = (int) ($this->config[$t]['retention_days'] ?? 0);
+            if ($days <= 0) {
+                $this->logger?->info('Retention disabled or zero days, skipping', ['type' => $t]);
+                continue;
+            }
+
+            $cutoff = (new \DateTimeImmutable(\sprintf('-%d days', $days)));
+            $this->logger?->info('Applying retention policy', ['type' => $t, 'days' => $days, 'cutoff' => $cutoff->format(\DATE_ATOM)]);
+
+            foreach ($this->storageAdapters as $storageName => $adapter) {
+                // List entries under the type prefix
+                $entries = $adapter->list($t);
+
+                foreach ($entries as $entry) {
+                    // LocalAdapter schema
+                    if (isset($entry['created_at']) && isset($entry['name']) && isset($entry['type'])) {
+                        $createdAt = $entry['created_at'] instanceof \DateTimeInterface ? $entry['created_at'] : new \DateTimeImmutable('@'.(string) $entry['created_at']);
+                        if ($createdAt < $cutoff) {
+                            $remotePath = $entry['type'].'/'.$entry['name'];
+                            if ($dryRun) {
+                                $this->logger?->info('Retention dry-run: would delete old backup', [
+                                    'storage' => $storageName,
+                                    'path' => $remotePath,
+                                    'created_at' => $createdAt->format(\DATE_ATOM),
+                                ]);
+                                continue;
+                            }
+                            $ok = $adapter->delete($remotePath);
+                            $this->logger?->info($ok ? 'Deleted old backup due to retention' : 'Failed to delete old backup', [
+                                'storage' => $storageName,
+                                'path' => $remotePath,
+                                'created_at' => $createdAt->format(\DATE_ATOM),
+                            ]);
+                        }
+                        continue;
+                    }
+
+                    // S3/Google schema
+                    if (isset($entry['path']) && isset($entry['modified'])) {
+                        $modified = $entry['modified'] instanceof \DateTimeInterface ? $entry['modified'] : new \DateTimeImmutable((string) $entry['modified']);
+                        if ($modified < $cutoff) {
+                            $remotePath = $entry['path'];
+                            if ($dryRun) {
+                                $this->logger?->info('Retention dry-run: would delete old remote backup', [
+                                    'storage' => $storageName,
+                                    'path' => $remotePath,
+                                    'modified' => $modified->format(\DATE_ATOM),
+                                ]);
+                                continue;
+                            }
+                            $ok = $adapter->delete($remotePath);
+                            $this->logger?->info($ok ? 'Deleted old remote backup due to retention' : 'Failed to delete old remote backup', [
+                                'storage' => $storageName,
+                                'path' => $remotePath,
+                                'modified' => $modified->format(\DATE_ATOM),
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

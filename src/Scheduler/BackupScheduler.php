@@ -127,10 +127,14 @@ class BackupScheduler implements ScheduleProviderInterface
      */
     private function configureDatabaseBackup(Schedule $schedule): void
     {
-        $frequency = $this->scheduleConfig['database']['frequency'] ?? 'daily';
-        $time = $this->scheduleConfig['database']['time'] ?? '02:00';
-
-        $cronExpression = $this->getCronExpression($frequency, $time);
+        $customCron = $this->scheduleConfig['database']['cron_expression'] ?? null;
+        if (\is_string($customCron) && '' !== trim($customCron)) {
+            $cronExpression = $customCron;
+        } else {
+            $frequency = $this->scheduleConfig['database']['frequency'] ?? 'daily';
+            $time = $this->scheduleConfig['database']['time'] ?? '02:00';
+            $cronExpression = $this->getCronExpression($frequency, $time);
+        }
 
         $message = new BackupMessage('database');
         $schedule->add(RecurringMessage::cron($cronExpression, $message));
@@ -143,10 +147,14 @@ class BackupScheduler implements ScheduleProviderInterface
      */
     private function configureFilesystemBackup(Schedule $schedule): void
     {
-        $frequency = $this->scheduleConfig['filesystem']['frequency'] ?? 'weekly';
-        $time = $this->scheduleConfig['filesystem']['time'] ?? '03:00';
-
-        $cronExpression = $this->getCronExpression($frequency, $time);
+        $customCron = $this->scheduleConfig['filesystem']['cron_expression'] ?? null;
+        if (\is_string($customCron) && '' !== trim($customCron)) {
+            $cronExpression = $customCron;
+        } else {
+            $frequency = $this->scheduleConfig['filesystem']['frequency'] ?? 'weekly';
+            $time = $this->scheduleConfig['filesystem']['time'] ?? '03:00';
+            $cronExpression = $this->getCronExpression($frequency, $time);
+        }
 
         $message = new BackupMessage('filesystem');
         $schedule->add(RecurringMessage::cron($cronExpression, $message));

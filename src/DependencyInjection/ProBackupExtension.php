@@ -56,8 +56,14 @@ class ProBackupExtension extends Extension
             $loader->load('scheduler.xml');
 
             $schedulerDef = $container->getDefinition('pro_backup.scheduler');
-            $schedulerDef->setArgument(1, $config['schedule']);
+            // Fix: the provider constructor takes a single argument (the schedule config)
+            $schedulerDef->setArgument(0, $config['schedule']);
         }
+
+        // Always set default storage on manager after adapters are registered
+        $container->getDefinition('pro_backup.manager')
+            ->addMethodCall('setDefaultStorage', [$config['default_storage']])
+            ->addMethodCall('setConfig', [$config]);
 
         // Set parameters
         $container->setParameter('pro_backup.config', $config);
