@@ -20,7 +20,7 @@ The Symfony Backup Bundle provides a complete and configurable system for automa
 ## Requirements
 
 - PHP: >= 8.2
-- Symfony: 5.4+
+- Symfony: 6.4+
 
 ## Installation
 
