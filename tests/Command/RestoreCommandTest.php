@@ -155,14 +155,10 @@ class RestoreCommandTest extends TestCase
         $this->commandTester->execute([
             'backup-id' => 'backup123',
             '--force' => true,
-            '--single-user' => true,
-            '--recovery' => 'norecovery',
             '--backup-existing' => true,
         ]);
 
         // Verify the options were passed correctly
-        $this->assertTrue($capturedOptions['single_user']);
-        $this->assertEquals('norecovery', $capturedOptions['recovery']);
         $this->assertTrue($capturedOptions['backup_existing']);
 
         // Verify the output

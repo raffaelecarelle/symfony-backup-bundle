@@ -8,7 +8,7 @@ The Symfony Backup Bundle provides a complete and configurable system for automa
 
 ## Features
 
-- Database backup and restore (MySQL, PostgreSQL, SQLite, SQL Server)
+- Database backup and restore (MySQL, PostgreSQL, SQLite)
 - Filesystem backup and restore
 - Multiple storage adapters (Local, S3, Google Cloud)
 - Compression support (gzip, zip)

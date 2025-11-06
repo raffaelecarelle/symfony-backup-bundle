@@ -33,8 +33,6 @@ class RestoreCommand extends Command
         $this
             ->addArgument('backup-id', InputArgument::REQUIRED, 'ID of the backup to restore')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force restore without confirmation')
-            ->addOption('single-user', null, InputOption::VALUE_NONE, 'Set database to single user mode during restore (SQL Server only)')
-            ->addOption('recovery', null, InputOption::VALUE_REQUIRED, 'Recovery option (SQL Server only): recovery|norecovery')
             ->addOption('backup-existing', null, InputOption::VALUE_NONE, 'Create a backup of the existing database before restore (SQLite only)')
             ->addOption('connection-name', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Doctrine connection name to use')
             ->setHelp(<<<'EOF'
@@ -45,11 +43,6 @@ The <info>%command.name%</info> command restores a backup:
 You can force the restore without confirmation:
 
   <info>php %command.full_name% backup_id --force</info>
-
-SQL Server specific options:
-
-  <info>php %command.full_name% backup_id --single-user</info>
-  <info>php %command.full_name% backup_id --recovery=norecovery</info>
 
 SQLite specific options:
 
@@ -103,14 +96,6 @@ EOF
 
         // Prepare restore options
         $options = [];
-
-        if ($input->getOption('single-user')) {
-            $options['single_user'] = true;
-        }
-
-        if ($input->getOption('recovery')) {
-            $options['recovery'] = $input->getOption('recovery');
-        }
 
         if ($input->getOption('backup-existing')) {
             $options['backup_existing'] = true;
