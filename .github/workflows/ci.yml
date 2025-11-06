@@ -113,8 +113,7 @@ jobs:
             
             -   name: PHPUnit
                 run: |
-                    vendor/bin/phpunit --version
-                    vendor/bin/phpunit --testdox --colors=always
+                    vendor/bin/simple-phpunit --testdox --colors=always
 
     release:
         name: Create Release
