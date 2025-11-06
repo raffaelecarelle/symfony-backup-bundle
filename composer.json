@@ -25,18 +25,19 @@
         "symfony/yaml": "^6.4|^7.0"
     },
     "require-dev": {
+        "ext-pdo": "*",
+        "aws/aws-sdk-php": "*",
         "doctrine/doctrine-bundle": "^2.0",
         "friendsofphp/php-cs-fixer": "^3.85",
+        "google/cloud-storage": "*",
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^2.1",
         "symfony/browser-kit": "^6.4|^7.0",
         "symfony/css-selector": "^6.4|^7.0",
+        "symfony/dotenv": "^7.3",
         "symfony/phpunit-bridge": "^6.4|^7.0",
         "symfony/twig-bundle": "^6.4|^7.0",
-        "symfony/web-profiler-bundle": "^6.4|^7.0",
-        "ext-pdo": "*",
-        "aws/aws-sdk-php": "*",
-        "google/cloud-storage": "*"
+        "symfony/web-profiler-bundle": "^6.4|^7.0"
     },
     "suggest": {
         "aws/aws-sdk-php": "For S3 storage adapter",

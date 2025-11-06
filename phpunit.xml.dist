@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          colors="true"
          executionOrder="random"
          failOnWarning="true"
@@ -25,7 +25,8 @@
         <ini name="error_reporting" value="-1"/>
         <ini name="display_errors" value="On"/>
         <ini name="display_startup_errors" value="On"/>
-        <env name="TESTAPP_DATABASE_URL_MYSQL" value="mysql://test_user:test_password@mysql:3306/test_db?serverVersion=8.0&amp;charset=utf8mb4" force="false"/>
-        <env name="TESTAPP_DATABASE_URL_PGSQL" value="postgresql://postgres:root@postgres:5432/test_db?serverVersion=15" force="false"/>
+        <!-- Environment variables for DB URLs are intentionally NOT set here.
+             Defaults go to tests/_fixtures/TestApp/.env.test.dist and can be overridden by
+             tests/_fixtures/TestApp/.env.test.local or CI-provided env vars. -->
     </php>
 </phpunit>
