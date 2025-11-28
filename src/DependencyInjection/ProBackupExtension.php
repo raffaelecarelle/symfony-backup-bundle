@@ -15,7 +15,7 @@ use ProBackupBundle\Adapter\Storage\S3Adapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
 class ProBackupExtension extends Extension
@@ -28,8 +28,8 @@ class ProBackupExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('services.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.php');
 
         // Configure the backup manager
         $backupManagerDef = $container->getDefinition('pro_backup.manager');
@@ -50,12 +50,12 @@ class ProBackupExtension extends Extension
 
         // Configure profiler integration
         if ($config['profiler']['enabled']) {
-            $loader->load('profiler.xml');
+            $loader->load('profiler.php');
         }
 
         // Configure scheduler
         if ($config['schedule']['enabled']) {
-            $loader->load('scheduler.xml');
+            $loader->load('scheduler.php');
 
             $schedulerDef = $container->getDefinition('pro_backup.scheduler');
             // Fix: the provider constructor takes a single argument (the schedule config)

@@ -4,8 +4,6 @@ parameters:
     level: 6
     paths:
         - src
-    bootstrapFiles:
-        - vendor/autoload.php
     excludePaths:
         - tests/_fixtures/**
         - var/*
