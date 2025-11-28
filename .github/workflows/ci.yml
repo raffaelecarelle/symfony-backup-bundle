@@ -45,15 +45,25 @@ jobs:
             matrix:
                 php: [ '8.2', '8.3', '8.4', '8.5' ]
                 symfony: [ '6.4', '7.4', '8.0' ]
-                exclude:
+                include:
                     -   php: '8.2'
-                        symfony: '8.0'
+                        symfony: '6.4'
+                    -   php: '8.2'
+                        symfony: '7.4'
                     -   php: '8.3'
-                        symfony: '8.0'
+                        symfony: '6.4'
+                    -   php: '8.3'
+                        symfony: '7.4'
                     -   php: '8.4'
                         symfony: '6.4'
+                    -   php: '8.4'
+                        symfony: '7.4'
+                    -   php: '8.4'
+                        symfony: '8.0'
                     -   php: '8.5'
-                        symfony: '6.4'
+                        symfony: '7.4'
+                    -   php: '8.5'
+                        symfony: '8.0'
         env:
             MYSQL_HOST: 127.0.0.1
             MYSQL_PORT: 3306
