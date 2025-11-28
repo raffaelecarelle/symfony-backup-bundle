@@ -44,10 +44,10 @@ jobs:
             fail-fast: false
             matrix:
                 php: [ '8.2', '8.3', '8.4', '8.5' ]
-                symfony: [ '6.4', '7.4', '8.*' ]
+                symfony: [ '6.4', '7.4', '8.0' ]
                 exclude:
                     -   php: '8.2'
-                    -   symfony: '8.*'
+                        symfony: '8.0'
                     -   php: '8.4'
                         symfony: '6.4'
                     -   php: '8.5'
@@ -119,6 +119,8 @@ jobs:
                     sudo apt-get install -y postgresql-client
 
             -   name: PHPUnit
+                env:
+                    APP_ENV: test
                 run: |
                     vendor/bin/simple-phpunit --testdox --colors=always
 
