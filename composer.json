@@ -33,7 +33,7 @@
         "google/cloud-storage": "*",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^1.11|^2.0",
-        "phpstan/phpstan-symfony": "^1.4",
+        "phpstan/phpstan-symfony": "^1.4|^2.0",
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^2.1",
         "symfony/browser-kit": "^6.4|^7.0|^8.0",
