@@ -35,7 +35,7 @@ If you enabled profiler section import the profiler routing file:
 ```yaml
 # config/routes/profiler.yaml
 _profiler_pro_backup:
-    resource: "@ProBackupBundle/Resources/config/routes.xml"
+    resource: "@ProBackupBundle/Resources/config/routes.php"
 ```
 
 ## Configuration
