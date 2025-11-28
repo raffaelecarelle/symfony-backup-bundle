@@ -7,15 +7,19 @@ namespace ProBackupBundle\Tests\Adapter\Storage;
 use Google\Cloud\Storage\Bucket;
 use Google\Cloud\Storage\StorageClient;
 use Google\Cloud\Storage\StorageObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\Storage\GoogleCloudAdapter;
 use Psr\Log\LoggerInterface;
 
 class GoogleCloudAdapterTest extends TestCase
 {
-    private StorageClient $client;
-    private Bucket $bucket;
-    private LoggerInterface $logger;
+    private MockObject $client;
+
+    private MockObject $bucket;
+
+    private MockObject $logger;
+
     private GoogleCloudAdapter $adapter;
 
     protected function setUp(): void
@@ -31,12 +35,12 @@ class GoogleCloudAdapterTest extends TestCase
 
     public function testStoreSuccess(): void
     {
-        $local = sys_get_temp_dir().'/gcs_local_'.uniqid('', true).'.txt';
+        $local = sys_get_temp_dir() . '/gcs_local_' . uniqid('', true) . '.txt';
         file_put_contents($local, 'content');
 
         $this->bucket->expects($this->once())
             ->method('upload')
-            ->with($this->callback(fn ($r) => \is_resource($r)), ['name' => 'backups/remote/file.txt']);
+            ->with($this->callback(fn ($r): bool => \is_resource($r)), ['name' => 'backups/remote/file.txt']);
 
         $this->assertTrue($this->adapter->store($local, 'remote/file.txt'));
         @unlink($local);
@@ -50,7 +54,7 @@ class GoogleCloudAdapterTest extends TestCase
     public function testRetrieveSuccess(): void
     {
         $remote = 'db/data.tar.gz';
-        $local = sys_get_temp_dir().'/gcs_download_'.uniqid('', true).'.tar.gz';
+        $local = sys_get_temp_dir() . '/gcs_download_' . uniqid('', true) . '.tar.gz';
 
         $object = $this->createMock(StorageObject::class);
         $object->expects($this->once())->method('exists')->willReturn(true);
@@ -58,7 +62,7 @@ class GoogleCloudAdapterTest extends TestCase
 
         $this->bucket->expects($this->once())
             ->method('object')
-            ->with('backups/'.$remote)
+            ->with('backups/' . $remote)
             ->willReturn($object);
 
         $this->assertTrue($this->adapter->retrieve($remote, $local));
@@ -70,7 +74,7 @@ class GoogleCloudAdapterTest extends TestCase
         $object->expects($this->once())->method('exists')->willReturn(false);
         $this->bucket->method('object')->willReturn($object);
 
-        $this->assertFalse($this->adapter->retrieve('missing.tar.gz', sys_get_temp_dir().'/out_'.uniqid('', true)));
+        $this->assertFalse($this->adapter->retrieve('missing.tar.gz', sys_get_temp_dir() . '/out_' . uniqid('', true)));
     }
 
     public function testDeleteSuccess(): void

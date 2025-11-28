@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\Command;
 
+use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Command\BackupCommand;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class BackupCommandTest extends TestCase
 {
-    private $mockBackupManager;
-    private $command;
-    private $commandTester;
-    private $defaultConfig;
+    private MockObject $mockBackupManager;
+
+    private BackupCommand $command;
+
+    private CommandTester $commandTester;
+
+    private array $defaultConfig;
 
     protected function setUp(): void
     {
@@ -36,9 +40,6 @@ class BackupCommandTest extends TestCase
         ];
 
         $this->command = new BackupCommand($this->mockBackupManager, $this->defaultConfig);
-
-        $application = new Application();
-        $application->add($this->command);
 
         $this->commandTester = new CommandTester($this->command);
     }
@@ -136,7 +137,7 @@ class BackupCommandTest extends TestCase
         $capturedConfig = null;
         $this->mockBackupManager->expects($this->once())
             ->method('backup')
-            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult) {
+            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult): BackupResult {
                 $capturedConfig = $config;
 
                 return $backupResult;
@@ -183,7 +184,7 @@ class BackupCommandTest extends TestCase
         $capturedConfig = null;
         $this->mockBackupManager->expects($this->once())
             ->method('backup')
-            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult) {
+            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult): BackupResult {
                 $capturedConfig = $config;
 
                 return $backupResult;
@@ -204,7 +205,7 @@ class BackupCommandTest extends TestCase
         $this->mockBackupManager = $this->createMock(BackupManager::class);
         $this->mockBackupManager->expects($this->once())
             ->method('backup')
-            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult) {
+            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult): BackupResult {
                 $capturedConfig = $config;
 
                 return $backupResult;
@@ -227,8 +228,6 @@ class BackupCommandTest extends TestCase
             ]
         );
 
-        $application = new Application();
-        $application->add($this->command);
         $this->commandTester = new CommandTester($this->command);
 
         $this->commandTester->execute([
@@ -254,7 +253,7 @@ class BackupCommandTest extends TestCase
         $capturedConfig = null;
         $this->mockBackupManager->expects($this->once())
             ->method('backup')
-            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult) {
+            ->willReturnCallback(function (BackupConfiguration $config) use (&$capturedConfig, $backupResult): BackupResult {
                 $capturedConfig = $config;
 
                 return $backupResult;

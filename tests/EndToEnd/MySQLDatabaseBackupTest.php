@@ -12,9 +12,13 @@ use ProBackupBundle\Model\BackupConfiguration;
 class MySQLDatabaseBackupTest extends AbstractEndToEndTest
 {
     private string $testDatabase;
+
     private string $host;
+
     private string $port;
+
     private string $user;
+
     private string $password;
 
     protected function setupTest(): void
@@ -57,6 +61,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $serverDsn = \sprintf('mysql:host=%s;port=%d;dbname=information_schema', $this->host, (int) $this->port);
         $serverPdo = new \PDO($serverDsn, $this->user, $this->password);
         $serverPdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
         $dbName = str_replace('`', '', $this->testDatabase);
         $serverPdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
@@ -128,7 +133,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $result = $this->backupManager->backup($config);
 
         // Assert backup was successful
-        $this->assertTrue($result->isSuccess(), 'Backup should be successful: '.$result->getError());
+        $this->assertTrue($result->isSuccess(), 'Backup should be successful: ' . $result->getError());
         $this->assertNotNull($result->getFilePath(), 'Backup file path should not be null');
         $this->assertNotNull($result->getFileSize(), 'Backup size should not be null');
         $this->assertGreaterThan(0, $result->getFileSize(), 'Backup size should be greater than 0');
@@ -152,7 +157,7 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $result = $this->backupManager->backup($config);
 
         // Assert backup was successful
-        $this->assertTrue($result->isSuccess(), 'Backup should be successful: '.$result->getError());
+        $this->assertTrue($result->isSuccess(), 'Backup should be successful: ' . $result->getError());
         $this->assertNotNull($result->getFilePath(), 'Backup file path should not be null');
 
         // Verify it's a zip file
@@ -211,8 +216,6 @@ class MySQLDatabaseBackupTest extends AbstractEndToEndTest
         $stmt = $pdo->query('SELECT title FROM posts WHERE user_id = 3');
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $this->assertEquals('MySQL Backup Test', $row['title'], 'Post data should match');
-
-        $pdo = null;
     }
 
     public function testMySQLBackupWithExcludedTables(): void

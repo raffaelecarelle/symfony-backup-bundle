@@ -17,16 +17,17 @@ class CommandExecutionTest extends AbstractEndToEndTest
     {
         // Seed the SQLite database used by Doctrine default connection in TestApp
         // The sqlite connection is configured at tests/_fixtures/TestApp/config/packages/doctrine.yaml
-        $projectDir = \dirname(__DIR__).'/_fixtures/TestApp';
-        $sqlitePath = $projectDir.'/var/test.sqlite';
+        $projectDir = \dirname(__DIR__) . '/_fixtures/TestApp';
+        $sqlitePath = $projectDir . '/var/test.sqlite';
         if (!is_dir(\dirname($sqlitePath))) {
             mkdir(\dirname($sqlitePath), 0777, true);
         }
 
-        $pdo = new \PDO('sqlite:'.$sqlitePath);
+        $pdo = new \PDO('sqlite:' . $sqlitePath);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $pdo->exec('DROP TABLE IF EXISTS users');
         $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)');
+
         $stmt = $pdo->prepare('INSERT INTO users (id, name, email) VALUES (?, ?, ?)');
         $stmt->execute([1, 'John Doe', 'john@example.com']);
         $stmt->execute([2, 'Jane Smith', 'jane@example.com']);
@@ -36,7 +37,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $this->assertTrue(is_readable($sqlitePath), 'SQLite DB file must be readable');
 
         // Ensure backup directory exists to avoid I/O issues
-        $backupsDir = $projectDir.'/var/backups';
+        $backupsDir = $projectDir . '/var/backups';
         if (!is_dir($backupsDir)) {
             mkdir($backupsDir, 0777, true);
         }
@@ -80,6 +81,7 @@ class CommandExecutionTest extends AbstractEndToEndTest
         if (preg_match('/^\s*(backup_[a-f0-9._-]+)\s+database/m', $output, $m)) {
             $this->backupId = $m[1];
         }
+
         $this->assertNotNull($this->backupId, 'Should find a backup ID');
     }
 
@@ -104,9 +106,9 @@ class CommandExecutionTest extends AbstractEndToEndTest
         $this->assertEquals(0, $tester->getStatusCode());
 
         // Verify restored database content by reading the sqlite used by the app
-        $projectDir = \dirname(__DIR__).'/_fixtures/TestApp';
-        $sqlitePath = $projectDir.'/var/test.sqlite';
-        $pdo = new \PDO('sqlite:'.$sqlitePath);
+        $projectDir = \dirname(__DIR__) . '/_fixtures/TestApp';
+        $sqlitePath = $projectDir . '/var/test.sqlite';
+        $pdo = new \PDO('sqlite:' . $sqlitePath);
         $stmt = $pdo->query('SELECT COUNT(*) FROM users');
         $this->assertEquals(2, (int) $stmt->fetchColumn(), 'Should have 2 users');
     }

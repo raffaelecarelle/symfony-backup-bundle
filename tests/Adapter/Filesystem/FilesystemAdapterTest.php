@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\Adapter\Filesystem;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\Filesystem\FilesystemAdapter;
 use ProBackupBundle\Model\BackupConfiguration;
@@ -12,31 +13,34 @@ use Psr\Log\LoggerInterface;
 
 class FilesystemAdapterTest extends TestCase
 {
-    private $mockLogger;
-    private $adapter;
-    private $tempDir;
-    private $testFilesDir;
+    private MockObject $mockLogger;
+
+    private FilesystemAdapter $adapter;
+
+    private string $tempDir;
+
+    private string $testFilesDir;
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir().'/filesystem_backup_test_'.uniqid('', true);
+        $this->tempDir = sys_get_temp_dir() . '/filesystem_backup_test_' . uniqid('', true);
         mkdir($this->tempDir, 0777, true);
 
         // Create a directory with test files to backup
-        $this->testFilesDir = $this->tempDir.'/test_files';
+        $this->testFilesDir = $this->tempDir . '/test_files';
         mkdir($this->testFilesDir, 0777, true);
 
         // Create some test files
-        file_put_contents($this->testFilesDir.'/file1.txt', 'Test content 1');
-        file_put_contents($this->testFilesDir.'/file2.txt', 'Test content 2');
+        file_put_contents($this->testFilesDir . '/file1.txt', 'Test content 1');
+        file_put_contents($this->testFilesDir . '/file2.txt', 'Test content 2');
 
         // Create a subdirectory with files
-        mkdir($this->testFilesDir.'/subdir', 0777, true);
-        file_put_contents($this->testFilesDir.'/subdir/file3.txt', 'Test content 3');
+        mkdir($this->testFilesDir . '/subdir', 0777, true);
+        file_put_contents($this->testFilesDir . '/subdir/file3.txt', 'Test content 3');
 
         // Create a directory to exclude
-        mkdir($this->testFilesDir.'/secrets', 0777, true);
-        file_put_contents($this->testFilesDir.'/secrets/secret.txt', 'Secret content');
+        mkdir($this->testFilesDir . '/secrets', 0777, true);
+        file_put_contents($this->testFilesDir . '/secrets/secret.txt', 'Secret content');
 
         $this->mockLogger = $this->createMock(LoggerInterface::class);
         $this->adapter = new FilesystemAdapter($this->mockLogger);
@@ -50,7 +54,7 @@ class FilesystemAdapterTest extends TestCase
         }
     }
 
-    private function removeDirectory($dir)
+    private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {
             return;
@@ -58,7 +62,7 @@ class FilesystemAdapterTest extends TestCase
 
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
-            $path = $dir.'/'.$file;
+            $path = $dir . '/' . $file;
             is_dir($path) ? $this->removeDirectory($path) : unlink($path);
         }
 
@@ -129,7 +133,7 @@ class FilesystemAdapterTest extends TestCase
             ->onlyMethods(['backup'])
             ->getMock();
 
-        $expectedArchivePath = $this->tempDir.'/test_backup_'.date('Y-m-d_H-i-s').'.zip';
+        $expectedArchivePath = $this->tempDir . '/test_backup_' . date('Y-m-d_H-i-s') . '.zip';
 
         // Create a dummy archive file
         file_put_contents($expectedArchivePath, 'test archive content');
@@ -160,11 +164,11 @@ class FilesystemAdapterTest extends TestCase
     public function testRestore(): void
     {
         // Create a test backup file
-        $backupPath = $this->tempDir.'/test_backup.zip';
+        $backupPath = $this->tempDir . '/test_backup.zip';
         file_put_contents($backupPath, 'test backup content');
 
         // Create a target directory for restore
-        $targetDir = $this->tempDir.'/restore_target';
+        $targetDir = $this->tempDir . '/restore_target';
         mkdir($targetDir, 0777, true);
 
         // Mock the adapter to avoid actually running the restore
@@ -188,7 +192,7 @@ class FilesystemAdapterTest extends TestCase
     public function testRestoreFailure(): void
     {
         // Create a test backup file
-        $backupPath = $this->tempDir.'/test_backup.zip';
+        $backupPath = $this->tempDir . '/test_backup.zip';
         file_put_contents($backupPath, 'test backup content');
 
         // Don't provide target directory to trigger failure

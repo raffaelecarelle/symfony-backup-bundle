@@ -20,7 +20,7 @@ class PurgeCommandTest extends TestCase
             ->with(null, false);
 
         $application = new Application();
-        $application->add(new PurgeCommand($manager));
+        $application->addCommand(new PurgeCommand($manager));
 
         $command = $application->find('pro:backup:purge');
         $tester = new CommandTester($command);
@@ -38,7 +38,7 @@ class PurgeCommandTest extends TestCase
             ->with('database', true);
 
         $application = new Application();
-        $application->add(new PurgeCommand($manager));
+        $application->addCommand(new PurgeCommand($manager));
 
         $command = $application->find('pro:backup:purge');
         $tester = new CommandTester($command);
@@ -56,7 +56,7 @@ class PurgeCommandTest extends TestCase
         $manager->expects(self::never())->method('applyRetentionPolicy');
 
         $application = new Application();
-        $application->add(new PurgeCommand($manager));
+        $application->addCommand(new PurgeCommand($manager));
 
         $command = $application->find('pro:backup:purge');
         $tester = new CommandTester($command);

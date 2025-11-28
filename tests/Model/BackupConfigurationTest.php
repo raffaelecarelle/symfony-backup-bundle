@@ -9,7 +9,7 @@ use ProBackupBundle\Model\BackupConfiguration;
 
 class BackupConfigurationTest extends TestCase
 {
-    private $config;
+    private BackupConfiguration $config;
 
     protected function setUp(): void
     {

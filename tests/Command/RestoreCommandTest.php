@@ -4,27 +4,28 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\Command;
 
+use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Command\RestoreCommand;
 use ProBackupBundle\Manager\BackupManager;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class RestoreCommandTest extends TestCase
 {
-    private $mockBackupManager;
-    private $command;
-    private $commandTester;
-    private $sampleBackup;
+    private MockObject $mockBackupManager;
+
+    private RestoreCommand $command;
+
+    private CommandTester $commandTester;
+
+    private array $sampleBackup;
 
     protected function setUp(): void
     {
         $this->mockBackupManager = $this->createMock(BackupManager::class);
 
         $this->command = new RestoreCommand($this->mockBackupManager);
-
-        $application = new Application();
-        $application->add($this->command);
 
         $this->commandTester = new CommandTester($this->command);
 
@@ -145,7 +146,7 @@ class RestoreCommandTest extends TestCase
         // Capture the options passed to restore
         $capturedOptions = null;
         $this->mockBackupManager->method('restore')
-            ->willReturnCallback(function ($backupId, $options) use (&$capturedOptions) {
+            ->willReturnCallback(function ($backupId, $options) use (&$capturedOptions): true {
                 $capturedOptions = $options;
 
                 return true;

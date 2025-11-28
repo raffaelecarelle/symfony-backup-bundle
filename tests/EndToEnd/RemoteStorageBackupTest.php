@@ -20,7 +20,7 @@ class RemoteStorageBackupTest extends AbstractEndToEndTest
             ],
         ]);
 
-        $pdo = new \PDO('sqlite:'.$this->dbPath);
+        $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->exec("INSERT INTO items (id, name) VALUES (1, 'One'), (2, 'Two')");
     }
 
@@ -43,12 +43,12 @@ class RemoteStorageBackupTest extends AbstractEndToEndTest
 
         // Verify that the backup has been copied to the remote storage location
         $projectDir = (string) $this->container->getParameter('kernel.project_dir');
-        $remoteBase = $projectDir.'/var/remote_storage';
-        $remotePath = $remoteBase.'/database/'.basename((string) $result->getFilePath());
+        $remoteBase = $projectDir . '/var/remote_storage';
+        $remotePath = $remoteBase . '/database/' . basename($result->getFilePath());
         $this->assertTrue($this->filesystem->exists($remotePath), 'Remote storage copy should exist');
 
         // Now restore from the backup id; BackupManager will pull from remote storage
-        $restoreDbPath = $this->tempDir.'/restored_remote.db';
+        $restoreDbPath = $this->tempDir . '/restored_remote.db';
         $restored = $this->backupManager->restore($result->getId(), [
             'connection' => [
                 'driver' => 'sqlite',
@@ -60,7 +60,7 @@ class RemoteStorageBackupTest extends AbstractEndToEndTest
         $this->assertTrue($this->filesystem->exists($restoreDbPath), 'Restored DB should exist');
 
         // Check restored data integrity
-        $pdo = new \PDO('sqlite:'.$restoreDbPath);
+        $pdo = new \PDO('sqlite:' . $restoreDbPath);
         $count = (int) $pdo->query('SELECT COUNT(*) FROM items')->fetchColumn();
         $this->assertSame(2, $count, 'Restored table should have 2 rows');
         $name = (string) $pdo->query('SELECT name FROM items WHERE id = 2')->fetchColumn();

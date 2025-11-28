@@ -5,24 +5,27 @@ declare(strict_types=1);
 namespace ProBackupBundle\Tests\Manager;
 
 use PHPUnit\Framework\TestCase;
+use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Storage\LocalAdapter;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
+use ProBackupBundle\Model\BackupResult;
 use Psr\Log\NullLogger;
 use Symfony\Component\Filesystem\Filesystem;
 
 class RetentionPolicyTest extends TestCase
 {
     private string $tmpDir;
+
     private Filesystem $fs;
 
     protected function setUp(): void
     {
         $this->fs = new Filesystem();
-        $this->tmpDir = sys_get_temp_dir().'/pro_backup_tests_'.uniqid('', true);
-        $this->fs->mkdir($this->tmpDir.'/database', 0777);
-        $this->fs->mkdir($this->tmpDir.'/filesystem', 0777);
+        $this->tmpDir = sys_get_temp_dir() . '/pro_backup_tests_' . uniqid('', true);
+        $this->fs->mkdir($this->tmpDir . '/database', 0777);
+        $this->fs->mkdir($this->tmpDir . '/filesystem', 0777);
     }
 
     protected function tearDown(): void
@@ -34,7 +37,7 @@ class RetentionPolicyTest extends TestCase
 
     private function createManagerWithLocal(string $backupDir, array $config): BackupManager
     {
-        $manager = new BackupManager($backupDir, null, new NullLogger(), null);
+        $manager = new BackupManager($backupDir, null, new NullLogger());
         $local = new LocalAdapter($backupDir);
         $manager->addStorageAdapter('local', $local);
         $manager->setDefaultStorage('local');
@@ -46,8 +49,8 @@ class RetentionPolicyTest extends TestCase
     public function testApplyRetentionLocalDeletesOldKeepsNew(): void
     {
         // Arrange: create two files under database/, one old (> 3 days) and one fresh (now)
-        $oldFile = $this->tmpDir.'/database/old.sql';
-        $newFile = $this->tmpDir.'/database/new.sql';
+        $oldFile = $this->tmpDir . '/database/old.sql';
+        $newFile = $this->tmpDir . '/database/new.sql';
         $this->fs->dumpFile($oldFile, 'old');
         $this->fs->dumpFile($newFile, 'new');
         // set mtime: old file = now - 3 days
@@ -71,7 +74,7 @@ class RetentionPolicyTest extends TestCase
     public function testApplyRetentionDryRunDoesNotDelete(): void
     {
         // Arrange
-        $file = $this->tmpDir.'/database/very_old.sql';
+        $file = $this->tmpDir . '/database/very_old.sql';
         $this->fs->dumpFile($file, 'x');
         touch($file, time() - 10 * 24 * 3600);
 
@@ -92,7 +95,7 @@ class RetentionPolicyTest extends TestCase
     {
         // Arrange: mock a remote adapter that returns entries with path/modified
         $adapter = $this->createMock(StorageAdapterInterface::class);
-        $cutoff = (new \DateTimeImmutable('-5 days'));
+        new \DateTimeImmutable('-5 days');
         $oldModified = (new \DateTimeImmutable('-10 days'));
         $newModified = (new \DateTimeImmutable('-1 day'));
 
@@ -111,7 +114,7 @@ class RetentionPolicyTest extends TestCase
             ->willReturn(true);
 
         // Any other methods may be called or not; we don't care here
-        $manager = new BackupManager($this->tmpDir, null, null, null);
+        $manager = new BackupManager($this->tmpDir, null, null);
         $manager->addStorageAdapter('remote', $adapter);
         $manager->setConfig([
             'database' => ['retention_days' => 5],
@@ -131,7 +134,7 @@ class RetentionPolicyTest extends TestCase
         $adapter->expects(self::never())->method('delete');
         $adapter->expects(self::never())->method('list');
 
-        $manager = new BackupManager($this->tmpDir, null, null, null);
+        $manager = new BackupManager($this->tmpDir, null, null);
         $manager->addStorageAdapter('remote', $adapter);
         $manager->setConfig([
             'database' => ['retention_days' => 0],
@@ -145,7 +148,7 @@ class RetentionPolicyTest extends TestCase
     public function testRetentionIsTriggeredAfterSuccessfulBackup(): void
     {
         // Seed old file under database to be removed after backup
-        $oldFile = $this->tmpDir.'/database/old_to_purge.sql';
+        $oldFile = $this->tmpDir . '/database/old_to_purge.sql';
         $this->fs->mkdir(\dirname($oldFile));
         $this->fs->dumpFile($oldFile, 'x');
         touch($oldFile, time() - 3 * 24 * 3600);
@@ -159,16 +162,17 @@ class RetentionPolicyTest extends TestCase
 
         $manager = $this->createManagerWithLocal($this->tmpDir, $config);
         // add a minimal adapter that supports 'database' and writes a file
-        $manager->addAdapter(new class implements \ProBackupBundle\Adapter\BackupAdapterInterface {
-            public function backup(BackupConfiguration $config): \ProBackupBundle\Model\BackupResult
+        $manager->addAdapter(new class implements BackupAdapterInterface {
+            public function backup(BackupConfiguration $config): BackupResult
             {
-                $out = rtrim((string) $config->getOutputPath(), '/').'/dummy.sql';
+                $out = rtrim((string) $config->getOutputPath(), '/') . '/dummy.sql';
                 if (!is_dir(\dirname($out))) {
                     mkdir(\dirname($out), 0777, true);
                 }
+
                 file_put_contents($out, 'content');
 
-                return new \ProBackupBundle\Model\BackupResult(true, $out, filesize($out) ?: 0, new \DateTimeImmutable(), 0.1);
+                return new BackupResult(true, $out, filesize($out) ?: 0, new \DateTimeImmutable(), 0.1);
             }
 
             public function restore(string $backupPath, array $options = []): bool
@@ -189,7 +193,7 @@ class RetentionPolicyTest extends TestCase
 
         // Perform backup
         $cfg = (new BackupConfiguration('database', 'test'))
-            ->setOutputPath($this->tmpDir.'/database');
+            ->setOutputPath($this->tmpDir . '/database');
         $result = $manager->backup($cfg);
         self::assertTrue($result->isSuccess());
 

@@ -19,7 +19,7 @@ class BackupMessageHandler
      * Constructor.
      *
      * @param BackupManager        $backupManager The backup manager service
-     * @param LoggerInterface|null $logger        The logger service
+     * @param null|LoggerInterface $logger        The logger service
      */
     public function __construct(private readonly BackupManager $backupManager, private readonly LoggerInterface $logger = new NullLogger())
     {
@@ -59,12 +59,12 @@ class BackupMessageHandler
                     'error' => $result->getError(),
                 ]);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Scheduled backup failed with exception', [
                 'type' => $message->getType(),
                 'name' => $message->getName(),
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
         }
     }

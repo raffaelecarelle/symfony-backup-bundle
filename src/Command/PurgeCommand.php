@@ -52,8 +52,8 @@ class PurgeCommand extends Command
         try {
             $applyType = 'all' === $type ? null : $type;
             $this->backupManager->applyRetentionPolicy($applyType, $dryRun);
-        } catch (\Throwable $e) {
-            $io->error('Failed to apply retention: '.$e->getMessage());
+        } catch (\Throwable $throwable) {
+            $io->error('Failed to apply retention: ' . $throwable->getMessage());
 
             return Command::FAILURE;
         }

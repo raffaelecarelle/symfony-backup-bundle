@@ -30,7 +30,7 @@ class BackupConfiguration
     private string $storage = 'local';
 
     /**
-     * @var string|null Compression type to use
+     * @var null|string Compression type to use
      */
     private ?string $compression = null;
 
@@ -40,12 +40,12 @@ class BackupConfiguration
     private array $exclusions = [];
 
     /**
-     * @var string|null Output path for the backup file
+     * @var null|string Output path for the backup file
      */
     private ?string $outputPath = null;
 
     /**
-     * @var string|null Connection name to use for database backups
+     * @var null|string Connection name to use for database backups
      */
     private ?string $connectionName = null;
 
@@ -54,11 +54,11 @@ class BackupConfiguration
      */
     public function __construct(string $type = '', string $name = '')
     {
-        if (!empty($type)) {
+        if ('' !== $type && '0' !== $type) {
             $this->type = $type;
         }
 
-        if (!empty($name)) {
+        if ('' !== $name && '0' !== $name) {
             $this->name = $name;
         }
     }

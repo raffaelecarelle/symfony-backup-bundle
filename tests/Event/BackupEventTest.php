@@ -8,11 +8,13 @@ use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Event\BackupEvent;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class BackupEventTest extends TestCase
 {
-    private $configuration;
-    private $result;
+    private BackupConfiguration $configuration;
+
+    private BackupResult $result;
 
     protected function setUp(): void
     {
@@ -43,6 +45,6 @@ class BackupEventTest extends TestCase
     {
         $event = new BackupEvent($this->configuration);
 
-        $this->assertInstanceOf(\Symfony\Contracts\EventDispatcher\Event::class, $event);
+        $this->assertInstanceOf(Event::class, $event);
     }
 }

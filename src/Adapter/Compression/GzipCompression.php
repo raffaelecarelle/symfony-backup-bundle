@@ -49,7 +49,7 @@ class GzipCompression implements CompressionAdapterInterface
 
         // Determine target path if not provided
         if (null === $targetPath) {
-            $targetPath = $sourcePath.'.'.$this->getExtension();
+            $targetPath = $sourcePath . '.' . $this->getExtension();
         }
 
         // Ensure target directory exists
@@ -88,11 +88,11 @@ class GzipCompression implements CompressionAdapterInterface
             }
 
             return $targetPath;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Gzip compression failed', [
                 'source' => $sourcePath,
                 'target' => $targetPath,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             // Clean up any partial target file
@@ -100,7 +100,7 @@ class GzipCompression implements CompressionAdapterInterface
                 $this->filesystem->remove($targetPath);
             }
 
-            throw new BackupException(\sprintf('Failed to compress file: %s', $e->getMessage()), 0, $e);
+            throw new BackupException(\sprintf('Failed to compress file: %s', $throwable->getMessage()), 0, $throwable);
         }
     }
 
@@ -126,7 +126,7 @@ class GzipCompression implements CompressionAdapterInterface
 
             // If the path didn't change, it didn't have a .gz extension
             if ($targetPath === $sourcePath) {
-                $targetPath = $sourcePath.'.decompressed';
+                $targetPath = $sourcePath . '.decompressed';
             }
         }
 
@@ -165,11 +165,11 @@ class GzipCompression implements CompressionAdapterInterface
             }
 
             return $resolvedTargetPath;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Gzip decompression failed', [
                 'source' => $sourcePath,
                 'target' => $targetPath,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             // Clean up any partial target file
@@ -177,7 +177,7 @@ class GzipCompression implements CompressionAdapterInterface
                 $this->filesystem->remove($targetPath);
             }
 
-            throw new BackupException(\sprintf('Failed to decompress file: %s', $e->getMessage()), 0, $e);
+            throw new BackupException(\sprintf('Failed to decompress file: %s', $throwable->getMessage()), 0, $throwable);
         }
     }
 

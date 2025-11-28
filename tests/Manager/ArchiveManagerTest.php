@@ -16,7 +16,9 @@ use Symfony\Component\Filesystem\Filesystem;
 class ArchiveManagerTest extends TestCase
 {
     private ArchiveManager $archiveManager;
+
     private Filesystem $filesystem;
+
     private string $tempDir;
 
     protected function setUp(): void
@@ -25,7 +27,7 @@ class ArchiveManagerTest extends TestCase
 
         $this->archiveManager = new ArchiveManager();
         $this->filesystem = new Filesystem();
-        $this->tempDir = sys_get_temp_dir().'/archive_manager_test_'.uniqid('', true);
+        $this->tempDir = sys_get_temp_dir() . '/archive_manager_test_' . uniqid('', true);
         $this->filesystem->mkdir($this->tempDir);
     }
 
@@ -50,10 +52,10 @@ class ArchiveManagerTest extends TestCase
     public function testCompressFileWithZipNoRemoveSource(): void
     {
         // Create test file
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content for zip compression');
 
-        $targetPath = $this->tempDir.'/test.zip';
+        $targetPath = $this->tempDir . '/test.zip';
 
         // Mock zip adapter
         $mockZipAdapter = $this->createMock(CompressionAdapterInterface::class);
@@ -73,10 +75,10 @@ class ArchiveManagerTest extends TestCase
     public function testCompressFileWithZipRemoveSource(): void
     {
         // Create test file
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content for zip compression');
 
-        $targetPath = $this->tempDir.'/test.zip';
+        $targetPath = $this->tempDir . '/test.zip';
 
         // Mock zip adapter
         $mockZipAdapter = $this->createMock(CompressionAdapterInterface::class);
@@ -95,7 +97,7 @@ class ArchiveManagerTest extends TestCase
     public function testCompressFileWithGzip(): void
     {
         // Create test file
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content for gzip compression');
 
         // Mock gzip adapter
@@ -107,20 +109,20 @@ class ArchiveManagerTest extends TestCase
         $this->archiveManager->addCompressionAdapter('gzip', $mockGzipAdapter);
 
         // Compress
-        $result = $this->archiveManager->compress($sourceFile, $sourceFile.'.gz', 'gzip', false);
+        $result = $this->archiveManager->compress($sourceFile, $sourceFile . '.gz', 'gzip', false);
 
-        $this->assertEquals($sourceFile.'.gz', $result);
+        $this->assertEquals($sourceFile . '.gz', $result);
     }
 
     public function testCompressDirectoryWithGzip(): void
     {
         // Create test directory with files
-        $sourceDir = $this->tempDir.'/test_dir';
+        $sourceDir = $this->tempDir . '/test_dir';
         $this->filesystem->mkdir($sourceDir);
-        file_put_contents($sourceDir.'/file1.txt', 'Content 1');
-        file_put_contents($sourceDir.'/file2.txt', 'Content 2');
+        file_put_contents($sourceDir . '/file1.txt', 'Content 1');
+        file_put_contents($sourceDir . '/file2.txt', 'Content 2');
 
-        $targetPath = $this->tempDir.'/test_dir.tar.gz';
+        $targetPath = $this->tempDir . '/test_dir.tar.gz';
 
         // Mock gzip adapter
         $mockGzipAdapter = $this->createMock(CompressionAdapterInterface::class);
@@ -143,12 +145,12 @@ class ArchiveManagerTest extends TestCase
     public function testCompressDirectoryWithGzipRemoveSource(): void
     {
         // Create test directory with files
-        $sourceDir = $this->tempDir.'/test_dir_remove';
+        $sourceDir = $this->tempDir . '/test_dir_remove';
         $this->filesystem->mkdir($sourceDir);
-        file_put_contents($sourceDir.'/file1.txt', 'Content 1');
-        file_put_contents($sourceDir.'/file2.txt', 'Content 2');
+        file_put_contents($sourceDir . '/file1.txt', 'Content 1');
+        file_put_contents($sourceDir . '/file2.txt', 'Content 2');
 
-        $targetPath = $this->tempDir.'/test_dir_remove.tar.gz';
+        $targetPath = $this->tempDir . '/test_dir_remove.tar.gz';
 
         // Mock gzip adapter that simulates successful compression
         $mockGzipAdapter = $this->createMock(CompressionAdapterInterface::class);
@@ -172,41 +174,41 @@ class ArchiveManagerTest extends TestCase
 
     public function testCompressWithUnsupportedType(): void
     {
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content');
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Unsupported compression type: rar');
 
-        $this->archiveManager->compress($sourceFile, $this->tempDir.'/test.rar', 'rar', false);
+        $this->archiveManager->compress($sourceFile, $this->tempDir . '/test.rar', 'rar', false);
     }
 
     public function testCompressWithoutZipAdapter(): void
     {
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content');
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Zip compression adapter not available');
 
-        $this->archiveManager->compress($sourceFile, $this->tempDir.'/test.zip', 'zip', false);
+        $this->archiveManager->compress($sourceFile, $this->tempDir . '/test.zip', 'zip', false);
     }
 
     public function testCompressWithoutGzipAdapter(): void
     {
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content');
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Gzip compression adapter not available');
 
-        $this->archiveManager->compress($sourceFile, $this->tempDir.'/test.gz', 'gzip', false);
+        $this->archiveManager->compress($sourceFile, $this->tempDir . '/test.gz', 'gzip', false);
     }
 
     public function testDecompressZipFile(): void
     {
-        $archivePath = $this->tempDir.'/test.zip';
-        $targetPath = $this->tempDir.'/extracted';
+        $archivePath = $this->tempDir . '/test.zip';
+        $targetPath = $this->tempDir . '/extracted';
 
         // Create mock archive file
         touch($archivePath);
@@ -227,8 +229,8 @@ class ArchiveManagerTest extends TestCase
 
     public function testDecompressZipFileWithoutKeepOriginal(): void
     {
-        $archivePath = $this->tempDir.'/test.zip';
-        $targetPath = $this->tempDir.'/extracted';
+        $archivePath = $this->tempDir . '/test.zip';
+        $targetPath = $this->tempDir . '/extracted';
 
         // Create mock archive file
         touch($archivePath);
@@ -249,8 +251,8 @@ class ArchiveManagerTest extends TestCase
 
     public function testDecompressGzipFile(): void
     {
-        $archivePath = $this->tempDir.'/test.sql.gz';
-        $targetPath = $this->tempDir.'/test.sql';
+        $archivePath = $this->tempDir . '/test.sql.gz';
+        $targetPath = $this->tempDir . '/test.sql';
 
         // Create mock archive file
         touch($archivePath);
@@ -272,16 +274,16 @@ class ArchiveManagerTest extends TestCase
 
     public function testDecompressTarGzFile(): void
     {
-        $archivePath = $this->tempDir.'/test.tar.gz';
+        $archivePath = $this->tempDir . '/test.tar.gz';
 
         // Create a real tar.gz file for testing
-        $testDir = $this->tempDir.'/test_content';
+        $testDir = $this->tempDir . '/test_content';
         $this->filesystem->mkdir($testDir);
-        file_put_contents($testDir.'/file1.txt', 'Content 1');
-        file_put_contents($testDir.'/file2.txt', 'Content 2');
+        file_put_contents($testDir . '/file1.txt', 'Content 1');
+        file_put_contents($testDir . '/file2.txt', 'Content 2');
 
         // Create tar file
-        $tarPath = $this->tempDir.'/test.tar';
+        $tarPath = $this->tempDir . '/test.tar';
         $tarCmd = \sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($testDir));
         exec($tarCmd);
 
@@ -311,39 +313,39 @@ class ArchiveManagerTest extends TestCase
 
         $this->assertNotNull($result);
         $this->assertStringContainsString('extract_', $result, 'Should create temp extraction directory');
-        $this->assertTrue($this->filesystem->exists($result.'/file1.txt'), 'Should extract file1.txt');
-        $this->assertTrue($this->filesystem->exists($result.'/file2.txt'), 'Should extract file2.txt');
+        $this->assertTrue($this->filesystem->exists($result . '/file1.txt'), 'Should extract file1.txt');
+        $this->assertTrue($this->filesystem->exists($result . '/file2.txt'), 'Should extract file2.txt');
     }
 
     public function testDecompressWithoutZipAdapter(): void
     {
-        $archivePath = $this->tempDir.'/test.zip';
+        $archivePath = $this->tempDir . '/test.zip';
         touch($archivePath);
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Zip compression adapter not available for decompression');
 
-        $this->archiveManager->decompress($archivePath, $this->tempDir.'/extracted');
+        $this->archiveManager->decompress($archivePath, $this->tempDir . '/extracted');
     }
 
     public function testDecompressWithoutGzipAdapter(): void
     {
-        $archivePath = $this->tempDir.'/test.gz';
+        $archivePath = $this->tempDir . '/test.gz';
         touch($archivePath);
 
         $this->expectException(BackupException::class);
         $this->expectExceptionMessage('Gzip compression adapter not available for decompression');
 
-        $this->archiveManager->decompress($archivePath, $this->tempDir.'/test');
+        $this->archiveManager->decompress($archivePath, $this->tempDir . '/test');
     }
 
     public function testDecompressUnknownFormat(): void
     {
-        $archivePath = $this->tempDir.'/test.txt';
+        $archivePath = $this->tempDir . '/test.txt';
         touch($archivePath);
 
         // Should return original path for unknown formats
-        $result = $this->archiveManager->decompress($archivePath, null);
+        $result = $this->archiveManager->decompress($archivePath);
 
         $this->assertEquals($archivePath, $result);
     }
@@ -374,11 +376,11 @@ class ArchiveManagerTest extends TestCase
 
     public function testCompressCreatesOutputDirectory(): void
     {
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content');
 
         // Target path in non-existent directory
-        $targetPath = $this->tempDir.'/nested/dir/test.zip';
+        $targetPath = $this->tempDir . '/nested/dir/test.zip';
 
         // Mock zip adapter
         $mockZipAdapter = $this->createMock(CompressionAdapterInterface::class);
@@ -388,17 +390,17 @@ class ArchiveManagerTest extends TestCase
         $this->archiveManager->compress($sourceFile, $targetPath, 'zip', false);
 
         $this->assertTrue(
-            $this->filesystem->exists($this->tempDir.'/nested/dir'),
+            $this->filesystem->exists($this->tempDir . '/nested/dir'),
             'Should create output directory structure'
         );
     }
 
     public function testCompressCaseInsensitive(): void
     {
-        $sourceFile = $this->tempDir.'/test.txt';
+        $sourceFile = $this->tempDir . '/test.txt';
         file_put_contents($sourceFile, 'Test content');
 
-        $targetPath = $this->tempDir.'/test.zip';
+        $targetPath = $this->tempDir . '/test.zip';
 
         // Mock zip adapter
         $mockZipAdapter = $this->createMock(CompressionAdapterInterface::class);
@@ -413,7 +415,7 @@ class ArchiveManagerTest extends TestCase
 
     public function testDecompressCaseInsensitive(): void
     {
-        $archivePath = $this->tempDir.'/test.ZIP';
+        $archivePath = $this->tempDir . '/test.ZIP';
         touch($archivePath);
 
         // Mock zip adapter
@@ -424,6 +426,6 @@ class ArchiveManagerTest extends TestCase
         $this->archiveManager->addCompressionAdapter('zip', $mockZipAdapter);
 
         // Test with uppercase extension
-        $this->archiveManager->decompress($archivePath, $this->tempDir.'/extracted');
+        $this->archiveManager->decompress($archivePath, $this->tempDir . '/extracted');
     }
 }

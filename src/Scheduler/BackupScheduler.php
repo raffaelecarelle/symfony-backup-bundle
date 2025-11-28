@@ -82,7 +82,7 @@ class BackupScheduler implements ScheduleProviderInterface
      */
     public function runDue(): array
     {
-        if (null === $this->manager) {
+        if (!$this->manager instanceof BackupManager) {
             return [];
         }
 

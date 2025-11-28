@@ -69,12 +69,12 @@ class GoogleCloudAdapter implements StorageAdapterInterface
             }
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to store file in Google Cloud Storage', [
                 'local_path' => $localPath,
                 'remote_path' => $remotePath,
                 'bucket' => $this->bucket->name(),
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -108,12 +108,12 @@ class GoogleCloudAdapter implements StorageAdapterInterface
             $object->downloadToFile($localPath);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to retrieve file from Google Cloud Storage', [
                 'remote_path' => $remotePath,
                 'local_path' => $localPath,
                 'bucket' => $this->bucket->name(),
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -143,11 +143,11 @@ class GoogleCloudAdapter implements StorageAdapterInterface
             $object->delete();
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to delete file from Google Cloud Storage', [
                 'remote_path' => $remotePath,
                 'bucket' => $this->bucket->name(),
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -186,11 +186,11 @@ class GoogleCloudAdapter implements StorageAdapterInterface
             }
 
             return $files;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to list files in Google Cloud Storage', [
                 'prefix' => $prefix,
                 'bucket' => $this->bucket->name(),
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return [];
@@ -204,11 +204,11 @@ class GoogleCloudAdapter implements StorageAdapterInterface
             $object = $this->bucket->object($objectName);
 
             return $object->exists();
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to check if file exists in Google Cloud Storage', [
                 'remote_path' => $remotePath,
                 'bucket' => $this->bucket->name(),
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -220,7 +220,7 @@ class GoogleCloudAdapter implements StorageAdapterInterface
      */
     private function getFullKey(string $remotePath): string
     {
-        return $this->prefix.ltrim($remotePath, '/');
+        return $this->prefix . ltrim($remotePath, '/');
     }
 
     /**

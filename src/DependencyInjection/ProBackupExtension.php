@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\DependencyInjection;
 
+use Aws\S3\S3Client;
+use Google\Cloud\Storage\StorageClient;
 use ProBackupBundle\Adapter\Compression\GzipCompression;
 use ProBackupBundle\Adapter\Compression\ZipCompression;
 use ProBackupBundle\Adapter\Filesystem\FilesystemAdapter;
@@ -13,7 +15,7 @@ use ProBackupBundle\Adapter\Storage\S3Adapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
 class ProBackupExtension extends Extension
@@ -26,8 +28,8 @@ class ProBackupExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.php');
 
         // Configure the backup manager
         $backupManagerDef = $container->getDefinition('pro_backup.manager');
@@ -38,7 +40,7 @@ class ProBackupExtension extends Extension
         $this->configureStorageAdapters($container, $config);
 
         // Configure database adapters
-        $this->configureDatabaseAdapters($container, $config);
+        $this->configureDatabaseAdapters();
 
         // Configure filesystem adapter
         $this->configureFilesystemAdapter($container, $config);
@@ -48,12 +50,12 @@ class ProBackupExtension extends Extension
 
         // Configure profiler integration
         if ($config['profiler']['enabled']) {
-            $loader->load('profiler.xml');
+            $loader->load('profiler.php');
         }
 
         // Configure scheduler
         if ($config['schedule']['enabled']) {
-            $loader->load('scheduler.xml');
+            $loader->load('scheduler.php');
 
             $schedulerDef = $container->getDefinition('pro_backup.scheduler');
             // Fix: the provider constructor takes a single argument (the schedule config)
@@ -82,8 +84,8 @@ class ProBackupExtension extends Extension
         $localDef = $container->register('pro_backup.storage.local', LocalAdapter::class);
         $localDef->setArguments([
             $localConfig['options']['path'],
-            $localConfig['options']['permissions'] ?? 0755,
             new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+            $localConfig['options']['permissions'] ?? 0755,
         ]);
         $localDef->addTag('pro_backup.storage_adapter', ['name' => 'local']);
 
@@ -93,13 +95,13 @@ class ProBackupExtension extends Extension
             $s3Config = $config['storage']['s3'];
 
             // Check if AWS SDK is available
-            if (!class_exists(\Aws\S3\S3Client::class)) {
+            if (!class_exists(S3Client::class)) {
                 throw new \RuntimeException('AWS SDK is not installed. Run "composer require aws/aws-sdk-php".');
             }
 
             // Create S3 client
-            $s3ClientDef = $container->register('pro_backup.aws_s3_client', \Aws\S3\S3Client::class);
-            $s3ClientDef->setFactory([\Aws\S3\S3Client::class, 'factory']);
+            $s3ClientDef = $container->register('pro_backup.aws_s3_client', S3Client::class);
+            $s3ClientDef->setFactory([S3Client::class, 'factory']);
             $s3ClientDef->setArguments([[
                 'version' => 'latest',
                 'region' => $s3Config['options']['region'],
@@ -126,12 +128,12 @@ class ProBackupExtension extends Extension
             $gcConfig = $config['storage']['google_cloud'];
 
             // Check if Google Cloud SDK is available
-            if (!class_exists(\Google\Cloud\Storage\StorageClient::class)) {
+            if (!class_exists(StorageClient::class)) {
                 throw new \RuntimeException('Google Cloud SDK is not installed. Run "composer require google/cloud-storage".');
             }
 
             // Create Google Cloud client
-            $gcClientDef = $container->register('pro_backup.google_cloud_client', \Google\Cloud\Storage\StorageClient::class);
+            $gcClientDef = $container->register('pro_backup.google_cloud_client', StorageClient::class);
             $gcClientDef->setArguments([[
                 'projectId' => $gcConfig['options']['project_id'],
                 'keyFilePath' => $gcConfig['options']['key_file'],
@@ -153,14 +155,7 @@ class ProBackupExtension extends Extension
         }
     }
 
-    /**
-     * Configure database adapters.
-     * The actual registration of adapters based on driver is done in DatabaseAdapterPass.
-     */
-    /**
-     * @param array<string, mixed> $config
-     */
-    private function configureDatabaseAdapters(ContainerBuilder $container, array $config): void
+    private function configureDatabaseAdapters(): void
     {
         // Database adapter registration is handled by DatabaseAdapterPass compiler pass
         // which has access to the actual Doctrine connection configuration

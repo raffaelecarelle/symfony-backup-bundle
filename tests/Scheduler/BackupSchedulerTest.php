@@ -116,7 +116,7 @@ class BackupSchedulerTest extends TestCase
         ];
 
         $scheduler = new BackupScheduler($config);
-        $schedule = $scheduler->getSchedule();
+        $scheduler->getSchedule();
 
         // Use reflection to access the private method and verify the cron expression
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);
@@ -137,7 +137,7 @@ class BackupSchedulerTest extends TestCase
         ];
 
         $scheduler = new BackupScheduler($config);
-        $schedule = $scheduler->getSchedule();
+        $scheduler->getSchedule();
 
         // Use reflection to access the private method and verify the cron expression
         $reflectionClass = new \ReflectionClass(BackupScheduler::class);

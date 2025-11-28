@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProBackupBundle\Tests\Manager;
 
 use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\Storage\StorageAdapterInterface;
@@ -20,16 +21,22 @@ use Symfony\Component\Filesystem\Filesystem;
 class BackupManagerTest extends TestCase
 {
     private BackupManager $backupManager;
-    private $mockAdapter;
-    private $mockStorageAdapter;
-    private $mockEventDispatcher;
-    private $mockLogger;
-    private $tempDir;
-    private $mockDoctrine;
+
+    private MockObject $mockAdapter;
+
+    private MockObject $mockStorageAdapter;
+
+    private MockObject $mockEventDispatcher;
+
+    private MockObject $mockLogger;
+
+    private string $tempDir;
+
+    private MockObject $mockDoctrine;
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir().'/backup_test_'.uniqid('', true);
+        $this->tempDir = sys_get_temp_dir() . '/backup_test_' . uniqid('', true);
         mkdir($this->tempDir, 0777, true);
 
         $this->mockAdapter = $this->createMock(BackupAdapterInterface::class);
@@ -64,11 +71,11 @@ class BackupManagerTest extends TestCase
         $config->setType('database');
         $config->setName('test_backup');
         // Fix: Set outputPath to avoid uninitialized property error
-        $config->setOutputPath($this->tempDir.'/database');
+        $config->setOutputPath($this->tempDir . '/database');
 
         $result = new BackupResult();
         $result->setSuccess(true);
-        $result->setFilePath($this->tempDir.'/test_backup.sql');
+        $result->setFilePath($this->tempDir . '/test_backup.sql');
         $result->setFileSize(1024);
         $result->setCreatedAt(new \DateTimeImmutable());
         $result->setDuration(0.5);
@@ -107,7 +114,7 @@ class BackupManagerTest extends TestCase
     public function testRestore(): void
     {
         $backupId = 'test_backup_123';
-        $backupPath = $this->tempDir.'/test_backup.sql';
+        $backupPath = $this->tempDir . '/test_backup.sql';
         $options = ['option1' => 'value1'];
 
         // Create a mock backup file
@@ -156,9 +163,9 @@ class BackupManagerTest extends TestCase
     public function testListBackups(): void
     {
         // Create some test backup files
-        file_put_contents($this->tempDir.'/database_backup_1.sql', 'test content');
-        file_put_contents($this->tempDir.'/database_backup_2.sql', 'test content');
-        file_put_contents($this->tempDir.'/filesystem_backup_1.zip', 'test content');
+        file_put_contents($this->tempDir . '/database_backup_1.sql', 'test content');
+        file_put_contents($this->tempDir . '/database_backup_2.sql', 'test content');
+        file_put_contents($this->tempDir . '/filesystem_backup_1.zip', 'test content');
 
         // Mock the listBackups method using reflection to return test data
         $backupManagerMock = $this->getMockBuilder(BackupManager::class)
@@ -171,7 +178,7 @@ class BackupManagerTest extends TestCase
                 'id' => 'backup1',
                 'name' => 'database_backup_1',
                 'type' => 'database',
-                'file_path' => $this->tempDir.'/database_backup_1.sql',
+                'file_path' => $this->tempDir . '/database_backup_1.sql',
                 'size' => 12,
                 'created_at' => new \DateTimeImmutable(),
             ],
@@ -179,7 +186,7 @@ class BackupManagerTest extends TestCase
                 'id' => 'backup2',
                 'name' => 'database_backup_2',
                 'type' => 'database',
-                'file_path' => $this->tempDir.'/database_backup_2.sql',
+                'file_path' => $this->tempDir . '/database_backup_2.sql',
                 'size' => 12,
                 'created_at' => new \DateTimeImmutable(),
             ],
@@ -205,7 +212,7 @@ class BackupManagerTest extends TestCase
     public function testDeleteBackup(): void
     {
         $backupId = 'test_backup_123';
-        $backupPath = $this->tempDir.'/test_backup.sql';
+        $backupPath = $this->tempDir . '/test_backup.sql';
 
         // Create a mock backup file
         file_put_contents($backupPath, 'test backup content');

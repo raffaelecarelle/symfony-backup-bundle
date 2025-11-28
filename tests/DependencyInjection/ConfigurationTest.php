@@ -14,13 +14,13 @@ class ConfigurationTest extends TestCase
     {
         $config = [
             'pro_backup' => [
-                'backup_dir' => sys_get_temp_dir().'/backups',
+                'backup_dir' => sys_get_temp_dir() . '/backups',
                 'default_storage' => 'local',
                 'storage' => [
                     'local' => [
                         'adapter' => 'local',
                         'options' => [
-                            'path' => sys_get_temp_dir().'/backups',
+                            'path' => sys_get_temp_dir() . '/backups',
                             'permissions' => 0755,
                         ],
                     ],

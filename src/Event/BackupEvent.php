@@ -15,7 +15,7 @@ class BackupEvent extends Event
 {
     /**
      * @param BackupConfiguration $configuration The backup configuration
-     * @param BackupResult|null   $result        The backup result (null for pre-backup events)
+     * @param null|BackupResult   $result        The backup result (null for pre-backup events)
      */
     public function __construct(private readonly BackupConfiguration $configuration, private readonly ?BackupResult $result = null)
     {
@@ -32,7 +32,7 @@ class BackupEvent extends Event
     /**
      * Get the backup result.
      *
-     * @return BackupResult|null The backup result or null if not available
+     * @return null|BackupResult The backup result or null if not available
      */
     public function getResult(): ?BackupResult
     {

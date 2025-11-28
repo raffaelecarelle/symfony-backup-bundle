@@ -49,7 +49,7 @@ class ZipCompression implements CompressionAdapterInterface
 
         // Determine target path if not provided
         if (null === $targetPath) {
-            $targetPath = $sourcePath.'.'.$this->getExtension();
+            $targetPath = $sourcePath . '.' . $this->getExtension();
         }
 
         // Ensure target directory exists
@@ -103,11 +103,11 @@ class ZipCompression implements CompressionAdapterInterface
             }
 
             return $targetPath;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Zip compression failed', [
                 'source' => $sourcePath,
                 'target' => $targetPath,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             // Clean up any partial target file
@@ -115,7 +115,7 @@ class ZipCompression implements CompressionAdapterInterface
                 $this->filesystem->remove($targetPath);
             }
 
-            throw new BackupException(\sprintf('Failed to compress file: %s', $e->getMessage()), 0, $e);
+            throw new BackupException(\sprintf('Failed to compress file: %s', $throwable->getMessage()), 0, $throwable);
         }
     }
 
@@ -143,18 +143,16 @@ class ZipCompression implements CompressionAdapterInterface
             // Extract to the same directory as the zip file
             $targetDir = \dirname($sourcePath);
             $extractSingleFile = false;
-        } else {
+        } elseif (str_ends_with($targetPath, '/') || is_dir($targetPath)) {
             // Check if target path is a directory or a file
-            if (str_ends_with($targetPath, '/') || is_dir($targetPath)) {
-                // Target is a directory
-                $targetDir = rtrim($targetPath, '/');
-                $extractSingleFile = false;
-            } else {
-                // Target is a file, extract only the first file in the zip
-                $targetDir = \dirname($targetPath);
-                $extractSingleFile = true;
-                $resolvedTargetPath = $targetPath; // non-null when extracting a single file
-            }
+            // Target is a directory
+            $targetDir = rtrim($targetPath, '/');
+            $extractSingleFile = false;
+        } else {
+            // Target is a file, extract only the first file in the zip
+            $targetDir = \dirname($targetPath);
+            $extractSingleFile = true;
+            $resolvedTargetPath = $targetPath; // non-null when extracting a single file
         }
 
         // Ensure target directory exists
@@ -192,7 +190,7 @@ class ZipCompression implements CompressionAdapterInterface
                     escapeshellarg($sourcePath),
                     escapeshellarg($firstFile),
                     escapeshellarg($targetDir),
-                    escapeshellarg($targetDir.'/'.basename($firstFile)),
+                    escapeshellarg($targetDir . '/' . basename($firstFile)),
                     escapeshellarg((string) $targetPath)
                 );
             } else {
@@ -223,24 +221,24 @@ class ZipCompression implements CompressionAdapterInterface
                 return (string) $resolvedTargetPath;
             } else {
                 // Get the list of extracted files
-                $files = glob($targetDir.'/*');
+                $files = glob($targetDir . '/*');
 
                 // If there's only one file and it's not a directory, return it
                 if (1 === \count($files) && isset($files[0]) && !is_dir($files[0])) {
-                    return (string) $files[0];
+                    return $files[0];
                 }
 
                 // Otherwise return the target directory
-                return (string) $targetDir;
+                return $targetDir;
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Zip decompression failed', [
                 'source' => $sourcePath,
                 'target' => $targetPath ?? $targetDir,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
-            throw new BackupException(\sprintf('Failed to decompress file: %s', $e->getMessage()), 0, $e);
+            throw new BackupException(\sprintf('Failed to decompress file: %s', $throwable->getMessage()), 0, $throwable);
         }
     }
 

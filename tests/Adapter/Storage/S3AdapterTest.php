@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProBackupBundle\Tests\Adapter\Storage;
 
 use Aws\S3\S3Client;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\Storage\S3Adapter;
 use Psr\Log\LoggerInterface;
@@ -12,10 +13,13 @@ use Psr\Log\LoggerInterface;
 class S3AdapterTest extends TestCase
 {
     private string $bucket = 'test-bucket';
+
     private string $prefix = 'backups';
 
-    private S3Client $s3;
-    private LoggerInterface $logger;
+    private MockObject $s3;
+
+    private MockObject $logger;
+
     private S3Adapter $adapter;
 
     protected function setUp(): void
@@ -32,12 +36,12 @@ class S3AdapterTest extends TestCase
 
     public function testStoreSuccess(): void
     {
-        $local = sys_get_temp_dir().'/s3_local_'.uniqid('', true).'.txt';
+        $local = sys_get_temp_dir() . '/s3_local_' . uniqid('', true) . '.txt';
         file_put_contents($local, 'content');
 
         $this->s3->expects($this->once())
             ->method('putObject')
-            ->with($this->callback(fn ($args) => 'test-bucket' === $args['Bucket']
+            ->with($this->callback(fn ($args): bool => 'test-bucket' === $args['Bucket']
                 && 'backups/remote/file.txt' === $args['Key']
                 && $args['SourceFile'] === $local));
 
@@ -54,17 +58,17 @@ class S3AdapterTest extends TestCase
     public function testRetrieveSuccess(): void
     {
         $remote = 'remote/data.bin';
-        $local = sys_get_temp_dir().'/s3_download_'.uniqid('', true).'.bin';
+        $local = sys_get_temp_dir() . '/s3_download_' . uniqid('', true) . '.bin';
 
         $this->s3->expects($this->once())
             ->method('doesObjectExist')
-            ->with('test-bucket', 'backups/'.$remote)
+            ->with('test-bucket', 'backups/' . $remote)
             ->willReturn(true);
 
         $this->s3->expects($this->once())
             ->method('getObject')
-            ->with($this->callback(fn ($args) => 'test-bucket' === $args['Bucket']
-                && $args['Key'] === 'backups/'.$remote
+            ->with($this->callback(fn ($args): bool => 'test-bucket' === $args['Bucket']
+                && $args['Key'] === 'backups/' . $remote
                 && $args['SaveAs'] === $local));
 
         $this->assertTrue($this->adapter->retrieve($remote, $local));
@@ -77,7 +81,7 @@ class S3AdapterTest extends TestCase
             ->with('test-bucket', 'backups/missing.txt')
             ->willReturn(false);
 
-        $this->assertFalse($this->adapter->retrieve('missing.txt', sys_get_temp_dir().'/whatever_'.uniqid('', true)));
+        $this->assertFalse($this->adapter->retrieve('missing.txt', sys_get_temp_dir() . '/whatever_' . uniqid('', true)));
     }
 
     public function testDeleteSuccess(): void

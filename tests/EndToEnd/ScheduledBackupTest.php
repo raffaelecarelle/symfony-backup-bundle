@@ -14,6 +14,7 @@ use ProBackupBundle\Scheduler\BackupScheduler;
 class ScheduledBackupTest extends AbstractEndToEndTest
 {
     private string $dbPath;
+
     private BackupScheduler $scheduler;
 
     protected function setupTest(): void
@@ -27,7 +28,7 @@ class ScheduledBackupTest extends AbstractEndToEndTest
         ]);
 
         // Insert some test data
-        $pdo = new \PDO('sqlite:'.$this->dbPath);
+        $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->exec("INSERT INTO users (id, name) VALUES (1, 'Test User')");
 
         // Create a scheduler

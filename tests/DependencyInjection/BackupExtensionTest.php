@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\DependencyInjection;
 
+use Aws\S3\S3Client;
+use Google\Cloud\Storage\StorageClient;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\DependencyInjection\ProBackupExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -96,7 +98,7 @@ class BackupExtensionTest extends TestCase
             ],
         ];
 
-        if (class_exists(\Aws\S3\S3Client::class)) {
+        if (class_exists(S3Client::class)) {
             $this->backupExtension->load([$configs], $this->containerBuilder);
             $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.aws_s3_client'));
             $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.storage.s3'));
@@ -127,7 +129,7 @@ class BackupExtensionTest extends TestCase
             ],
         ];
 
-        if (class_exists(\Google\Cloud\Storage\StorageClient::class)) {
+        if (class_exists(StorageClient::class)) {
             $this->backupExtension->load([$configs], $this->containerBuilder);
             $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.google_cloud_client'));
             $this->assertTrue($this->containerBuilder->hasDefinition('pro_backup.storage.google_cloud'));

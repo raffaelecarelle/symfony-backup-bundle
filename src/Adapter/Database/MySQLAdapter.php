@@ -7,6 +7,7 @@ namespace ProBackupBundle\Adapter\Database;
 use Doctrine\DBAL\Connection;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\DatabaseConnectionInterface;
+use ProBackupBundle\Exception\BackupException;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;
@@ -46,9 +47,10 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
         $filename = $this->generateFilename($config);
         $outputPath = $config->getOutputPath();
         if (null === $outputPath) {
-            throw new \ProBackupBundle\Exception\BackupException('Output path is not specified');
+            throw new BackupException('Output path is not specified');
         }
-        $filepath = $outputPath.'/'.$filename;
+
+        $filepath = $outputPath . '/' . $filename;
 
         // Ensure the output directory exists
         if (!$this->filesystem->exists($outputPath)) {
@@ -89,10 +91,10 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
                 null,
                 ['compression' => $config->getCompression() ?? '(none)']
             );
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('MySQL backup failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             // Clean up any partial files
@@ -106,7 +108,7 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
                 null,
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
-                $e->getMessage()
+                $throwable->getMessage()
             );
         }
     }
@@ -134,10 +136,10 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('MySQL restore failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             return false;
@@ -195,7 +197,7 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
         );
 
         if ($password) {
-            $command .= ' --password='.escapeshellarg($password);
+            $command .= ' --password=' . escapeshellarg($password);
         }
 
         if ($options['single_transaction'] ?? true) {
@@ -219,12 +221,10 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
         }
 
         foreach ($excludeTables as $table) {
-            $command .= ' --ignore-table='.escapeshellarg($database.'.'.$table);
+            $command .= ' --ignore-table=' . escapeshellarg($database . '.' . $table);
         }
 
-        $command .= ' '.escapeshellarg((string) $database).' > '.escapeshellarg($filepath);
-
-        return $command;
+        return $command . (' ' . escapeshellarg((string) $database) . ' > ' . escapeshellarg($filepath));
     }
 
     /**
@@ -250,15 +250,13 @@ class MySQLAdapter implements BackupAdapterInterface, DatabaseConnectionInterfac
         );
 
         if ($password) {
-            $command .= ' --password='.escapeshellarg($password);
+            $command .= ' --password=' . escapeshellarg($password);
         }
 
         if ($options['force'] ?? false) {
             $command .= ' --force';
         }
 
-        $command .= ' '.escapeshellarg((string) $database).' < '.escapeshellarg($filepath);
-
-        return $command;
+        return $command . (' ' . escapeshellarg((string) $database) . ' < ' . escapeshellarg($filepath));
     }
 }

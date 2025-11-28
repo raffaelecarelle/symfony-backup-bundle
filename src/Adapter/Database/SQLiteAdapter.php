@@ -47,7 +47,8 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
         if (null === $outputPath) {
             throw new BackupException('Output path is not specified');
         }
-        $filepath = $outputPath.'/'.$filename;
+
+        $filepath = $outputPath . '/' . $filename;
 
         // Ensure the output directory exists
         if (!$this->filesystem->exists($outputPath)) {
@@ -87,10 +88,10 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime
             );
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('SQLite backup failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             // Clean up any partial files
@@ -104,7 +105,7 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
                 null,
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
-                $e->getMessage()
+                $throwable->getMessage()
             );
         }
     }
@@ -135,7 +136,7 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
 
                 // Create a backup of the current database if requested (default true)
                 if ($options['backup_existing'] ?? true) {
-                    $backupExistingPath = $targetDbPath.'.bak.'.date('YmdHis');
+                    $backupExistingPath = $targetDbPath . '.bak.' . date('YmdHis');
                     $this->filesystem->copy($targetDbPath, $backupExistingPath);
                     $this->logger->info('Created backup of existing database', [
                         'backup_path' => $backupExistingPath,
@@ -151,10 +152,10 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('SQLite restore failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             return false;
@@ -212,7 +213,7 @@ class SQLiteAdapter implements BackupAdapterInterface, DatabaseConnectionInterfa
         }
 
         // Check for memory database
-        if (isset($params['memory']) && true === $params['memory']) {
+        if (isset($params['memory']) && $params['memory']) {
             return ':memory:';
         }
 

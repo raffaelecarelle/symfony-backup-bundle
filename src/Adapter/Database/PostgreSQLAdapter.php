@@ -7,6 +7,7 @@ namespace ProBackupBundle\Adapter\Database;
 use Doctrine\DBAL\Connection;
 use ProBackupBundle\Adapter\BackupAdapterInterface;
 use ProBackupBundle\Adapter\DatabaseConnectionInterface;
+use ProBackupBundle\Exception\BackupException;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use ProBackupBundle\Process\Factory\ProcessFactory;
@@ -52,9 +53,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
         $filename = $this->generateFilename($config);
         $outputPath = $config->getOutputPath();
         if (null === $outputPath) {
-            throw new \ProBackupBundle\Exception\BackupException('Output path is not specified');
+            throw new BackupException('Output path is not specified');
         }
-        $filepath = $outputPath.'/'.$filename;
+
+        $filepath = $outputPath . '/' . $filename;
 
         // Ensure the output directory exists
         if (!$this->filesystem->exists($outputPath)) {
@@ -87,10 +89,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime
             );
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('PostgreSQL backup failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             // Clean up any partial files
@@ -104,7 +106,7 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
                 null,
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
-                $e->getMessage()
+                $throwable->getMessage()
             );
         }
     }
@@ -126,10 +128,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('PostgreSQL restore failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             return false;
@@ -185,10 +187,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
         // Set environment variables for password
         $env = '';
         if ($password) {
-            $env = 'PGPASSWORD='.escapeshellarg($password).' ';
+            $env = 'PGPASSWORD=' . escapeshellarg($password) . ' ';
         }
 
-        $command = $env.\sprintf(
+        $command = $env . \sprintf(
             'pg_dump --host=%s --port=%s --username=%s',
             escapeshellarg($host),
             escapeshellarg((string) $port),
@@ -226,12 +228,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
 
         // Exclude tables
         foreach ($excludeTables as $table) {
-            $command .= ' --exclude-table='.escapeshellarg((string) $table);
+            $command .= ' --exclude-table=' . escapeshellarg((string) $table);
         }
 
-        $command .= ' '.escapeshellarg((string) $database).' > '.escapeshellarg($filepath);
-
-        return $command;
+        return $command . (' ' . escapeshellarg((string) $database) . ' > ' . escapeshellarg($filepath));
     }
 
     /**
@@ -252,7 +252,7 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
         // Set environment variables for password
         $env = '';
         if ($password) {
-            $env = 'PGPASSWORD='.escapeshellarg($password).' ';
+            $env = 'PGPASSWORD=' . escapeshellarg($password) . ' ';
         }
 
         // Check if this is a custom format backup
@@ -260,7 +260,7 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
 
         if ($isCustomFormat) {
             // Use pg_restore for custom format
-            $command = $env.\sprintf(
+            $command = $env . \sprintf(
                 'pg_restore --host=%s --port=%s --username=%s --dbname=%s',
                 escapeshellarg($host),
                 escapeshellarg((string) $port),
@@ -288,10 +288,10 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
                 $command .= ' --disable-triggers';
             }
 
-            $command .= ' '.escapeshellarg($filepath);
+            $command .= ' ' . escapeshellarg($filepath);
         } else {
             // Use psql for plain format
-            $command = $env.\sprintf(
+            $command = $env . \sprintf(
                 'psql --host=%s --port=%s --username=%s --dbname=%s',
                 escapeshellarg($host),
                 escapeshellarg((string) $port),
@@ -301,14 +301,12 @@ class PostgreSQLAdapter implements BackupAdapterInterface, DatabaseConnectionInt
 
             // Optionally stop on first error for clearer diagnostics
             $command .= ' --set=ON_ERROR_STOP=1';
-            if ($options['on_error_stop'] ?? false) {
-            }
 
             if ($options['single_transaction'] ?? false) {
                 $command .= ' --single-transaction';
             }
 
-            $command .= ' < '.escapeshellarg($filepath);
+            $command .= ' < ' . escapeshellarg($filepath);
         }
 
         return $command;

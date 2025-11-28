@@ -26,7 +26,7 @@ final class ProfilerPanelTest extends WebTestCase
 
     public function testBackupProfilerPanelIsVisibleWhenEnabled(): void
     {
-        $client = static::createClient(options: [
+        $client = self::createClient(options: [
             'environment' => 'test',
             'debug' => true,
         ]);
@@ -40,7 +40,7 @@ final class ProfilerPanelTest extends WebTestCase
 
     public function testBackupProfilerPanelIsHiddenWhenDisabledInConfig(): void
     {
-        $client = static::createClient(options: [
+        $client = self::createClient(options: [
             'environment' => 'no_prof', // custom env with profiler bundle enabled but pro_backup.profiler disabled
             'debug' => true,
         ]);
