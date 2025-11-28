@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Adapter\Compression;
 
+use ProBackupBundle\Exception\BackupException;
+
 /**
  * Interface for compression adapters.
  */
@@ -13,12 +15,12 @@ interface CompressionAdapterInterface
      * Compress a file.
      *
      * @param string               $sourcePath Path to the file to compress
-     * @param string|null          $targetPath Path where the compressed file should be stored (if null, will use sourcePath + extension)
+     * @param null|string          $targetPath Path where the compressed file should be stored (if null, will use sourcePath + extension)
      * @param array<string, mixed> $options    Additional options for the compression
      *
-     * @return string Path to the compressed file
+     * @throws BackupException If compression fails
      *
-     * @throws \ProBackupBundle\Exception\BackupException If compression fails
+     * @return string Path to the compressed file
      */
     public function compress(string $sourcePath, ?string $targetPath = null, array $options = []): string;
 
@@ -26,12 +28,12 @@ interface CompressionAdapterInterface
      * Decompress a file.
      *
      * @param string               $sourcePath Path to the file to decompress
-     * @param string|null          $targetPath Path where the decompressed file should be stored (if null, will use sourcePath without extension)
+     * @param null|string          $targetPath Path where the decompressed file should be stored (if null, will use sourcePath without extension)
      * @param array<string, mixed> $options    Additional options for the decompression
      *
-     * @return string Path to the decompressed file
+     * @throws BackupException If decompression fails
      *
-     * @throws \ProBackupBundle\Exception\BackupException If decompression fails
+     * @return string Path to the decompressed file
      */
     public function decompress(string $sourcePath, ?string $targetPath = null, array $options = []): string;
 

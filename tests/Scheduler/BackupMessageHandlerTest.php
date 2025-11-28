@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\Scheduler;
 
+use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
@@ -14,11 +16,15 @@ use Psr\Log\LoggerInterface;
 
 class BackupMessageHandlerTest extends TestCase
 {
-    private $mockBackupManager;
-    private $mockLogger;
-    private $handler;
-    private $message;
-    private $configuration;
+    private MockObject $mockBackupManager;
+
+    private MockObject $mockLogger;
+
+    private BackupMessageHandler $handler;
+
+    private BackupMessage $message;
+
+    private BackupConfiguration $configuration;
 
     protected function setUp(): void
     {
@@ -49,7 +55,7 @@ class BackupMessageHandlerTest extends TestCase
         // Configure mocks
         $this->mockBackupManager->expects($this->once())
             ->method('backup')
-            ->with($this->callback(fn (BackupConfiguration $config) => 'database' === $config->getType() && 'test_backup' === $config->getName()))
+            ->with($this->callback(fn (BackupConfiguration $config): bool => 'database' === $config->getType() && 'test_backup' === $config->getName()))
             ->willReturn($result);
 
         // Expect logger calls
@@ -57,7 +63,7 @@ class BackupMessageHandlerTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Starting scheduled backup', $this->anything()],
-                ['Scheduled backup completed successfully', $this->callback(fn ($context) => 'database' === $context['type']
+                ['Scheduled backup completed successfully', $this->callback(fn ($context): bool => 'database' === $context['type']
                    && 'test_backup' === $context['name']
                    && '/path/to/backup.sql.gz' === $context['file']
                    && 1024 === $context['size']
@@ -92,7 +98,7 @@ class BackupMessageHandlerTest extends TestCase
 
         $this->mockLogger->expects($this->once())
             ->method('error')
-            ->with('Scheduled backup failed', $this->callback(fn ($context) => 'database' === $context['type']
+            ->with('Scheduled backup failed', $this->callback(fn ($context): bool => 'database' === $context['type']
                    && 'test_backup' === $context['name']
                    && 'Database connection failed' === $context['error']));
 
@@ -114,7 +120,7 @@ class BackupMessageHandlerTest extends TestCase
 
         $this->mockLogger->expects($this->once())
             ->method('error')
-            ->with('Scheduled backup failed with exception', $this->callback(fn ($context) => 'database' === $context['type']
+            ->with('Scheduled backup failed with exception', $this->callback(fn ($context): bool => 'database' === $context['type']
                    && 'test_backup' === $context['name']
                    && 'Unexpected error occurred' === $context['exception']));
 

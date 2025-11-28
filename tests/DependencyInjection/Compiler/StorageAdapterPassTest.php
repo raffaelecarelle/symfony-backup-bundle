@@ -12,9 +12,11 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class StorageAdapterPassTest extends TestCase
 {
-    private $compilerPass;
-    private $containerBuilder;
-    private $managerDefinition;
+    private StorageAdapterPass $compilerPass;
+
+    private ContainerBuilder $containerBuilder;
+
+    private Definition $managerDefinition;
 
     protected function setUp(): void
     {
@@ -40,10 +42,12 @@ class StorageAdapterPassTest extends TestCase
         // Create and register some tagged services
         $localDefinition = new Definition();
         $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'local']);
+
         $this->containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         $s3Definition = new Definition();
         $s3Definition->addTag('pro_backup.storage_adapter', ['name' => 's3']);
+
         $this->containerBuilder->setDefinition('pro_backup.storage.s3', $s3Definition);
 
         // Process the container
@@ -71,6 +75,7 @@ class StorageAdapterPassTest extends TestCase
         // Create and register a tagged service without a name
         $localDefinition = new Definition();
         $localDefinition->addTag('pro_backup.storage_adapter');
+
         $this->containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         // Process the container
@@ -93,6 +98,7 @@ class StorageAdapterPassTest extends TestCase
         $localDefinition = new Definition();
         $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'local']);
         $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'filesystem']);
+
         $this->containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         // Process the container
@@ -119,6 +125,7 @@ class StorageAdapterPassTest extends TestCase
         // Create and register a tagged service
         $localDefinition = new Definition();
         $localDefinition->addTag('pro_backup.storage_adapter', ['name' => 'local']);
+
         $containerBuilder->setDefinition('pro_backup.storage.local', $localDefinition);
 
         // Process the container

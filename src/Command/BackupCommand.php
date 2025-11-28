@@ -186,17 +186,17 @@ EOF
             ]);
 
             return Command::FAILURE;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $io->progressFinish();
 
             $io->error([
                 'Backup failed with exception',
-                \sprintf('Error: %s', $e->getMessage()),
+                \sprintf('Error: %s', $throwable->getMessage()),
             ]);
 
             if ($output->isVerbose()) {
                 $io->section('Exception details');
-                $io->text((string) $e);
+                $io->text((string) $throwable);
             }
 
             return Command::FAILURE;
@@ -221,6 +221,6 @@ EOF
 
         $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, $precision).' '.$units[$pow];
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }

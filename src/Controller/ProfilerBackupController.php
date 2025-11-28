@@ -39,10 +39,10 @@ class ProfilerBackupController
                 'backups' => $backups,
                 'count' => \count($backups),
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
         }
     }
@@ -71,10 +71,10 @@ class ProfilerBackupController
                 'file_size' => $result->getFileSize(),
                 'error' => $result->getError(),
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
         }
     }
@@ -96,10 +96,10 @@ class ProfilerBackupController
             $success = $this->backupManager->restore($backupId);
 
             return new JsonResponse(['success' => $success]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
         }
     }
@@ -124,8 +124,8 @@ class ProfilerBackupController
                     'Content-Disposition' => \sprintf('attachment; filename="%s"', basename((string) $backup['file_path'])),
                 ]
             );
-        } catch (\Throwable $e) {
-            return new Response($e->getMessage(), 404);
+        } catch (\Throwable $throwable) {
+            return new Response($throwable->getMessage(), 404);
         }
     }
 
@@ -143,10 +143,10 @@ class ProfilerBackupController
             $this->backupDataCollector->reset();
 
             return new JsonResponse(['success' => $success]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             return new JsonResponse([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
         }
     }

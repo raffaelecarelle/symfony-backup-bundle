@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Adapter\Storage;
 
+use Aws\S3\S3Client;
 use ProBackupBundle\Exception\BackupException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -24,11 +25,11 @@ class S3Adapter implements StorageAdapterInterface
     /**
      * Constructor.
      *
-     * @param \Aws\S3\S3Client $s3Client AWS S3 client
-     * @param string           $bucket   S3 bucket name
-     * @param string           $prefix   Base prefix for storing backups
+     * @param S3Client $s3Client AWS S3 client
+     * @param string   $bucket   S3 bucket name
+     * @param string   $prefix   Base prefix for storing backups
      */
-    public function __construct(private readonly \Aws\S3\S3Client $s3Client, private readonly string $bucket, string $prefix = '', private readonly LoggerInterface $logger = new NullLogger())
+    public function __construct(private readonly S3Client $s3Client, private readonly string $bucket, string $prefix = '', private readonly LoggerInterface $logger = new NullLogger())
     {
         $this->prefix = trim($prefix, '/');
         $this->filesystem = new Filesystem();
@@ -61,12 +62,12 @@ class S3Adapter implements StorageAdapterInterface
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to store file in S3', [
                 'local_path' => $localPath,
                 'remote_path' => $remotePath,
                 'bucket' => $this->bucket,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -104,12 +105,12 @@ class S3Adapter implements StorageAdapterInterface
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to retrieve file from S3', [
                 'remote_path' => $remotePath,
                 'local_path' => $localPath,
                 'bucket' => $this->bucket,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -142,11 +143,11 @@ class S3Adapter implements StorageAdapterInterface
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to delete file from S3', [
                 'remote_path' => $remotePath,
                 'bucket' => $this->bucket,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -184,11 +185,11 @@ class S3Adapter implements StorageAdapterInterface
             }
 
             return $files;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to list files in S3', [
                 'prefix' => $prefix,
                 'bucket' => $this->bucket,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return [];
@@ -201,11 +202,11 @@ class S3Adapter implements StorageAdapterInterface
             $key = $this->getFullKey($remotePath);
 
             return $this->s3Client->doesObjectExist($this->bucket, $key);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to check if file exists in S3', [
                 'remote_path' => $remotePath,
                 'bucket' => $this->bucket,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -217,7 +218,7 @@ class S3Adapter implements StorageAdapterInterface
      */
     private function getFullKey(string $remotePath): string
     {
-        return $this->prefix.ltrim($remotePath, '/');
+        return $this->prefix . ltrim($remotePath, '/');
     }
 
     /**

@@ -26,6 +26,7 @@ class BackupManager
 {
     /** @var array<string,mixed> */
     private array $config = [];
+
     /**
      * @var BackupAdapterInterface[] List of backup adapters
      */
@@ -141,7 +142,7 @@ class BackupManager
         $this->logger?->info('Starting backup', ['type' => $config->getType()]);
 
         // Set default storage if not specified
-        if (!$config->getStorage()) {
+        if ('' === $config->getStorage() || '0' === $config->getStorage()) {
             $config->setStorage($this->defaultStorage);
         }
 
@@ -157,7 +158,7 @@ class BackupManager
         }
 
         // Dispatch pre-backup event
-        if ($this->eventDispatcher) {
+        if ($this->eventDispatcher instanceof EventDispatcherInterface) {
             $event = new BackupEvent($config);
             $this->eventDispatcher->dispatch($event, BackupEvents::PRE_BACKUP);
         }
@@ -167,7 +168,7 @@ class BackupManager
 
         // Validate the configuration
         $errors = $adapter->validate($config);
-        if (!empty($errors)) {
+        if ([] !== $errors) {
             $errorMessage = \sprintf('Invalid backup configuration: %s', implode(', ', $errors));
             $this->logger->error($errorMessage);
 
@@ -195,7 +196,7 @@ class BackupManager
                 $name = $config->getName() ?: $config->getType();
                 $extension = 'zip' === $config->getCompression() ? 'zip' : 'tar.gz';
                 $filename = \sprintf('%s_%s.%s', $name, $timestamp, $extension);
-                $targetPath = rtrim((string) $config->getOutputPath(), '/').'/'.$filename;
+                $targetPath = rtrim((string) $config->getOutputPath(), '/') . '/' . $filename;
 
                 // Compress using ArchiveManager
                 $finalPath = $this->archiveManager->compress($source, $targetPath, $config->getCompression(), true);
@@ -217,7 +218,7 @@ class BackupManager
             }
 
             // Dispatch post-backup event
-            if ($this->eventDispatcher) {
+            if ($this->eventDispatcher instanceof EventDispatcherInterface) {
                 $event = new BackupEvent($config, $result);
                 $this->eventDispatcher->dispatch($event, BackupEvents::POST_BACKUP);
             }
@@ -254,17 +255,17 @@ class BackupManager
                 $this->logger->error('Backup failed', ['error' => $result->getError()]);
 
                 // Dispatch backup failed event
-                if ($this->eventDispatcher) {
+                if ($this->eventDispatcher instanceof EventDispatcherInterface) {
                     $event = new BackupEvent($config, $result);
                     $this->eventDispatcher->dispatch($event, BackupEvents::BACKUP_FAILED);
                 }
             }
 
             return $result;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Backup failed with exception', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             $result = new BackupResult(
@@ -273,11 +274,11 @@ class BackupManager
                 null,
                 null,
                 null,
-                $e->getMessage()
+                $throwable->getMessage()
             );
 
             // Dispatch backup failed event
-            if ($this->eventDispatcher) {
+            if ($this->eventDispatcher instanceof EventDispatcherInterface) {
                 $event = new BackupEvent($config, $result);
                 $this->eventDispatcher->dispatch($event, BackupEvents::BACKUP_FAILED);
             }
@@ -292,9 +293,9 @@ class BackupManager
      * @param string $backupId ID of the backup to restore
      * @param array  $options  Additional options for the restore operation
      *
-     * @return bool True if restore was successful, false otherwise
-     *
      * @throws BackupException If the backup is not found
+     *
+     * @return bool True if restore was successful, false otherwise
      */
     public function restore(string $backupId, array $options = []): bool
     {
@@ -306,7 +307,7 @@ class BackupManager
         $this->logger->info('Starting restore', ['backup_id' => $backupId]);
 
         // Dispatch pre-restore event
-        if ($this->eventDispatcher) {
+        if ($this->eventDispatcher instanceof EventDispatcherInterface) {
             $event = new BackupEvent(new BackupConfiguration());
             $this->eventDispatcher->dispatch($event, BackupEvents::PRE_RESTORE);
         }
@@ -324,7 +325,7 @@ class BackupManager
 
             $success = $adapter->restore($backupPath, $options);
 
-            if ($this->eventDispatcher) {
+            if ($this->eventDispatcher instanceof EventDispatcherInterface) {
                 $event = new BackupEvent(new BackupConfiguration());
                 $this->eventDispatcher->dispatch($event, BackupEvents::POST_RESTORE);
             }
@@ -334,22 +335,22 @@ class BackupManager
             } else {
                 $this->logger->error('Restore failed', ['backup_id' => $backupId]);
 
-                if ($this->eventDispatcher) {
+                if ($this->eventDispatcher instanceof EventDispatcherInterface) {
                     $event = new BackupEvent(new BackupConfiguration());
                     $this->eventDispatcher->dispatch($event, BackupEvents::RESTORE_FAILED);
                 }
             }
 
             return $success;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Restore failed with exception', [
                 'backup_id' => $backupId,
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             // Dispatch restore failed event
-            if ($this->eventDispatcher) {
+            if ($this->eventDispatcher instanceof EventDispatcherInterface) {
                 $event = new BackupEvent(new BackupConfiguration());
                 $this->eventDispatcher->dispatch($event, BackupEvents::RESTORE_FAILED);
             }
@@ -362,13 +363,13 @@ class BackupManager
             }
         }
 
-        return isset($success) ? (bool) $success : false;
+        return isset($success) && (bool) $success;
     }
 
     /**
      * List all available backups.
      *
-     * @param BackupConfiguration|null $configuration Filter by backup type
+     * @param null|BackupConfiguration $configuration Filter by backup type
      *
      * @return array List of backups
      */
@@ -382,7 +383,7 @@ class BackupManager
             return array_values($this->backups);
         }
 
-        return array_values(array_filter($this->backups, fn ($backup) => $backup['type'] === $configuration->getType()));
+        return array_values(array_filter($this->backups, fn (array $backup): bool => $backup['type'] === $configuration->getType()));
     }
 
     /**
@@ -390,7 +391,7 @@ class BackupManager
      *
      * @param string $id Backup ID
      *
-     * @return array|null Backup data or null if not found
+     * @return null|array Backup data or null if not found
      */
     public function getBackup(string $id): ?array
     {
@@ -404,18 +405,18 @@ class BackupManager
     /**
      * Get the most recent backup.
      *
-     * @param string|null $type Filter by backup type
+     * @param null|string $type Filter by backup type
      *
-     * @return array|null Backup data or null if no backups
+     * @return null|array Backup data or null if no backups
      */
     public function getLastBackup(?string $type = null): ?array
     {
         $backups = $this->listBackups($type);
-        if (empty($backups)) {
+        if ([] === $backups) {
             return null;
         }
 
-        usort($backups, fn ($a, $b) => $b['created_at'] <=> $a['created_at']);
+        usort($backups, fn (array $a, array $b): int => $b['created_at'] <=> $a['created_at']);
 
         return $backups[0];
     }
@@ -455,10 +456,10 @@ class BackupManager
             $this->logger->info('Backup deleted successfully', ['backup_id' => $id]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to delete backup', [
                 'backup_id' => $id,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -517,7 +518,7 @@ class BackupManager
                 $resolvedConnectionName = $doctrine?->getDefaultConnectionName();
             }
 
-            if (null === $doctrine || null === $resolvedConnectionName) {
+            if (!$doctrine instanceof ManagerRegistry || null === $resolvedConnectionName) {
                 // No Doctrine context available -> skip DB adapters
                 continue;
             }
@@ -565,10 +566,10 @@ class BackupManager
 
         try {
             return $storage->store($result->getFilePath(), $remotePath);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to store backup remotely', [
                 'storage' => $storageName,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -580,9 +581,9 @@ class BackupManager
      *
      * @param array $backup Backup data
      *
-     * @return string Local path to the retrieved file
-     *
      * @throws BackupException If the backup cannot be retrieved
+     *
+     * @return string Local path to the retrieved file
      */
     private function retrieveFromRemote(array $backup): string
     {
@@ -617,16 +618,16 @@ class BackupManager
     /**
      * Generate a remote path for a backup file.
      *
-     * @param BackupResult|array       $backup Backup result or data
-     * @param BackupConfiguration|null $config Backup configuration
+     * @param array|BackupResult       $backup Backup result or data
+     * @param null|BackupConfiguration $config Backup configuration
      *
      * @return string Remote path
      */
-    private function generateRemotePath($backup, ?BackupConfiguration $config = null): string
+    private function generateRemotePath(array|BackupResult $backup, ?BackupConfiguration $config = null): string
     {
         if ($backup instanceof BackupResult) {
             $fileName = basename((string) $backup->getFilePath());
-            $type = $config ? $config->getType() : 'unknown';
+            $type = $config instanceof BackupConfiguration ? $config->getType() : 'unknown';
 
             return \sprintf('%s/%s', $type, $fileName);
         }
@@ -640,7 +641,7 @@ class BackupManager
     /**
      * Apply retention policy by deleting old backups beyond configured retention days.
      *
-     * @param string|null $type   'database' | 'filesystem' (null = both)
+     * @param null|string $type   'database' | 'filesystem' (null = both)
      * @param bool        $dryRun If true, only logs actions without deleting
      */
     public function applyRetentionPolicy(?string $type = null, bool $dryRun = false): void
@@ -664,9 +665,9 @@ class BackupManager
                 foreach ($entries as $entry) {
                     // LocalAdapter schema
                     if (isset($entry['created_at']) && isset($entry['name']) && isset($entry['type'])) {
-                        $createdAt = $entry['created_at'] instanceof \DateTimeInterface ? $entry['created_at'] : new \DateTimeImmutable('@'.(string) $entry['created_at']);
+                        $createdAt = $entry['created_at'] instanceof \DateTimeInterface ? $entry['created_at'] : new \DateTimeImmutable('@' . $entry['created_at']);
                         if ($createdAt < $cutoff) {
-                            $remotePath = $entry['type'].'/'.$entry['name'];
+                            $remotePath = $entry['type'] . '/' . $entry['name'];
                             if ($dryRun) {
                                 $this->logger?->info('Retention dry-run: would delete old backup', [
                                     'storage' => $storageName,
@@ -675,6 +676,7 @@ class BackupManager
                                 ]);
                                 continue;
                             }
+
                             $ok = $adapter->delete($remotePath);
                             $this->logger?->info($ok ? 'Deleted old backup due to retention' : 'Failed to delete old backup', [
                                 'storage' => $storageName,
@@ -682,6 +684,7 @@ class BackupManager
                                 'created_at' => $createdAt->format(\DATE_ATOM),
                             ]);
                         }
+
                         continue;
                     }
 
@@ -698,6 +701,7 @@ class BackupManager
                                 ]);
                                 continue;
                             }
+
                             $ok = $adapter->delete($remotePath);
                             $this->logger?->info($ok ? 'Deleted old remote backup due to retention' : 'Failed to delete old remote backup', [
                                 'storage' => $storageName,
@@ -716,7 +720,7 @@ class BackupManager
      */
     private function loadExistingBackups(?BackupConfiguration $configuration = null): array
     {
-        if (!$configuration) {
+        if (!$configuration instanceof BackupConfiguration) {
             $backups = [];
             foreach ($this->storageAdapters as $storageAdapter) {
                 $backups = array_merge($this->backups, $storageAdapter->list());

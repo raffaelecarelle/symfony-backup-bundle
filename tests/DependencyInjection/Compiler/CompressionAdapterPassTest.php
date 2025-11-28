@@ -12,9 +12,11 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class CompressionAdapterPassTest extends TestCase
 {
-    private $compilerPass;
-    private $containerBuilder;
-    private $managerDefinition;
+    private CompressionAdapterPass $compilerPass;
+
+    private ContainerBuilder $containerBuilder;
+
+    private Definition $managerDefinition;
 
     protected function setUp(): void
     {
@@ -40,10 +42,12 @@ class CompressionAdapterPassTest extends TestCase
         // Create and register some tagged services
         $gzipDefinition = new Definition();
         $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
+
         $this->containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         $zipDefinition = new Definition();
         $zipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'zip']);
+
         $this->containerBuilder->setDefinition('pro_backup.compression.zip', $zipDefinition);
 
         // Process the container
@@ -71,6 +75,7 @@ class CompressionAdapterPassTest extends TestCase
         // Create and register a tagged service without a name
         $gzipDefinition = new Definition();
         $gzipDefinition->addTag('pro_backup.compression_adapter');
+
         $this->containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         // Process the container
@@ -93,6 +98,7 @@ class CompressionAdapterPassTest extends TestCase
         $gzipDefinition = new Definition();
         $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
         $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gz']);
+
         $this->containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         // Process the container
@@ -119,6 +125,7 @@ class CompressionAdapterPassTest extends TestCase
         // Create and register a tagged service
         $gzipDefinition = new Definition();
         $gzipDefinition->addTag('pro_backup.compression_adapter', ['name' => 'gzip']);
+
         $containerBuilder->setDefinition('pro_backup.compression.gzip', $gzipDefinition);
 
         // Process the container

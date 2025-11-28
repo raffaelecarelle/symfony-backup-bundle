@@ -5,26 +5,28 @@ declare(strict_types=1);
 namespace ProBackupBundle\Tests\Adapter\Database;
 
 use Doctrine\DBAL\Connection;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Adapter\Database\PostgreSQLAdapter;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Process\Factory\ProcessFactory;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Process;
 
 class PostgreSQLAdapterTest extends TestCase
 {
-    private $tempDir;
-    private $mockConnection;
-    private $mockLogger;
-    private $adapter;
-    private $filesystem;
-    private $mockProcessFactory;
+    private string $tempDir;
+
+    private MockObject $mockConnection;
+
+    private MockObject $mockLogger;
+
+    private PostgreSQLAdapter $adapter;
+
+    private MockObject $mockProcessFactory;
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir().'/postgresql_adapter_test_'.uniqid('', true);
+        $this->tempDir = sys_get_temp_dir() . '/postgresql_adapter_test_' . uniqid('', true);
         mkdir($this->tempDir, 0777, true);
 
         $this->mockConnection = $this->createMock(Connection::class);
@@ -37,7 +39,6 @@ class PostgreSQLAdapterTest extends TestCase
         ]);
 
         $this->mockLogger = $this->createMock(LoggerInterface::class);
-        $this->filesystem = new Filesystem();
 
         $this->mockProcessFactory = $this->createMock(ProcessFactory::class);
         $this->adapter = new PostgreSQLAdapter(
@@ -54,7 +55,7 @@ class PostgreSQLAdapterTest extends TestCase
         }
     }
 
-    private function removeDirectory($dir)
+    private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {
             return;
@@ -62,45 +63,11 @@ class PostgreSQLAdapterTest extends TestCase
 
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
-            $path = $dir.'/'.$file;
+            $path = $dir . '/' . $file;
             is_dir($path) ? $this->removeDirectory($path) : unlink($path);
         }
 
         rmdir($dir);
-    }
-
-    /**
-     * Mock a successful process execution.
-     */
-    private function mockSuccessfulProcess(): void
-    {
-        // Create a mock for Process
-        $mockProcess = $this->getMockBuilder(Process::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        // Configure the mock
-        $mockProcess->method('run')->willReturn(0);
-        $mockProcess->method('isSuccessful')->willReturn(true);
-
-        // Replace the Process class with our mock
-        $this->mockStaticMethod(Process::class, 'fromShellCommandline', $mockProcess);
-    }
-
-    /**
-     * Mock a static method.
-     */
-    private function mockStaticMethod($class, $method, $return)
-    {
-        $mock = $this->createMock($class);
-        $mock->method($method)->willReturn($return);
-
-        // Use reflection to replace the static method
-        $reflectionClass = new \ReflectionClass($class);
-        $reflectionMethod = $reflectionClass->getMethod($method);
-
-        // This is a workaround since we can't directly mock static methods in PHPUnit
-        // In a real test, we would use a library like AspectMock or create a wrapper class
     }
 
     public function testGetConnection(): void
@@ -121,7 +88,7 @@ class PostgreSQLAdapterTest extends TestCase
     public function testValidate(): void
     {
         $config = new BackupConfiguration();
-        $config->setOutputPath($this->tempDir.'/backups');
+        $config->setOutputPath($this->tempDir . '/backups');
 
         $errors = $this->adapter->validate($config);
 
@@ -146,10 +113,11 @@ class PostgreSQLAdapterTest extends TestCase
     public function testBuildPgDumpCommand(): void
     {
         $config = new BackupConfiguration();
-        $config->setOutputPath($this->tempDir.'/backups');
+        $config->setOutputPath($this->tempDir . '/backups');
         $config->setName('test_backup');
         $config->setOption('create', true);
-        $filepath = $this->tempDir.'/backups/test_db_backup.sql';
+
+        $filepath = $this->tempDir . '/backups/test_db_backup.sql';
 
         // Use reflection to access the private method
         $reflectionClass = new \ReflectionClass(PostgreSQLAdapter::class);
@@ -175,7 +143,7 @@ class PostgreSQLAdapterTest extends TestCase
      */
     public function testBuildPgRestoreCommandForPlainFormat(): void
     {
-        $filepath = $this->tempDir.'/test_backup.sql';
+        $filepath = $this->tempDir . '/test_backup.sql';
         file_put_contents($filepath, '-- PostgreSQL backup file');
 
         // Use reflection to access the private method
@@ -203,7 +171,7 @@ class PostgreSQLAdapterTest extends TestCase
      */
     public function testBuildPgRestoreCommandForCustomFormat(): void
     {
-        $filepath = $this->tempDir.'/test_backup.dump';
+        $filepath = $this->tempDir . '/test_backup.dump';
         file_put_contents($filepath, 'PGDMP'); // Fake custom format header
 
         // Use reflection to access the private method

@@ -12,9 +12,13 @@ use ProBackupBundle\Model\BackupConfiguration;
 class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
 {
     private string $dbName;
+
     private string $host;
+
     private string $port;
+
     private string $user;
+
     private string $password;
 
     protected function setupTest(): void
@@ -62,13 +66,14 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         // Check if database exists
         $stmt = $pdo->prepare('SELECT 1 FROM pg_database WHERE datname = :name');
         $stmt->execute(['name' => $this->dbName]);
+
         $exists = (bool) $stmt->fetchColumn();
 
         if (!$exists) {
             try {
                 // Quote database name safely (avoid double quotes injection)
                 $dbName = str_replace('"', '', $this->dbName);
-                $pdo->exec('CREATE DATABASE "'.$dbName.'" WITH ENCODING \'UTF8\'');
+                $pdo->exec('CREATE DATABASE "' . $dbName . '" WITH ENCODING \'UTF8\'');
             } catch (\Throwable) {
                 // Ignore creation failure (e.g., insufficient privileges); later connection may still succeed in CI where DB is pre-created
             }
@@ -147,7 +152,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         $result = $this->backupManager->backup($config);
 
         // Assert backup was successful
-        $this->assertTrue($result->isSuccess(), 'Backup should be successful: '.$result->getError());
+        $this->assertTrue($result->isSuccess(), 'Backup should be successful: ' . $result->getError());
         $this->assertNotNull($result->getFilePath(), 'Backup file path should not be null');
         $this->assertNotNull($result->getFileSize(), 'Backup size should not be null');
         $this->assertGreaterThan(0, $result->getFileSize(), 'Backup size should be greater than 0');
@@ -172,7 +177,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         $result = $this->backupManager->backup($config);
 
         // Assert backup was successful
-        $this->assertTrue($result->isSuccess(), 'Backup should be successful: '.$result->getError());
+        $this->assertTrue($result->isSuccess(), 'Backup should be successful: ' . $result->getError());
         $this->assertNotNull($result->getFilePath(), 'Backup file path should not be null');
 
         // Verify it's a zip file
@@ -192,7 +197,7 @@ class PostgreSQLDatabaseBackupTest extends AbstractEndToEndTest
         $result = $this->backupManager->backup($config);
 
         // Assert backup was successful
-        $this->assertTrue($result->isSuccess(), 'Backup should be successful: '.$result->getError());
+        $this->assertTrue($result->isSuccess(), 'Backup should be successful: ' . $result->getError());
         $this->assertNotNull($result->getFilePath(), 'Backup file path should not be null');
     }
 

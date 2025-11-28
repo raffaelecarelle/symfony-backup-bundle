@@ -27,7 +27,7 @@ class DatabaseAdapterPass implements CompilerPassInterface
         $managerDefinition = $container->getDefinition('pro_backup.manager');
         $taggedServices = $container->findTaggedServiceIds('pro_backup.database_adapter');
 
-        foreach ($taggedServices as $id => $tags) {
+        foreach (array_keys($taggedServices) as $id) {
             $managerDefinition->addMethodCall('addAdapter', [
                 new Reference($id),
             ]);
@@ -45,7 +45,7 @@ class DatabaseAdapterPass implements CompilerPassInterface
         $connections = $config['database']['connections'];
 
         foreach ($connections as $connectionName) {
-            $connectionServiceId = 'doctrine.dbal.'.$connectionName.'_connection';
+            $connectionServiceId = 'doctrine.dbal.' . $connectionName . '_connection';
 
             if (!$container->has($connectionServiceId)) {
                 continue;
@@ -61,7 +61,7 @@ class DatabaseAdapterPass implements CompilerPassInterface
         string $connectionName,
         string $connectionServiceId,
     ): void {
-        $adapterServiceId = 'pro_backup.database.adapter.'.$connectionName;
+        $adapterServiceId = 'pro_backup.database.adapter.' . $connectionName;
 
         if ($container->has($adapterServiceId)) {
             return;

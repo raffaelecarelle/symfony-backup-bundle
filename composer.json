@@ -28,7 +28,7 @@
     "require-dev": {
         "ext-pdo": "*",
         "aws/aws-sdk-php": "*",
-        "doctrine/doctrine-bundle": "^2.0",
+        "doctrine/doctrine-bundle": "^2.0|^3.0",
         "friendsofphp/php-cs-fixer": "^3.85",
         "google/cloud-storage": "*",
         "phpunit/phpunit": "^9.5",

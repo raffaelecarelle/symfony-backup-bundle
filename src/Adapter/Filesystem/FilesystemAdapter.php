@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace ProBackupBundle\Adapter\Filesystem;
 
 use ProBackupBundle\Adapter\BackupAdapterInterface;
-use ProBackupBundle\Adapter\Compression\GzipCompression;
-use ProBackupBundle\Adapter\Compression\ZipCompression;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 /**
  * Adapter for filesystem backups.
@@ -36,7 +32,7 @@ class FilesystemAdapter implements BackupAdapterInterface
         $startTime = microtime(true);
         $filename = $this->generateFilename($config);
         $outputPath = $config->getOutputPath();
-        $filepath = $outputPath.'/'.$filename;
+        $filepath = $outputPath . '/' . $filename;
 
         // Ensure the output directory exists
         if (!$this->filesystem->exists($outputPath)) {
@@ -49,7 +45,7 @@ class FilesystemAdapter implements BackupAdapterInterface
 
         try {
             // Create a temporary directory for the files
-            $tempDir = sys_get_temp_dir().'/backup_'.uniqid('', true);
+            $tempDir = sys_get_temp_dir() . '/backup_' . uniqid('', true);
             $this->filesystem->mkdir($tempDir, 0755);
 
             // Get paths from configuration
@@ -101,7 +97,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 // Copy files to temporary directory
                 foreach ($finder as $file) {
                     $relativePath = $file->getRelativePathname();
-                    $targetPath = $tempDir.'/'.$relativePath;
+                    $targetPath = $tempDir . '/' . $relativePath;
 
                     if ($file->isDir()) {
                         $this->filesystem->mkdir($targetPath, 0755);
@@ -110,6 +106,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                         if (!$this->filesystem->exists($parent)) {
                             $this->filesystem->mkdir($parent, 0755);
                         }
+
                         $this->filesystem->copy($file->getRealPath(), $targetPath, true);
                     }
                 }
@@ -129,10 +126,10 @@ class FilesystemAdapter implements BackupAdapterInterface
                 null,
                 []
             );
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Filesystem backup failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             // Clean up any partial files
@@ -140,7 +137,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 $this->filesystem->remove($tempDir);
             }
 
-            if (isset($filepath) && $this->filesystem->exists($filepath)) {
+            if ($this->filesystem->exists($filepath)) {
                 $this->filesystem->remove($filepath);
             }
 
@@ -150,7 +147,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                 null,
                 new \DateTimeImmutable(),
                 microtime(true) - $startTime,
-                $e->getMessage()
+                $throwable->getMessage()
             );
         }
     }
@@ -208,7 +205,7 @@ class FilesystemAdapter implements BackupAdapterInterface
 
             foreach ($finder as $file) {
                 $relativePath = $file->getRelativePathname();
-                $targetPath = $targetDir.'/'.$relativePath;
+                $targetPath = $targetDir . '/' . $relativePath;
 
                 if ($file->isDir()) {
                     $this->filesystem->mkdir($targetPath, 0755);
@@ -217,6 +214,7 @@ class FilesystemAdapter implements BackupAdapterInterface
                     if (!$this->filesystem->exists($parent)) {
                         $this->filesystem->mkdir($parent, 0755);
                     }
+
                     $this->filesystem->copy($file->getRealPath(), $targetPath, true);
                 }
             }
@@ -226,10 +224,10 @@ class FilesystemAdapter implements BackupAdapterInterface
             ]);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Filesystem restore failed', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             return false;
@@ -267,104 +265,6 @@ class FilesystemAdapter implements BackupAdapterInterface
         $extension = 'zip' === $config->getCompression() ? 'zip' : 'tar.gz';
 
         return \sprintf('%s_%s.%s', $name, $timestamp, $extension);
-    }
-
-    /**
-     * Create an archive of the specified directory.
-     *
-     * @param string $sourceDir   Directory to archive
-     * @param string $targetPath  Path where the archive should be created
-     * @param string $compression Compression type ('zip' or 'gzip')
-     *
-     * @return string Path to the created archive
-     *
-     * @throws ProcessFailedException If the archive creation fails
-     */
-    private function createArchive(string $sourceDir, string $targetPath, string $compression): string
-    {
-        // Ensure parent directory exists
-        $dir = \dirname($targetPath);
-        if (!$this->filesystem->exists($dir)) {
-            $this->filesystem->mkdir($dir, 0755);
-        }
-
-        if ('zip' === strtolower($compression)) {
-            // Use the ZipCompression adapter to compress the directory
-            $zip = new ZipCompression(6, false, $this->logger);
-
-            return $zip->compress($sourceDir, $targetPath);
-        }
-
-        // Default to gzip: we first create a tarball, then gzip it using the GzipCompression adapter
-        // Compute the temporary tar path from the desired targetPath (.tar.gz -> .tar)
-        $tarPath = preg_replace('/\.gz$/', '', $targetPath) ?: ($targetPath.'.tar');
-
-        // Create the tarball of the directory contents (without including the top-level folder name)
-        $tarCommand = \sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($sourceDir));
-        $tarProcess = Process::fromShellCommandline($tarCommand);
-        $tarProcess->setTimeout(3600);
-        $tarProcess->run();
-        if (!$tarProcess->isSuccessful()) {
-            throw new ProcessFailedException($tarProcess);
-        }
-
-        try {
-            $gzip = new GzipCompression(6, false, $this->logger);
-            $gzip->compress($tarPath, $targetPath);
-        } finally {
-            // Always remove the intermediate tarball if it exists
-            if ($this->filesystem->exists($tarPath)) {
-                $this->filesystem->remove($tarPath);
-            }
-        }
-
-        return $targetPath;
-    }
-
-    /**
-     * Extract an archive to the specified directory.
-     *
-     * @param string $archivePath Path to the archive
-     * @param string $targetDir   Directory where the archive should be extracted
-     * @param string $extension   File extension of the archive
-     *
-     * @throws ProcessFailedException If the extraction fails
-     */
-    private function extractArchive(string $archivePath, string $targetDir, string $extension): void
-    {
-        // Ensure target directory exists
-        if (!$this->filesystem->exists($targetDir)) {
-            $this->filesystem->mkdir($targetDir, 0755);
-        }
-
-        if ('zip' === strtolower($extension)) {
-            // Delegate to ZipCompression adapter
-            $zip = new ZipCompression(6, true, $this->logger);
-            $zip->decompress($archivePath, $targetDir);
-
-            return;
-        }
-
-        // Default to gzip: first gunzip to a tar, then extract the tar
-        $tarPath = preg_replace('/\.gz$/', '', $archivePath) ?: ($archivePath.'.tar');
-
-        try {
-            $gzip = new GzipCompression(6, true, $this->logger);
-            $gzip->decompress($archivePath, $tarPath);
-
-            // Now extract the tarball contents into targetDir
-            $tarCommand = \sprintf('tar -xf %s -C %s', escapeshellarg($tarPath), escapeshellarg($targetDir));
-            $tarProcess = Process::fromShellCommandline($tarCommand);
-            $tarProcess->setTimeout(3600);
-            $tarProcess->run();
-            if (!$tarProcess->isSuccessful()) {
-                throw new ProcessFailedException($tarProcess);
-            }
-        } finally {
-            if ($this->filesystem->exists($tarPath)) {
-                $this->filesystem->remove($tarPath);
-            }
-        }
     }
 
     /**

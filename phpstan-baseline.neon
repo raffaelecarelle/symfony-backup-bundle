@@ -7,23 +7,6 @@ parameters:
 			path: src/Adapter/Database/SQLiteAdapter.php
 
 		-
-			message: '#^Method ProBackupBundle\\Adapter\\Filesystem\\FilesystemAdapter\:\:createArchive\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Adapter/Filesystem/FilesystemAdapter.php
-
-		-
-			message: '#^Method ProBackupBundle\\Adapter\\Filesystem\\FilesystemAdapter\:\:extractArchive\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Adapter/Filesystem/FilesystemAdapter.php
-
-		-
-			message: '#^Variable \$filepath in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.variable
-			count: 1
-			path: src/Adapter/Filesystem/FilesystemAdapter.php
-		-
 			message: '#^Method ProBackupBundle\\Adapter\\Storage\\LocalAdapter\:\:list\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

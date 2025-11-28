@@ -12,9 +12,11 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class DatabaseAdapterPassTest extends TestCase
 {
-    private $compilerPass;
-    private $containerBuilder;
-    private $managerDefinition;
+    private DatabaseAdapterPass $compilerPass;
+
+    private ContainerBuilder $containerBuilder;
+
+    private Definition $managerDefinition;
 
     protected function setUp(): void
     {
@@ -46,10 +48,12 @@ class DatabaseAdapterPassTest extends TestCase
         // Create and register some tagged services
         $mysqlDefinition = new Definition();
         $mysqlDefinition->addTag('pro_backup.database_adapter');
+
         $this->containerBuilder->setDefinition('pro_backup.database.mysql', $mysqlDefinition);
 
         $postgresDefinition = new Definition();
         $postgresDefinition->addTag('pro_backup.database_adapter');
+
         $this->containerBuilder->setDefinition('pro_backup.database.postgres', $postgresDefinition);
 
         // Process the container
@@ -76,6 +80,7 @@ class DatabaseAdapterPassTest extends TestCase
         $mysqlDefinition = new Definition();
         $mysqlDefinition->addTag('pro_backup.database_adapter');
         $mysqlDefinition->addTag('pro_backup.database_adapter');
+
         $this->containerBuilder->setDefinition('pro_backup.database.mysql', $mysqlDefinition);
 
         // Process the container
@@ -100,6 +105,7 @@ class DatabaseAdapterPassTest extends TestCase
         // Create and register a tagged service
         $mysqlDefinition = new Definition();
         $mysqlDefinition->addTag('pro_backup.database_adapter');
+
         $containerBuilder->setDefinition('pro_backup.database.mysql', $mysqlDefinition);
 
         // Process the container

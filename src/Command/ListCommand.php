@@ -69,19 +69,19 @@ EOF
         $backups = $this->backupManager->listBackups();
 
         if ($type) {
-            $backups = array_filter($backups, fn ($backup) => $backup['type'] === $type);
+            $backups = array_filter($backups, fn (array $backup): bool => $backup['type'] === $type);
         }
 
         // Filter by storage if specified
         if ($storage) {
-            $backups = array_filter($backups, fn ($backup) => $backup['storage'] === $storage);
+            $backups = array_filter($backups, fn (array $backup): bool => $backup['storage'] === $storage);
         }
 
         // Sort backups by creation date (newest first)
-        usort($backups, fn ($a, $b) => $b['created_at'] <=> $a['created_at']);
+        usort($backups, fn (array $a, array $b): int => $b['created_at'] <=> $a['created_at']);
 
         // Display backups
-        if (empty($backups)) {
+        if ([] === $backups) {
             if ('json' === $format) {
                 $output->writeln('[]');
 
@@ -132,7 +132,7 @@ EOF
                 array_merge(
                     [['Total', $this->formatFileSize($usage['total'])]],
                     array_map(
-                        fn ($type, $size) => [$type, $this->formatFileSize($size)],
+                        fn ($type, int $size): array => [$type, $this->formatFileSize($size)],
                         array_keys($usage['by_type']),
                         array_values($usage['by_type'])
                     )
@@ -185,7 +185,7 @@ EOF
         foreach ($rows as $row) {
             $output->writeln(implode(',', array_map(fn ($value) =>
                 // Quote values containing commas
-            str_contains((string) $value, ',') ? '"'.$value.'"' : $value, $row)));
+            str_contains((string) $value, ',') ? '"' . $value . '"' : $value, $row)));
         }
     }
 
@@ -207,6 +207,6 @@ EOF
 
         $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, $precision).' '.$units[$pow];
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }

@@ -31,7 +31,7 @@ class SQLiteDatabaseBackupTest extends AbstractEndToEndTest
         ]);
 
         // Insert some test data
-        $pdo = new \PDO('sqlite:'.$this->dbPath);
+        $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->exec("INSERT INTO users (id, name, email) VALUES
             (1, 'John Doe', 'john@example.com'),
             (2, 'Jane Smith', 'jane@example.com')");
@@ -66,7 +66,7 @@ class SQLiteDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($this->filesystem->exists($result->getFilePath()), 'Backup file should exist');
 
         // Test restore functionality
-        $restoreDbPath = $this->tempDir.'/restored.db';
+        $restoreDbPath = $this->tempDir . '/restored.db';
         $restoreResult = $this->backupManager->restore($result->getId(), [
             'connection' => [
                 'driver' => 'sqlite',
@@ -78,7 +78,7 @@ class SQLiteDatabaseBackupTest extends AbstractEndToEndTest
         $this->assertTrue($this->filesystem->exists($restoreDbPath), 'Restored database file should exist');
 
         // Verify restored data
-        $pdo = new \PDO('sqlite:'.$restoreDbPath);
+        $pdo = new \PDO('sqlite:' . $restoreDbPath);
 
         // Check users table
         $stmt = $pdo->query('SELECT COUNT(*) FROM users');

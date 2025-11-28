@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProBackupBundle\Tests\Command;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Command\ListCommand;
 use ProBackupBundle\Manager\BackupManager;
@@ -12,11 +13,15 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class ListCommandTest extends TestCase
 {
-    private $mockBackupManager;
-    private $command;
-    private $commandTester;
-    private $sampleBackups;
-    private $storageUsage;
+    private MockObject $mockBackupManager;
+
+    private ListCommand $command;
+
+    private CommandTester $commandTester;
+
+    private array $sampleBackups;
+
+    private array $storageUsage;
 
     protected function setUp(): void
     {
@@ -126,7 +131,7 @@ class ListCommandTest extends TestCase
         $output = $this->commandTester->getDisplay();
 
         // Check that the output is valid JSON
-        $jsonData = json_decode((string) $output, true);
+        $jsonData = json_decode($output, true);
         $this->assertIsArray($jsonData);
         $this->assertCount(3, $jsonData);
 

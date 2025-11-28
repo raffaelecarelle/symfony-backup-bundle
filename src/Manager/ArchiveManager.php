@@ -7,6 +7,8 @@ namespace ProBackupBundle\Manager;
 use ProBackupBundle\Adapter\Compression\CompressionAdapterInterface;
 use ProBackupBundle\Exception\BackupException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 /**
  * Centralizes archive compression and decompression operations.
@@ -43,9 +45,9 @@ class ArchiveManager
      * @param string $compressionType Type of compression (zip, gzip)
      * @param bool   $removeSource    Whether to remove the source after compression
      *
-     * @return string Path to the created archive
-     *
      * @throws BackupException If compression fails or adapter is not available
+     *
+     * @return string Path to the created archive
      */
     public function compress(string $source, string $targetPath, string $compressionType, bool $removeSource = false): string
     {
@@ -61,6 +63,7 @@ class ArchiveManager
             if (!$zip) {
                 throw new BackupException('Zip compression adapter not available');
             }
+
             $zip->compress($source, $targetPath, ['keep_original' => !$removeSource]);
 
             return $targetPath;
@@ -79,15 +82,15 @@ class ArchiveManager
                     $targetPath .= '.tar.gz';
                 }
 
-                $tarPath = preg_replace('/\.gz$/', '', $targetPath) ?: ($targetPath.'.tar');
+                $tarPath = preg_replace('/\.gz$/', '', $targetPath) ?: ($targetPath . '.tar');
 
                 // Create tar from source directory contents (without top-level folder)
                 $tarCmd = \sprintf('tar -cf %s -C %s .', escapeshellarg($tarPath), escapeshellarg($source));
-                $proc = \Symfony\Component\Process\Process::fromShellCommandline($tarCmd);
+                $proc = Process::fromShellCommandline($tarCmd);
                 $proc->setTimeout(3600);
                 $proc->run();
                 if (!$proc->isSuccessful()) {
-                    throw new \Symfony\Component\Process\Exception\ProcessFailedException($proc);
+                    throw new ProcessFailedException($proc);
                 }
 
                 try {
@@ -109,7 +112,7 @@ class ArchiveManager
             // For files, directly gzip
             $gzip->compress($source, null, ['keep_original' => !$removeSource]);
 
-            return $source.'.gz';
+            return $source . '.gz';
         }
 
         throw new BackupException(\sprintf('Unsupported compression type: %s', $compressionType));
@@ -119,12 +122,12 @@ class ArchiveManager
      * Decompress an archive into a target location.
      *
      * @param string      $archivePath  Path to the archive
-     * @param string|null $targetPath   Target directory or file path (null for same directory)
+     * @param null|string $targetPath   Target directory or file path (null for same directory)
      * @param bool        $keepOriginal Whether to keep the original archive
      *
-     * @return string Path to the decompressed content (file or directory)
-     *
      * @throws BackupException If decompression fails or adapter is not available
+     *
+     * @return string Path to the decompressed content (file or directory)
      */
     public function decompress(string $archivePath, ?string $targetPath = null, bool $keepOriginal = true): string
     {
@@ -138,7 +141,7 @@ class ArchiveManager
 
             // If targetPath is not provided, create a temp directory
             if (null === $targetPath) {
-                $targetPath = sys_get_temp_dir().'/extract_'.uniqid('', true);
+                $targetPath = sys_get_temp_dir() . '/extract_' . uniqid('', true);
                 $this->filesystem->mkdir($targetPath, 0755);
             }
 
@@ -158,21 +161,21 @@ class ArchiveManager
             if (str_ends_with($archivePath, '.tar.gz')) {
                 // Create temp directory for extraction if not provided
                 if (null === $targetPath) {
-                    $targetPath = sys_get_temp_dir().'/extract_'.uniqid('', true);
+                    $targetPath = sys_get_temp_dir() . '/extract_' . uniqid('', true);
                     $this->filesystem->mkdir($targetPath, 0755);
                 }
 
-                $tarPath = preg_replace('/\.gz$/', '', $archivePath) ?: ($archivePath.'.tar');
+                $tarPath = preg_replace('/\.gz$/', '', $archivePath) ?: ($archivePath . '.tar');
                 try {
                     $gzip->decompress($archivePath, $tarPath, ['keep_original' => $keepOriginal]);
 
                     // Extract tar into the target directory
                     $tarCmd = \sprintf('tar -xf %s -C %s', escapeshellarg($tarPath), escapeshellarg($targetPath));
-                    $proc = \Symfony\Component\Process\Process::fromShellCommandline($tarCmd);
+                    $proc = Process::fromShellCommandline($tarCmd);
                     $proc->setTimeout(3600);
                     $proc->run();
                     if (!$proc->isSuccessful()) {
-                        throw new \Symfony\Component\Process\Exception\ProcessFailedException($proc);
+                        throw new ProcessFailedException($proc);
                     }
                 } finally {
                     if ($this->filesystem->exists($tarPath)) {
@@ -197,7 +200,7 @@ class ArchiveManager
      *
      * @param string $filePath Path to the file
      *
-     * @return string|null Compression type (zip, gzip) or null if unknown
+     * @return null|string Compression type (zip, gzip) or null if unknown
      */
     public function detectCompressionType(string $filePath): ?string
     {

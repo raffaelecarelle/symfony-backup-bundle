@@ -22,10 +22,8 @@ class Kernel extends BaseKernel
     {
         $contents = require $this->getProjectDir().'/config/bundles.php';
         foreach ($contents as $class => $envs) {
-            if (isset($envs['all']) || isset($envs[$this->environment])) {
-                if (\is_string($class) && is_subclass_of($class, BundleInterface::class)) {
-                    yield new $class();
-                }
+            if ((isset($envs['all']) || isset($envs[$this->environment])) && (\is_string($class) && is_subclass_of($class, BundleInterface::class))) {
+                yield new $class();
             }
         }
     }

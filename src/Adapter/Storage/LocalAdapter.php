@@ -28,8 +28,8 @@ class LocalAdapter implements StorageAdapterInterface
      */
     public function __construct(
         string $basePath,
-        private readonly int $permissions = 0755,
         private readonly LoggerInterface $logger = new NullLogger(),
+        private readonly int $permissions = 0755,
         private readonly Filesystem $filesystem = new Filesystem(),
     ) {
         $this->basePath = rtrim($basePath, '/\\');
@@ -60,11 +60,11 @@ class LocalAdapter implements StorageAdapterInterface
             $this->filesystem->copy($localPath, $targetPath, true);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to store file in local storage', [
                 'local_path' => $localPath,
                 'remote_path' => $remotePath,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -96,11 +96,11 @@ class LocalAdapter implements StorageAdapterInterface
             $this->filesystem->copy($sourcePath, $localPath, true);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to retrieve file from local storage', [
                 'remote_path' => $remotePath,
                 'local_path' => $localPath,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -127,10 +127,10 @@ class LocalAdapter implements StorageAdapterInterface
             $this->filesystem->remove($targetPath);
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to delete file from local storage', [
                 'remote_path' => $remotePath,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -173,10 +173,10 @@ class LocalAdapter implements StorageAdapterInterface
             }
 
             return $files;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $this->logger->error('Failed to list files in local storage', [
                 'prefix' => $prefix,
-                'exception' => $e->getMessage(),
+                'exception' => $throwable->getMessage(),
             ]);
 
             return [];
@@ -195,6 +195,6 @@ class LocalAdapter implements StorageAdapterInterface
      */
     private function getFullPath(string $remotePath): string
     {
-        return $this->basePath.'/'.ltrim($remotePath, '/\\');
+        return $this->basePath . '/' . ltrim($remotePath, '/\\');
     }
 }

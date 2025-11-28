@@ -154,7 +154,7 @@ class BackupMessage
             $config->setOutputPath($this->outputPath);
         }
 
-        if (!empty($this->exclusions)) {
+        if ([] !== $this->exclusions) {
             $config->setExclusions($this->exclusions);
         }
 

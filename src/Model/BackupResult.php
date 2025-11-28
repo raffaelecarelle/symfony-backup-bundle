@@ -10,7 +10,7 @@ namespace ProBackupBundle\Model;
 class BackupResult
 {
     /**
-     * @var string|null Unique identifier for the backup
+     * @var null|string Unique identifier for the backup
      */
     private ?string $id = null;
 
@@ -18,11 +18,11 @@ class BackupResult
      * Constructor.
      *
      * @param bool                    $success   Whether the backup was successful
-     * @param string|null             $filePath  Path to the backup file
-     * @param int|null                $fileSize  Size of the backup file in bytes
-     * @param \DateTimeImmutable|null $createdAt When the backup was created
-     * @param float|null              $duration  Duration of the backup operation in seconds
-     * @param string|null             $error     Error message if the backup failed
+     * @param null|string             $filePath  Path to the backup file
+     * @param null|int                $fileSize  Size of the backup file in bytes
+     * @param null|\DateTimeImmutable $createdAt When the backup was created
+     * @param null|float              $duration  Duration of the backup operation in seconds
+     * @param null|string             $error     Error message if the backup failed
      * @param array<string, mixed>    $metadata  Additional metadata
      */
     public function __construct(
