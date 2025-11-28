@@ -8,7 +8,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Command\ListCommand;
 use ProBackupBundle\Manager\BackupManager;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class ListCommandTest extends TestCase
@@ -28,9 +27,6 @@ class ListCommandTest extends TestCase
         $this->mockBackupManager = $this->createMock(BackupManager::class);
 
         $this->command = new ListCommand($this->mockBackupManager);
-
-        $application = new Application();
-        $application->add($this->command);
 
         $this->commandTester = new CommandTester($this->command);
 

@@ -11,7 +11,6 @@ use ProBackupBundle\Command\BackupCommand;
 use ProBackupBundle\Manager\BackupManager;
 use ProBackupBundle\Model\BackupConfiguration;
 use ProBackupBundle\Model\BackupResult;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class BackupCommandTest extends TestCase
@@ -41,9 +40,6 @@ class BackupCommandTest extends TestCase
         ];
 
         $this->command = new BackupCommand($this->mockBackupManager, $this->defaultConfig);
-
-        $application = new Application();
-        $application->add($this->command);
 
         $this->commandTester = new CommandTester($this->command);
     }
@@ -231,9 +227,6 @@ class BackupCommandTest extends TestCase
                 ],
             ]
         );
-
-        $application = new Application();
-        $application->add($this->command);
 
         $this->commandTester = new CommandTester($this->command);
 

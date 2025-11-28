@@ -9,7 +9,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ProBackupBundle\Command\RestoreCommand;
 use ProBackupBundle\Manager\BackupManager;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class RestoreCommandTest extends TestCase
@@ -27,9 +26,6 @@ class RestoreCommandTest extends TestCase
         $this->mockBackupManager = $this->createMock(BackupManager::class);
 
         $this->command = new RestoreCommand($this->mockBackupManager);
-
-        $application = new Application();
-        $application->add($this->command);
 
         $this->commandTester = new CommandTester($this->command);
 
