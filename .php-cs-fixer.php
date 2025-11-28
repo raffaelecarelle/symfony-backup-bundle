@@ -9,6 +9,7 @@ use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 return (new Config())
     ->setParallelConfig(ParallelConfigFactory::detect())
     ->setRiskyAllowed(true)
+    ->setUnsupportedPhpVersionAllowed(true)
     ->setRules([
         '@Symfony' => true,
         '@Symfony:risky' => true,
